@@ -1,4 +1,4 @@
-# EcoRide
-Ce site est un site de covoiturage
+# Quai Antique
+Ce site est un site vitrine pour le restaurant Quai Antique
 
 # Installation
