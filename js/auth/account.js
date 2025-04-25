@@ -46,7 +46,9 @@ inputMarque.addEventListener("keyup", validateFormVehicule);
 inputModele.addEventListener("keyup", validateFormVehicule);
 inputCouleur.addEventListener("keyup", validateFormVehicule);
 inputNbPlaces.addEventListener("keyup", validateFormVehicule);
-btnChauffeur.addEventListener("change", updateRole);
+btnChauffeur.addEventListener("change", updateRoleChauffeur);
+btnPassager.addEventListener("change", updateRolePassager);
+
 //btnPassager.addEventListener("keyup", updateRole(1));
 btnSupprimer.addEventListener("click", supprimerVehicule);
 /*btnChauffeur.addEventListener("click", updateRole);*/
@@ -92,6 +94,7 @@ function validateForm(){
 }
 getInfosUsers();
 getVehicules();
+getRoles(); 
 
 
 
@@ -288,7 +291,7 @@ function getVehicules(){
         console.error("erreur lors de la récupération des données des véhicules", error);
     });
 }   
-function updateRole(e){
+function updateRoleChauffeur(e){
     let myHeaders = new Headers();
 
     myHeaders.append("Content-Type", "application/json");
@@ -332,7 +335,49 @@ function updateRole(e){
         .catch(error => console.log('error', error));}
     }
 
-
+    function updateRolePassager(e){
+        let myHeaders = new Headers();
+    
+        myHeaders.append("Content-Type", "application/json");
+        myHeaders.append("X-AUTH-TOKEN", getToken());
+    
+       
+    
+        if (btnPassager.checked){
+            let raw = JSON.stringify({
+                "libelle": "passager"});
+       
+            let requestOptions = {
+                method: 'POST',
+                headers: myHeaders,
+                body: raw,
+                redirect: 'follow'     
+            };
+        fetch(apiUrl+"role", requestOptions)
+        .then(response => {
+            if(response.ok){
+                return response.json();
+            } 
+        })
+        .then(result => {      
+        })
+        .catch(error => console.log('error', error));}
+        else {
+            let requestOptions = {
+                method: 'DELETE',
+                headers: myHeaders,
+                redirect: 'follow'     
+            };
+            fetch(apiUrl+"role/passager", requestOptions)
+            .then(response => {
+                if(response.ok){
+                    return response.json();
+                } 
+            })
+            .then(result => {      
+            })
+            .catch(error => console.log('error', error));}
+        }
     function getRoles(){
         let myHeaders = new Headers();
         myHeaders.append("X-AUTH-TOKEN", getToken());
@@ -343,7 +388,7 @@ function updateRole(e){
             redirect: 'follow'
         };
     
-         fetch(apiUrl+"roles/", requestOptions)
+         fetch(apiUrl+"role", requestOptions)
         .then(response =>{
             if(response.ok){
                 return response.json();
@@ -353,7 +398,11 @@ function updateRole(e){
             }
         })
         .then(result => {
-            setUser(result);
+            console.log(result);
+            for (let i of result){
+                if (i['libelle']=="chauffeur"){btnChauffeur.checked=true};
+                if (i['libelle']=="passager"){btnPassager.checked=true};
+        }
         })
         .catch(error =>{
             console.error("erreur lors de la récupération des données utilisateur", error);
