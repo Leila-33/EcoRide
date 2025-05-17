@@ -12064,10 +12064,10 @@ p {
 }
 
 .login {
-  max-width: 520px;
+  max-width: 700px;
   margin: 0 auto;
-  padding: 40px 0 32px 0;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  padding: 30px 0 30px 0;
+  box-shadow: 0 0 19px rgba(0, 0, 0, 0.1);
 }
 
 #signinForm, #formulaireInscription {
@@ -12076,4 +12076,156 @@ p {
 
 .message {
   padding-inline: 100px;
+}
+
+.photo {
+  border-radius: 90;
+}
+
+.container1 {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: 30px repeat(2, minmax(0, 1fr));
+}
+
+.container2 {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: 50px repeat(4, minmax(0, 1fr)) 50px;
+}
+
+.item1 {
+  grid-column: 1/2;
+  grid-row: 2/3;
+  height: 100px;
+  width: 100px;
+  border-radius: 50%;
+  -o-object-fit: cover;
+     object-fit: cover;
+  margin-bottom: 10px;
+}
+
+.item2 {
+  grid-column: 2/3;
+  grid-row: 2/3;
+}
+
+.item3 {
+  grid-column: 3/4;
+  grid-row: 2/3;
+}
+
+.item4 {
+  grid-column: 4/5;
+  grid-row: 2/3;
+}
+
+.item5 {
+  grid-column: 5/6;
+  grid-row: 2/3;
+}
+
+.item6 {
+  grid-column: 6/7;
+  grid-row: 2/3;
+}
+
+.item7 {
+  grid-column: 7/8;
+  grid-row: 2/3;
+}
+
+.item8 {
+  grid-column: 1/2;
+  grid-row: 3/4;
+}
+
+.item9 {
+  grid-column: 2/3;
+  grid-row: 3/4;
+}
+
+.item10 {
+  grid-column: 3/4;
+  grid-row: 3/4;
+}
+
+.item11 {
+  grid-column: 4/5;
+  grid-row: 3/4;
+}
+
+.item12 {
+  grid-column: 5/6;
+  grid-row: 3/4;
+}
+
+.item13 {
+  grid-column: 6/7;
+  grid-row: 3/4;
+}
+
+.item14 {
+  grid-column: 7/8;
+  grid-row: 3/4;
+}
+
+.item15 {
+  grid-column: 2/3;
+  grid-row: 4/5;
+}
+
+.item16 {
+  grid-column: 3/4;
+  grid-row: 4/5;
+}
+
+.item17 {
+  grid-column: 2/4;
+  grid-row: 5/6;
+}
+
+/*.item18{
+    grid-column:4/9;
+    grid-row:5/6;
+
+}*/
+.btnDetail {
+  margin-top: auto;
+  grid-column: 8/9;
+  grid-row: 2/3;
+}
+
+.btnDetail1 {
+  grid-column: 8/9;
+  grid-row: 3/4;
+}
+
+.card {
+  --bs-card-border-color:white;
+}
+
+.responseUser {
+  grid-column: 2/4;
+  grid-row: 6/7;
+}
+
+.btnResponseUserOui {
+  margin-bottom: auto;
+  margin-right: auto;
+  grid-column: 4/5;
+  grid-row: 6/7;
+}
+
+.btnResponseUserNon {
+  margin-bottom: auto;
+  margin-left: auto;
+  grid-column: 4/5;
+  grid-row: 6/7;
+}
+
+.id19 {
+  text-align: center;
+  grid-column: 1/4;
+  grid-row: 1/2;
 }/*# sourceMappingURL=main.css.map */

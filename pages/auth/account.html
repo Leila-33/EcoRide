@@ -16,13 +16,27 @@
 <div class="accordion" id="accordionExample">
     <div class="accordion-item">
       <h2 class="accordion-header">
-        <button class="accordion-button  " type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
           Mes informations personnelles
         </button>
       </h2>
       <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
         <div class="accordion-body">
-            <form class="row g-3" id="infosForm">
+          <div class="text-center">
+                    <img id="imgInfos" style="height:100px; width:100px; border-radius:50%; object-fit:cover; margin-bottom:10px;">
+              <div id="mesInfos" class="text-center">
+        </div>
+        <button type="button" class="btn btn-primary mb-5" id="btnInfos1" data-bs-toggle="collapse" data-bs-target="#infosForm" aria-controls="infosForm" >Modifier mes informations personnelles</button>
+
+      </div>
+
+            <form id="infosForm" class="collapse">
+           
+            <div class="row g-3">
+              <div class="col-md-12">
+                <label for="PhotoInput" class="form-label">Photo</label>
+                <input type="file" class="form-control" id="PhotoInput" name="Photo"> 
+            </div>
                 <div class="col-md-4">
                     <label for="NomInput" class="form-label">Nom</label>
                     <input type="text" class="form-control" id="NomInput" name="Nom"> 
@@ -69,12 +83,15 @@
                       </div>
                 </div>
                 <div class="text-center">
-                    <button type="button" class="btn btn-primary" id="btnInfos">Modifier mes informations personnelles</button>
+                    <button type="button" class="btn btn-primary" id="btnInfos" data-bs-toggle="collapse" data-bs-target="#infosForm" aria-controls="infosForm" >Modifier mes informations personnelles</button>
                 </div>
+              </div>
             </form>
-          </div>
       </div>
+
     </div>
+  </div>
+
     <div class="accordion-item" id="chauffeur">
       <h2 class="accordion-header">
         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
@@ -83,7 +100,7 @@
       </h2>
       <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
         <div id="accordion" class="accordion-body">
-          <ul id="voitures" class="list-group list-group-horizontal">
+          <ul id="voitures" class="row row-cols-md-3  g-4">
           </ul>
           
 <div class="modal" tabindex="-1" id='myModal'>
@@ -98,12 +115,16 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn--bs-red"  data-bs-dismiss="modal"id="supprimer">Supprimer</button>
+        <button type="button" class="btn btn--bs-red"  data-bs-dismiss="modal"id="supprimerVehicule">Supprimer</button>
       </div>
     </div>
   </div>
 </div>
-            <form class="row g-3" id="vehiculeForm">
+
+<div class="text-center">
+  <button type="button" class="btn btn-primary mb-5" id="btnAjoutVehicule" data-bs-toggle="collapse" data-bs-target="#vehiculeForm" aria-controls="vehiculeForm1" >Ajouter un véhicule</button>
+</div>     
+            <form class="row g-3 collapse "  id="vehiculeForm">
                 <div class="col-md-6">
                   <label for="inputPlaque" class="form-label">Plaque d'immatriculation</label>
                   <input type="text" class="form-control" id="PlaqueInput" name="Plaque">
@@ -126,7 +147,7 @@
                 </div>
                 <div class="col-md-4">
                   <label for="inputNbPlaces" class="form-label">Nombre de places disponibles</label>
-                  <input type="number" class="form-control" id="NbPlacesInput" name="NbPlaces">
+                  <input type="number" class="form-control" id="NbPlacesInput" min="1" name="NbPlaces">
                 </div>
                 <div class="col-md-4">
                     <label for="inputEnergie" class="form-label">Energie</label>
@@ -137,73 +158,62 @@
                   </div>
           
                 <div class="text-center">
-                  <button type="button" class="btn btn-primary" id="btnVehicule">Ajouter un véhicule</button>
+                  <button type="button" class="btn btn-primary" id="btnVehicule"data-bs-toggle="collapse" data-bs-target="#vehiculeForm" aria-expanded="false" aria-controls="vehiculeForm">Ajouter une voiture</button>
                 </div>
               </form>
         </div>
       </div>
     </div>
-    <div class="accordion-item">
+    <div class="accordion-item" id="preferences">
       <h2 class="accordion-header">
         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
          Mes préférences
         </button>
+        
       </h2>
       <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
         <div class="accordion-body">
-
-            <label>Accepte les animaux : </label>
-            <form class="hstack mt-3 gap-3">
-
-            <div class="form-check ">
-                <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
-                <label class="form-check-label" for="flexRadioDefault1">
-                  Oui
-                </label>
+          <ul id="preference" class="row row-cols-md-3 g-4">
+          </ul>
+          <div class="modal" tabindex="-1" id='myModal1'>
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Supprimer</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" checked>
-                <label class="form-check-label" for="flexRadioDefault2">
-                  Non
-                </label>
-            </div>    
-            </form>
-    
-            <label>Accepte les fumeurs : </label>
-            <form class="hstack mt-3 gap-3">
-
-            <div class="form-check ">
-                    <input class="form-check-input" type="radio" name="flexRadioDefault1" id="flexRadioDefault3">
-                    <label class="form-check-label" for="flexRadioDefault3">
-                      Oui
-                    </label>
+              <div class="modal-body">
+                <p>Voulez-vous vraiment supprimer cette préférence ?</p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary"  data-bs-dismiss="modal"id="supprimerPreference">Supprimer</button>
+              </div>
             </div>
-            <div class="form-check">
-                    <input class="form-check-input" type="radio" name="flexRadioDefault1" id="flexRadioDefault4" checked>
-                    <label class="form-check-label" for="flexRadioDefault4">
-                      Non
-                    </label>
-            </div> 
-            </form>
-
-            <form class="row ">
+          </div>
+        </div>
+          
+        <div class="text-center mt-3">
+          <button class="btn btn-primary" type="button" id="btnPreferences1" data-bs-toggle="collapse" data-bs-target="#preferenceForm" aria-expanded="false" aria-controls="preferenceForm">Ajouter une préférence</button>
+        </div>
+            <form class="row g-3 collapse" id="preferenceForm">
                 <div class="col-md-6 mb-3 mt-5">
-                  <label for="inputModele" class="form-label">Propriété</label>
-                  <input type="text" class="form-control" id="inputPropriete" >
+                  <label for="inputPropriete" class="form-label">Propriété</label>
+                  <input type="text" class="form-control" id="proprieteInput" name="propriete" >
                 </div>
 
                 <div class="col-md-6 mb-3 mt-5">
-                  <label for="inputCouleur" class="form-label">Valeur</label>
-                  <input type="text" class="form-control" id="inputValeur">
+                  <label for="inputValeur" class="form-label">Valeur</label>
+                  <input type="text" class="form-control" id="valeurInput" name="valeur">
                 </div>
                 <div class="text-center mt-3">
-                  <button class="btn btn-primary" type="button" id="btnPreferences">Ajouter une préférence</button>
+                  <button class="btn btn-primary" type="button" id="btnPreferences" data-bs-toggle="collapse" data-bs-target="#preferenceForm" aria-expanded="false" aria-controls="preferenceForm">Ajouter une préférence</button>
                 </div>
             </form>
               </div>
               </div>
       </div>
- <div class="accordion-item">
+ <div class="accordion-item" id="voyage">
       <h2 class="accordion-header">
         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
          Saisir un voyage
@@ -211,50 +221,83 @@
       </h2>
       <div id="collapseFive" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
         <div class="accordion-body">
-          <form class="row g-3">
+          <form class="row g-3" id="vehiculeForm3">
 <div class="col-md-4">
   <label for="inputPlaque" class="form-label">Lieu de départ</label>
-
-          <input class="form-control me-2 col-md-4" type="search" placeholder="Search" aria-label="Search">
+          <input class="form-control me-2 col-md-4" id="lieuDepart" type="search" placeholder="Search" aria-label="Search" name="lieuDepart">
         </div>
           <div class="col-md-4">
             <label for="inputPlaque" class="form-label">Date de départ</label>
-
-          <input class="form-control me-2 col-md-4" type="date">
+          <input class="form-control me-2 col-md-4" id="dateDepart" type="date" name="dateDepart">
           </div>
           <div class="col-md-4">
             <label for="inputPlaque" class="form-label">Heure de départ</label>
-
-          <input class="form-control me-2 col-md-4" type="time" >
+          <input class="form-control me-2 col-md-4" id="heureDepart" type="time" name="heureDepart" >
           </div>
       <div class="col-md-4">
         <label for="inputPlaque" class="form-label">Lieu d'arrivée</label>
-         <input class="form-control me-2 col-md-4" type="search" placeholder="Search" aria-label="Search">
+         <input class="form-control me-2 col-md-4" id="lieuArrivee" type="search" placeholder="Search" aria-label="Search" name="lieuArrivee">
          </div>
           <div class="col-md-4">
            <label for="inputPlaque" class="form-label">Date d'arrivée</label>
-          <input class="form-control me-2 col-md-4" type="date">
+          <input class="form-control me-2 col-md-4" id="dateArrivee" type="date" name="dateArrivee">
           </div>
           <div class="col-md-4">
           <label for="inputPlaque" class="form-label">Heure d'arrivée</label>
-            <input class="form-control me-2 col-md-4" type="time" >
+            <input class="form-control me-2 col-md-4" id="heureArrivee" type="time" name="heureArrivee" >
             </div>
                 <div class="col-md-4">
-                  <label for="inputVehicules" class="form-label">Vehicule</label>
-                  <select id="inputVehicules" class="form-select">
-                    <option selected>1</option>
-                    <option>2</option>
-                    <option>3</option>
-                    <option>4</option>
-                  </select>
+                  <label for="inputPrix" class="form-label">Prix*</label>
+                  <input type="number" class="form-control" id="prixInput" min="1" name="prix">
                 </div>
                 <div class="col-md-4">
-                  <label for="inputPrix" class="form-label">Prix*</label>
-                  <input type="text" class="form-control" id="inputPrix">
+                  <label for="inputNbPlace" class="form-label">Nombre de places</label>
+                  <input type="number" class="form-control"  id="nbPlaceInput" min="1" name="nbPlace">
                 </div>
-                </form>
+                <div class="col-md-4">
+                  <label for="inputVehicules" class="form-label">Voiture</label>
+                  <select id="inputVehicules" class="form-select"name="inputVehicules">
+                  </select>
+                </div>
+              </form>
+
                 <div class="text-center mt-3 mb-3">
-                  <button class="btn btn-primary" type="button">Saisir un voyage</button>
+                  <form class="row g-3 d-none" id="vehiculeForm2">
+
+                    <div class="col-md-6">
+                      <label for="inputPlaque" class="form-label">Plaque d'immatriculation</label>
+                      <input type="text" class="form-control" id="PlaqueInput2" name="Plaque">
+                    </div>
+                    <div class="col-md-6">
+                      <label for="inputDateImmatriculation" class="form-label">Date d'immatriculation</label>
+                      <input type="text" class="form-control" id="DateImmatriculationInput2" placeholder="jj/mm/aaaa" name="DateImmatriculation">
+                    </div>
+                    <div class="col-md-4">
+                      <label for="inputMarque" class="form-label">Marque</label>
+                      <input type="text" class="form-control" id="MarqueInput2" name="Marque" >
+                    </div>
+                    <div class="col-md-4">
+                      <label for="inputModele" class="form-label">Modèle</label>
+                      <input type="text" class="form-control" id="ModeleInput2" name="Modele" >
+                    </div>
+                    <div class="col-md-4">
+                      <label for="inputCouleur" class="form-label">Couleur</label>
+                      <input type="text" class="form-control" id="CouleurInput2" name="Couleur">
+                    </div>
+                    <div class="col-md-4">
+                      <label for="inputNbPlaces" class="form-label">Nombre de places disponibles</label>
+                      <input type="number" class="form-control" id="NbPlacesInput2" min="1" name="NbPlaces">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="inputEnergie" class="form-label">Energie</label>
+                        <select id="inputEnergie2" class="form-select" name="Energie">
+                          <option selected>Fuel</option>
+                          <option>Electricité</option>
+                        </select>
+                      </div>
+                  </form>
+                 
+                  <button class="btn btn-primary" id="enregistrerVoyage" type="button">Saisir un voyage</button>
                 </div>
                 <p class="h6">*Une participation de 2 crédits est prise par EcoRide pour garantir le bon fonctionnement.</p>
 
@@ -263,16 +306,101 @@
       </div>
       <div class="accordion-item">
         <h2 class="accordion-header">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSix" aria-expanded="false" aria-controls="collapseSix">
+          <button class="accordion-button collapsed" type="button" id="btnMesVoyages" data-bs-toggle="collapse" data-bs-target="#collapseSix" aria-expanded="false" aria-controls="collapseSix">
            Mes voyages enregistrés
           </button>
         </h2>
         <div id="collapseSix" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-          <div class="accordion-body">
-          </div>
+          <div class="accordion-body" id="accordionBody">
+            <div id="covoiturages" class="list-group list-group-horizontal">
+            </div>
+            </div>
         </div>
       </div>
  </div>
  </div>
  </div>
   
+</ul>
+          
+
+<div class="modal" tabindex="-1" id='myModalChauffeur'>
+<div class="modal-dialog">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title">Veuillez renseigner une voiture et vos préférences</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <div class="modal-body">
+      <form class="row g-3" id="vehiculeForm1">
+        <div class="col-md-6">
+          <label for="inputPlaque" class="form-label">Plaque d'immatriculation</label>
+          <input type="text" class="form-control" id="PlaqueInput1" name="Plaque">
+        </div>
+        <div class="col-md-6">
+          <label for="inputDateImmatriculation" class="form-label">Date d'immatriculation</label>
+          <input type="text" class="form-control" id="DateImmatriculationInput1" placeholder="jj/mm/aaaa" name="DateImmatriculation">
+        </div>
+        <div class="col-md-4">
+          <label for="inputMarque" class="form-label">Marque</label>
+          <input type="text" class="form-control" id="MarqueInput1" name="Marque" >
+        </div>
+        <div class="col-md-4">
+          <label for="inputModele" class="form-label">Modèle</label>
+          <input type="text" class="form-control" id="ModeleInput1" name="Modele" >
+        </div>
+        <div class="col-md-4">
+          <label for="inputCouleur" class="form-label">Couleur</label>
+          <input type="text" class="form-control" id="CouleurInput1" name="Couleur">
+        </div>
+        <div class="col-md-4">
+          <label for="inputNbPlaces" class="form-label">Nombre de places disponibles</label>
+          <input type="number" class="form-control" id="NbPlacesInput1" min="1" name="NbPlaces">
+        </div>
+        <div class="col-md-4">
+            <label for="inputEnergie" class="form-label">Energie</label>
+            <select id="inputEnergie1" class="form-select" name="Energie">
+              <option selected>Fuel</option>
+              <option>Electricité</option>
+            </select>
+          </div>
+      </form>
+      <form id="formCheck1">
+            <label class="mt-3">Accepte les animaux : </label>
+            <div class="hstack mt-3 gap-3">
+
+                <input class="form-check-input" type="radio" name="animaux" id="flexRadioDefault1" value="oui">
+                <label class="form-check-label" for="flexRadioDefault1">
+                  Oui
+                </label>
+                <input class="form-check-input" type="radio" name="animaux" id="flexRadioDefault2" value="non">
+                <label class="form-check-label" for="flexRadioDefault2">
+                  Non
+                </label>
+              </div>
+
+            <label>Accepte les fumeurs : </label>
+            <div class="hstack mt-3 gap-3">
+
+                    <input class="form-check-input" type="radio" name="fumeurs" id="flexRadioDefault3"  value="oui">
+                    <label class="form-check-label" for="flexRadioDefault3">
+                      Oui
+                    </label>
+                    <input class="form-check-input" type="radio" name="fumeurs" id="flexRadioDefault4"  value="non">
+                    <label class="form-check-label" for="flexRadioDefault4">
+                      Non
+                    </label>
+            </div>
+            </form>
+  
+   
+      </form>    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="closeEnregistrerPreference">Close</button>
+      <button type="button" class="btn btn-primary"  data-bs-dismiss="modal"id="enregistrerPreference">Enregistrer</button>
+    </div>
+  </div>
+</div>
+</div>
+
+      

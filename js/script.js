@@ -2,6 +2,9 @@ const tokenCookieName = "accesstoken";
 const RoleCookieName = "role";
 const signoutBtn = document.getElementById("signout-btn");
 const apiUrl = "http://127.0.0.1:8000/api/";
+let btnId="";
+let btnChauffeur1="";
+
 signoutBtn.addEventListener("click", signout); 
 function getRole(){
     return getCookie(RoleCookieName);
@@ -138,6 +141,19 @@ function validateRequired(input){
         return false;
     }
 }
+function validatePhoto(input){
+    const fileTypes=["image/png","image/jpeg"];
+    if (input.files.length===0 || fileTypes.includes(input.files[0].type)){
+        input.classList.add("is-valid");
+        input.classList.remove("is-invalid"); 
+        return true;
+    }
+    else{
+        input.classList.remove("is-valid");
+        input.classList.add("is-invalid");
+        return false;
+    }
+}
 function validateDate(input){
     const dateRegex = /^[0-9]{2}[/][0-9]{2}[/][0-9]{4}$/;
     const dateUser=input.value;
@@ -153,9 +169,9 @@ function validateDate(input){
     }
 }
 function validateTelephone(input){
-    const telephoneRegex = /^[0-9]{5}$/;
+    const telephoneRegex = /^[0-9]{10}$/;
     const telephoneUser=input.value;
-    if(telephoneUser.match(telephoneRegex)){
+    if(telephoneUser.match(telephoneRegex) ||telephoneUser ==""){
         input.classList.add("is-valid");
         input.classList.remove("is-invalid"); 
         return true;
@@ -208,3 +224,10 @@ function validateConfirmationPassword(inputPwd, inputConfirmPwd){
         return false;
     }
 }
+function toHours(time){
+    let hours=Math.floor(time/(3600000)); 
+    let minutes=time/(60000)-hours*60;
+    if (minutes<10){minutes="0"+minutes;}
+    return hours+ "h" + minutes;
+    
+    }
