@@ -252,14 +252,14 @@ function validatePreferencesForm(){
 
 //Affiche les infomations de l'utilisateur
 getRoles(); 
-getInfosUsers();
+getInfosUser();
 getVehicules();
 getPreferences();
 
 
 
 
-function getInfosUsers(){
+function getInfosUser(){
     let myHeaders = new Headers();
     myHeaders.append("X-AUTH-TOKEN", getToken());
 

@@ -1,12 +1,17 @@
-let lienCovoiturages=document.getElementById("lienCovoiturages");
+let btnCovoiturages=document.getElementById("btnCovoiturages");
+btnCovoiturages.addEventListener("click",()=>{ getCovoiturages(); getPrixEtDureeMaximumEtMinimum();})
+
 let dateDepart=document.getElementById("dateDepart");
 let lieuDepart=document.getElementById("lieuDepart");
 let lieuArrivee=document.getElementById("lieuArrivee");
+dateDepart.addEventListener("keyup", validateForm);
+lieuDepart.addEventListener("keyup", validateForm);
+lieuArrivee.addEventListener("keyup", validateForm);
+
 let covoituragesForm=document.getElementById("covoituragesForm");
 let id1=document.getElementById("id1");
-
 let param=new URL(document.location).searchParams;
-let idUser=0;
+let idUser;
 if (isConnected()){      
 idUser=getIdUser();
 }
@@ -14,7 +19,51 @@ lieuDepart.value=param.get("lieuDepart");
 lieuArrivee.value=param.get("lieuArrivee");
 dateDepart.value=param.get("dateDepart");
 
-lienCovoiturages.addEventListener("click",()=>{ getCovoiturages();})
+
+
+
+let prixMinimum, prixMaximum, DureeMaximum, DureeMinimum;
+let PrixInput=document.getElementById("PrixInput");;
+let DureeInput=document.getElementById("DureeInput");
+let NoteInput=document.getElementById("NoteInput");
+let EnergieInput=document.getElementById("EnergieInput");
+let btnFiltrer=document.getElementById("btnFiltrer");
+btnFiltrer.addEventListener("click", filtrerResultats);
+btnCovoiturages.click();
+
+function getPrixEtDureeMaximumEtMinimum(){
+    let myHeaders = new Headers();
+
+    let requestOptions = {
+        method: 'GET',
+        headers: myHeaders,
+        redirect: 'follow'
+    };
+     fetch(apiUrl+"covoiturage/prixMaximumEtMinimum/" + lieuDepart.value + "/"+ lieuArrivee.value +"/" + dateDepart.value, requestOptions)
+    .then(response =>{
+        if(response.ok){
+            return response.json();
+        }
+        else{
+            console.log("Impossible de récupérer les informations utilisateur");
+        }
+    })
+    .then(result => {//filtre
+        prixMinimum=Object.entries(result['0'])['0']['1'];
+        prixMaximum=Object.entries(result['1'])['0']['1'];
+        PrixInput.setAttribute("min",prixMinimum);
+        PrixInput.setAttribute("max",prixMaximum);
+        DureeMaximum=Object.entries(result['2'])['0']['1'];
+        DureeMinimum=Object.entries(result['3'])['0']['1'];
+        DureeInput.setAttribute("max",DureeMaximum.split(":")[0]);
+        DureeInput.setAttribute("min",DureeMinimum.split(":")[0]);
+        console.log(result);
+    })
+    .catch(error =>{
+        console.error("erreur lors de la récupération des données utilisateur", error);
+    });}
+
+
 function getIdUser(){
     let myHeaders = new Headers();
     myHeaders.append("X-AUTH-TOKEN", getToken());
@@ -131,18 +180,13 @@ function setCovoiturages(covoiturages){
         newDiv14.innerHTML=i['heureArrivee'];
         newDiv15.innerHTML=i['lieuArrivee'];
         newDiv16.innerHTML=i['nbPlace'] + place;
-        newDiv17.innerHTML=i['energie']=="Fuel"? "Trajet non écologique" : "Trajet écologique";
-
-  
+        newDiv17.innerHTML=i['voiture']['energie']=="Fuel"? "Trajet non écologique" : "Trajet écologique";
         newDiv10.classList.add( "btnDetail");
-
- 
      
         newDiv2.appendChild(newDiv3);
         newDiv2.appendChild(newDiv4);
         newDiv2.appendChild(newDiv5);
         newDiv2.appendChild(newDiv6);
-
         newDiv2.appendChild(newDiv7);
         newDiv2.appendChild(newDiv8);
         newDiv2.appendChild(newDiv9);
@@ -164,7 +208,7 @@ function setCovoiturages(covoiturages){
         let Chauffeur = idUser ==(i['voiture']['user']['id']) ? true : false ;
         btn.setAttribute("href","/detail" +"?id=" + i['id'] + "&idUser=" + idUser + "&Chauffeur=" + Chauffeur);}
         else{
-        btn.setAttribute("href","/detail");}
+        btn.setAttribute("href","/detail" + "?id=" + i['id']);}
      
 
         btn.appendChild(document.createTextNode('Détail'));
@@ -189,4 +233,51 @@ function setCovoiturages(covoiturages){
     sp1.classList.add("mb-3");
     let parentDiv = id1.parentNode;
     parentDiv.insertBefore(sp1, id1.nextSibling);
+}
+function filtrerResultats(){
+    let myHeaders = new Headers();
+    //myHeaders.append("X-AUTH-TOKEN", getToken());
+
+    let requestOptions = {
+        method: 'GET',
+        headers: myHeaders,
+        redirect: 'follow'
+    };
+
+let energie;
+      energie=EnergieInput.checked==true?"Electrique":"Fuel";
+      console.log(DureeInput.value + ":00" );
+     fetch(apiUrl+"covoiturage/Covoiturage/" + lieuDepart.value + "/"+ lieuArrivee.value +"/" + dateDepart.value+"/" 
+        +PrixInput.value +"/" + DureeInput.value+ ":00/" + NoteInput.value + "/"+ energie,requestOptions)
+    .then(response =>{
+        if(response.ok){
+            return response.json();
+        }
+        else{
+            console.log("Impossible de récupérer les informations des covoiturages");
+            id1.textContent="Il n'y a pas de covoiturages disponibles à cette date.";
+        }
+    })
+      .then(result => {
+        console.log(result);
+        setCovoiturages(result);
+
+})
+    .catch(error =>{
+        console.error("erreur lors de la récupération des données des covoiturages", error);
+    });
+}
+function validateForm(){
+    const dateDepartOk = validateRequired(dateDepart);
+    const lieuDepartOk = validateRequired(lieuDepart);
+    const lieuArriveeOk = validateRequired(lieuArrivee);
+    if (dateDepartOk && lieuDepartOk && lieuArriveeOk){
+        btnCovoiturages.disabled=false;
+    }
+    else{
+        btnCovoiturages.disabled=true;
+    }
+}
+function validateRequired(input){
+    return input.value != '';
 }

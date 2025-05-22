@@ -9,10 +9,10 @@
                               <form id="covoituragesForm">
                               <input class="form-control me-2 mb-3" type="search" placeholder="Lieu de départ" aria-label="Search" id="lieuDepart" name="lieuDepart">
                              <input class="form-control me-2 mb-3" type="search" placeholder="Lieu d'arrivée" aria-label="Lieu d'arrivée"id="lieuArrivee" name="lieuArrivee">
-                              <input class="form-control me-2 mb-3" type="date" id="dateDepart" id="dateDepart" name="dateDepart">
+                              <input class="form-control me-2 mb-3" type="date" id="dateDepart" name="dateDepart">
                               <div class= "text-center pt-4 mb-5"> 
 
-                              <a id="lienCovoiturages" class="btn btn-primary">Rechercher</a>
+                              <button type="button" id="btnCovoiturages" class="btn btn-primary">Rechercher</a>
                               </div>
 
                              
@@ -22,11 +22,33 @@
 </div>
     
 <div class="card m-3">
-  <div class="card-body shadow p-3 bg-body-tertiary rounded">
-    <div  id="id1"> 
+  <div class="card-body shadow p-3 bg-body-tertiary rounded container3" >
+    <div  id="id1" class="container5"> 
     </div>
+      <div class="card m-3 container4">
+        <div class="card-body shadow p-3 bg-body-tertiary rounded">
+        <div style="display:grid; grid-gap:19px" id="id2">
+          <p class="text-center" style="grid-row: 1/2;">Affiner la recherche</p> 
+          <button class="btn btn-primary mx-auto" style="grid-row: 2/3">Tout réinitialiser</button>
+         <label for="PrixInput" class="form-label" style="grid-row: 3/4">Prix maximum</label>
+              <input type="number" class="form-control" style="grid-row: 4/5"  id="PrixInput" name="Prix">
+              <label for="DureeInput" class="form-label" style="grid-row: 5/6">Durée maximum (en heures)</label>
+              <input type="number" class="form-control" style="grid-row: 6/7"  id="DureeInput" name="Duree">
+   <label for="NoteInput" class="form-label" style="grid-row: 7/8">Note minimale</label>
+    <input type="number" class="form-control" style="grid-row: 8/9" min="1" max="5"  id="NoteInput" name="Note">  
+    <div class="hstack gap-3"><input class="form-check-input" style="grid-row: 9/10" type="checkbox" value="oui" id="EnergieInput">
+  <label class="form-check-label"  for="checkDefault">Trajet écologique</label></div>
+      <button class="btn btn-primary mx-auto" style="grid-row: 10/11" id="btnFiltrer">Filtrer</button>
+
+
+</div>
+
+        </div>
+        </div>                 
+        </div> 
   </div>                 
   </div>                   
-                
+  
+  
       
     

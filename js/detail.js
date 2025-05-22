@@ -28,20 +28,18 @@ const btnResponseUserNon = document.getElementById("btnResponseUserNon");
 const responseUser = document.getElementById("responseUser");
 let statut=0;
 let idChauffeur=0;
-
-const btnStatut = document.getElementById("btnStatut");
+let btnStatut;
 let btnAnnuler=document.createElement("button");
 avisForm=document.getElementById("avisForm")
 envoyerAvis=document.getElementById("envoyerAvis");
 envoyerCommentaire=document.getElementById("envoyerCommentaire");
 let userResponse;
 let userResponse1;
-btnStatut.addEventListener("click",()=>{clickStatutAndButton()});
 
 getCovoiturage();
 function getCovoiturage(){
         let myHeaders = new Headers();
-        myHeaders.append("X-AUTH-TOKEN", getToken());
+        //myHeaders.append("X-AUTH-TOKEN", getToken());
     
         let requestOptions = {
             method: 'GET',
@@ -49,7 +47,7 @@ function getCovoiturage(){
             redirect: 'follow'
         };
     
-         fetch(apiUrl+"covoiturage/" + parseInt(param.get("id")), requestOptions)
+         fetch(apiUrl+"covoiturage/c/" + parseInt(param.get("id")), requestOptions)
         .then(response =>{
             if(response.ok){
                 return response.json();
@@ -96,32 +94,58 @@ function getCovoiturage(){
             id0.appendChild(newDiv);           
             } 
             idChauffeur=i['voiture']['user']['id'];
+            if (isConnected()){
             statut=i["statut"];
             userResponse=i["reponses"];
             userResponse1=i["reponses1"];
-            if (param.get("Chauffeur")){
+            /*if (param.get("Chauffeur")){
+            setStatutButton(1);
             switch (statut){
-            case "en attente": btnStatut.appendChild(document.createTextNode('Démarrer')); 
-            btnAnnuler.classList.add("btnDetail1", "btn", "btn-primary","my-auto");
-            btnAnnuler.appendChild(document.createTextNode('Annuler'));
-            btnAnnuler.addEventListener("click",()=>{
-            const myModalAnnulerCovoiturage = new bootstrap.Modal('#myModalAnnulerCovoiturage');
-            myModalAnnulerCovoiturage.show();})
-            id0.appendChild(btnAnnuler);
-            break;
+            case "en attente":
+                btnStatut.appendChild(document.createTextNode('Démarrer')); 
+                btnAnnuler.classList.add("btnDetail1", "btn", "btn-primary","my-auto");
+                btnAnnuler.appendChild(document.createTextNode('Annuler'));
+                btnAnnuler.addEventListener("click",()=>{
+                    const myModalAnnulerCovoiturage = new bootstrap.Modal('#myModalAnnulerCovoiturage');
+                    myModalAnnulerCovoiturage.show();})
+                id0.appendChild(btnAnnuler);
+                break;
             case "en cours":
-            btnStatut.appendChild(document.createTextNode('Arrivé à destination')); break;
-            case "terminé": btnStatut.appendChild(document.createTextNode('Terminé'));break;} 
-   // }else{
-       if (statut=='terminé'){
-        setQuestionPassager();}}
-        let sp1 = document.createElement("div");
+                btnStatut.appendChild(document.createTextNode('Arrivé à destination')); break;
+            case "terminé": 
+                btnStatut.appendChild(document.createTextNode('Terminé'));break;} 
+   // }else{*/
+       
+        if (statut=='en attente' && (!i["users"].includes(param.get("idUser")))){
+            setStatutButton(2);}
+        else if (statut=='terminé' && i["users"].includes(param.get("idUser"))){
+        setQuestionPassager();} 
+    } else{setStatutButton(3);}
+           // if (statut=='en attente'){  tous les covoiturages montrés sont déjà en attente
+      let sp1 = document.createElement("div");
         sp1.classList.add("mb-3");
-        let parentDiv = detail.parentNode;
-        parentDiv.insertBefore(sp1, detail.nextSibling);
-    }
+        let parentDiv = id0.parentNode;
+        parentDiv.insertBefore(sp1, id0.nextSibling);}
     
 
+        function  setStatutButton(i){
+            let btnStatut=document.createElement("button");
+            btnStatut.classList.add("btnDetail", "btn", "btn-primary","my-auto");
+            id0.appendChild(btnStatut); 
+            if (i==1){
+             btnStatut.addEventListener("click",()=>{clickStatutAndButton()});}
+            else if(i==2){
+        btnStatut.appendChild(document.createTextNode('Participer'));
+            btnStatut.addEventListener("click",()=>{
+            const myModalParticiperCovoiturage = new bootstrap.Modal('#myModalParticiperCovoiturage');
+            myModalParticiperCovoiturage.show();})}
+            else{  btnStatut.appendChild(document.createTextNode('Participer')); 
+        btnStatut.addEventListener("click",()=>{window.location.replace("/signin")});}
+        }
+           
+
+
+           
 
 
     function setQuestionPassager(){
@@ -176,9 +200,6 @@ function getCovoiturage(){
                 envoyerAvis.addEventListener("click",()=>{setReponse("reponse1","oui");btnSoumettreAvis.remove();
                 //enregistre ravis
                 let dataForm = new FormData(avisForm);
-                console.log("note" + dataForm.get("Note"));
-                console.log(dataForm.get("Avis"));
-                console.log(idChauffeur);
                 let raw = JSON.stringify({
                 "note": dataForm.get("Note"),
                 "commentaire": dataForm.get("Avis"),
@@ -279,7 +300,7 @@ function getCovoiturage(){
 
     function getAvis(){
         let myHeaders = new Headers();
-        myHeaders.append("X-AUTH-TOKEN", getToken());
+        //myHeaders.append("X-AUTH-TOKEN", getToken());
     
         let requestOptions = {
             method: 'GET',
