@@ -231,3 +231,17 @@ function toHours(time){
     return hours+ "h" + minutes;
     
     }
+    function validateForm(btn,input1,input2,input3){
+    const input1Ok = validateRequired1(input1);
+    const input2Ok = validateRequired1(input2);
+    const input3Ok = validateRequired1(input3);
+    if (input1Ok && input2Ok && input3Ok){
+        btn.disabled=false;
+    }
+    else{
+        btn=disabled=true;
+    }
+}
+function validateRequired1(input){
+    return input.value != '';
+}

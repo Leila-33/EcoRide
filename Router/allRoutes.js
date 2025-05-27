@@ -12,6 +12,7 @@ export const allRoutes = [
     new Route("/detail", "Détails du covoiturage", "/pages/reservations/detail.html", ["client"],"/js/detail.js"),
     new Route("/contact", "Contact", "/pages/contact.html", ["client"],"/js/contact.js"),
     new Route("/covoiturages", "Covoiturages", "/pages/covoiturages.html", ["client"],"/js/covoiturages.js"),
+    new Route("/mentionslegales", "Mentions légales", "/pages/mentionslegales.html", ["client"]),
 
 
     ];

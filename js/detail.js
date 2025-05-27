@@ -2,6 +2,10 @@
 let param=new URL(document.location).searchParams;
 const supprimerVehicule = document.getElementById("supprimerVehicule");
 supprimerVehicule.addEventListener("click",supprimerCovoiturage);
+const confirmerParticiper = document.getElementById("confirmerParticiper");
+const participerCovoiturage = document.getElementById("participerCovoiturage");
+   idUser=param.get("idUser");
+
 const id0 = document.getElementById("id0");
 const id1 = document.getElementById("id1");
 const id2 = document.getElementById("id2");
@@ -28,7 +32,7 @@ const btnResponseUserNon = document.getElementById("btnResponseUserNon");
 const responseUser = document.getElementById("responseUser");
 let statut=0;
 let idChauffeur=0;
-let btnStatut;
+let btnStatut, credit;
 let btnAnnuler=document.createElement("button");
 avisForm=document.getElementById("avisForm")
 envoyerAvis=document.getElementById("envoyerAvis");
@@ -36,7 +40,71 @@ envoyerCommentaire=document.getElementById("envoyerCommentaire");
 let userResponse;
 let userResponse1;
 
-getCovoiturage();
+
+function paiement(prix){
+    console.log(prix);
+   let myHeaders = new Headers();
+    myHeaders.append("X-AUTH-TOKEN", getToken());
+   let raw = JSON.stringify({
+        "date_operation": new Date(Date()).toISOString().slice(0,10),
+        "operation": prix});
+    let requestOptions = {
+        method: 'POST',
+        body: raw,
+        headers: myHeaders,
+        redirect: 'follow'
+    };
+     fetch(apiUrl+"credit/" + Number(prix), requestOptions)
+    .then(response =>{
+        if(response.ok){
+            return response.json();
+        }
+        else{
+            console.log("Impossible de récupérer les informations utilisateur");
+        }
+    })
+    .then(result => {
+        console.log(result);
+
+
+    })
+    .catch(error =>{
+        console.error("erreur lors de la récupération des données utilisateur", error);
+    });
+}
+
+
+
+getIdUser();
+function getIdUser(){
+    let myHeaders = new Headers();
+    myHeaders.append("X-AUTH-TOKEN", getToken());
+
+    let requestOptions = {
+        method: 'GET',
+        headers: myHeaders,
+        redirect: 'follow'
+    };
+     fetch(apiUrl+"account/me", requestOptions)
+    .then(response =>{
+        if(response.ok){
+            return response.json();
+        }
+        else{
+            console.log("Impossible de récupérer les informations utilisateur");
+        }
+    })
+    .then(result => {
+        console.log(result);
+        credit= result["credit"];
+        getCovoiturage();
+
+
+    })
+    .catch(error =>{
+        console.error("erreur lors de la récupération des données utilisateur", error);
+    });
+}
 function getCovoiturage(){
         let myHeaders = new Headers();
         //myHeaders.append("X-AUTH-TOKEN", getToken());
@@ -75,7 +143,8 @@ function getCovoiturage(){
             id5.innerHTML=i['lieuDepart'];
             id6.innerHTML="Durée : " + toHours(new Date(i['dateArrivee'].replace("00:00",i['heureArrivee']))-new Date(i['dateDepart'].replace("00:00",i['heureDepart']))) ;
             id7.innerHTML="Prix : " + i['prixPersonne'];
-            id8.innerHTML=i['voiture']['user']['pseudo'] +"<br>" + i['voiture']['user']['pseudo'];
+            let noteChauffeur=i['noteChauffeur']!=null?i['noteChauffeur']:'';
+            id8.innerHTML=i['voiture']['user']['pseudo'] +"<br>" + i['voiture']['user']['pseudo'] + "<br>"+ "Note : " + noteChauffeur + '/5';
             id9.innerHTML="Arrivée :";
             id10.innerHTML=new Intl.DateTimeFormat("fr-FR").format(new Date(i['dateArrivee']));
             id11.innerHTML=i['heureArrivee'];
@@ -98,14 +167,33 @@ function getCovoiturage(){
             statut=i["statut"];
             userResponse=i["reponses"];
             userResponse1=i["reponses1"];
-            /*if (param.get("Chauffeur")){
+             /*if (param.get("Chauffeur")){
             setStatutButton(1);
-            switch (statut){
+            
+   // }else{*/
+   idUser=param.get("idUser");
+    setStatutButton(1, i['prix_Personne'], i['users']);
+
+    } else{setStatutButton(3);}
+           // if (statut=='en attente'){  tous les covoiturages montrés sont déjà en attente
+      let sp1 = document.createElement("div");
+        sp1.classList.add("mb-3");
+        let parentDiv = id0.parentNode;
+        parentDiv.insertBefore(spi1, id0.nextSibling);}
+    
+
+        function  setStatutButton(i,prix, users){
+            let btnStatut=document.createElement("button");
+            btnStatut.classList.add("btnDetail", "btn", "btn-primary","my-auto");
+            id0.appendChild(btnStatut); 
+            if (i==1){
+                //Chauffeur
+                switch (statut){
             case "en attente":
                 btnStatut.appendChild(document.createTextNode('Démarrer')); 
                 btnAnnuler.classList.add("btnDetail1", "btn", "btn-primary","my-auto");
                 btnAnnuler.appendChild(document.createTextNode('Annuler'));
-                btnAnnuler.addEventListener("click",()=>{
+                btnAnnuler.addEventListener("click", ()=>{
                     const myModalAnnulerCovoiturage = new bootstrap.Modal('#myModalAnnulerCovoiturage');
                     myModalAnnulerCovoiturage.show();})
                 id0.appendChild(btnAnnuler);
@@ -114,38 +202,48 @@ function getCovoiturage(){
                 btnStatut.appendChild(document.createTextNode('Arrivé à destination')); break;
             case "terminé": 
                 btnStatut.appendChild(document.createTextNode('Terminé'));break;} 
-   // }else{*/
-       
-        if (statut=='en attente' && (!i["users"].includes(param.get("idUser")))){
-            setStatutButton(2);}
-        else if (statut=='terminé' && i["users"].includes(param.get("idUser"))){
-        setQuestionPassager();} 
-    } else{setStatutButton(3);}
-           // if (statut=='en attente'){  tous les covoiturages montrés sont déjà en attente
-      let sp1 = document.createElement("div");
-        sp1.classList.add("mb-3");
-        let parentDiv = id0.parentNode;
-        parentDiv.insertBefore(sp1, id0.nextSibling);}
-    
-
-        function  setStatutButton(i){
-            let btnStatut=document.createElement("button");
-            btnStatut.classList.add("btnDetail", "btn", "btn-primary","my-auto");
-            id0.appendChild(btnStatut); 
-            if (i==1){
-             btnStatut.addEventListener("click",()=>{clickStatutAndButton()});}
-            else if(i==2){
-        btnStatut.appendChild(document.createTextNode('Participer'));
-            btnStatut.addEventListener("click",()=>{
-            const myModalParticiperCovoiturage = new bootstrap.Modal('#myModalParticiperCovoiturage');
-            myModalParticiperCovoiturage.show();})}
+            btnStatut.addEventListener("click",()=>{clickStatutAndButton(1)});}
+          // Passager connecté
+          else if(i==2){
+            if (i["users"].includes(idUser)){
+                btnStatut.addEventListener("click",()=>{clickStatutAndButton()});}
+                switch (statut){
+                    case "en attente":
+                        btnStatut.appendChild(document.createTextNode('En attente'));
+                    case "en cours":
+                        btnStatut.appendChild(document.createTextNode('En cours'));
+                    case "terminé": 
+                        btnStatut.appendChild(document.createTextNode('Arrivé à destination'));} 
+                        setQuestionPassager();}
+            else if (statut=='en attente' && (!i["users"].includes(idUser))){
+                btnStatut.appendChild(document.createTextNode('Participer'));
+                if (credit<l){btnStatut.disabled=true;
+                    let creditInsuffisant=document.createElement("p");
+                    creditInsuffisant.classList.add("item18","mx-auto");
+                    creditInsuffisant.appendChild(document.createTextNode('Credit insuffisant'));
+                    id0.appendChild(creditInsuffisant);} 
+                else {        
+                    btnStatut.addEventListener("click",()=>{
+                    let credits=credit>1?"credits":"credit"
+                    confirmerParticiper.textContent="En participant, vous confirmez le débit de "+ prix +" "+ credits+ " de votre compte.";
+                    const myModalParticiperCovoiturage = new bootstrap.Modal('#myModalParticiperCovoiturage');
+                    myModalParticiperCovoiturage.show();})
+                    participerCovoiturage.addEventListener("click",
+                    ()=>{paiement(-prix);
+                    ajouterParticipant();          
+                    btnStatut.appendChild(document.createTextNode('En attente')); });
+        }}}
+        // Personne non connectée
             else{  btnStatut.appendChild(document.createTextNode('Participer')); 
         btnStatut.addEventListener("click",()=>{window.location.replace("/signin")});}
         }
            
 
 
-           
+
+
+    
+     
 
 
     function setQuestionPassager(){
@@ -296,7 +394,10 @@ function getCovoiturage(){
                         .then(response => { if(response.ok){return response.json(); } })
                         .then(result => {})
                         .catch(error => console.log('error', error));
-                    }}}
+                    }
+                }
+
+                }
 
     function getAvis(){
         let myHeaders = new Headers();
@@ -341,3 +442,37 @@ function getCovoiturage(){
 
          
     }}
+    
+function ajouterParticipant(){
+    let myHeaders = new Headers();
+    myHeaders.append("X-AUTH-TOKEN", getToken());
+
+    let requestOptions = {
+        method: 'PUT',
+        headers: myHeaders,
+        redirect: 'follow'
+    };
+     fetch(apiUrl+"covoiturage/addUser/" + param.get("id"), requestOptions)
+    .then(response =>{
+        if(response.ok){
+            return response.json();
+        }
+        else{
+            console.log("Impossible de récupérer les informations utilisateur");
+        }
+    })
+    .then(result => {
+        console.log(result);
+        credit= result["credit"];
+        getCovoiturage();
+
+
+    })
+    .catch(error =>{
+        console.error("erreur lors de la récupération des données utilisateur", error);
+    });
+
+
+
+    
+}

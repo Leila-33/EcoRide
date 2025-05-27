@@ -12185,11 +12185,12 @@ p {
   grid-row: 5/6;
 }
 
-/*.item18{
-    grid-column:4/9;
-    grid-row:5/6;
+.item18 {
+  grid-column: 8/9;
+  grid-row: 3/4;
+  color: red;
+}
 
-}*/
 .btnDetail {
   margin-top: auto;
   grid-column: 8/9;

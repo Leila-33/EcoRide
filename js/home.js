@@ -1,8 +1,13 @@
-lienCovoiturages=document.getElementById("lienCovoiturages");
-dateDepart=document.getElementById("dateDepart");
-lieuDepart=document.getElementById("lieuDepart");
-lieuArrivee=document.getElementById("lieuArrivee");
+const btnCovoiturages=document.getElementById("btnCovoiturages");
+const dateDepart=document.getElementById("dateDepart");
+const lieuDepart=document.getElementById("lieuDepart");
+const lieuArrivee=document.getElementById("lieuArrivee");
+const covoituragesForm=document.getElementById("covoituragesForm");
 
-covoituragesForm=document.getElementById("covoituragesForm");
+btnCovoiturages.addEventListener("click",()=>{dataForm = new FormData(covoituragesForm); window.location.replace("/covoiturages" +"?lieuDepart=" + dataForm.get("lieuDepart") + "&lieuArrivee=" + dataForm.get("lieuArrivee")  + "&dateDepart=" + dataForm.get("dateDepart"));})
+btnCovoiturages.disabled=true;
 
-lienCovoiturages.addEventListener("click",()=>{dataForm = new FormData(covoituragesForm); lienCovoiturages.setAttribute("href","/covoiturages" +"?lieuDepart=" + dataForm.get("lieuDepart") + "&lieuArrivee=" + dataForm.get("lieuArrivee")  + "&dateDepart=" + dataForm.get("dateDepart"));})
+
+dateDepart.addEventListener("change", ()=>{validateForm(btnCovoiturages,dateDepart,lieuDepart,lieuArrivee);});
+lieuDepart.addEventListener("change", ()=>{validateForm(btnCovoiturages,dateDepart,lieuDepart,lieuArrivee);});
+lieuArrivee.addEventListener("change", ()=>{validateForm(btnCovoiturages,dateDepart,lieuDepart,lieuArrivee);});

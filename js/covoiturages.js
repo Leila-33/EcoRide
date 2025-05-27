@@ -1,19 +1,19 @@
 let btnCovoiturages=document.getElementById("btnCovoiturages");
-btnCovoiturages.addEventListener("click",()=>{ getCovoiturages(); getPrixEtDureeMaximumEtMinimum();})
+btnCovoiturages.addEventListener("click",()=>{getCovoiturages(2);})
 
 let dateDepart=document.getElementById("dateDepart");
 let lieuDepart=document.getElementById("lieuDepart");
 let lieuArrivee=document.getElementById("lieuArrivee");
-dateDepart.addEventListener("keyup", validateForm);
-lieuDepart.addEventListener("keyup", validateForm);
-lieuArrivee.addEventListener("keyup", validateForm);
+dateDepart.addEventListener("change", ()=>{validateForm(btnCovoiturages,dateDepart,lieuDepart,lieuArrivee);});
+lieuDepart.addEventListener("change", ()=>{validateForm(btnCovoiturages,dateDepart,lieuDepart,lieuArrivee);});
+lieuArrivee.addEventListener("change", ()=>{validateForm(btnCovoiturages,dateDepart,lieuDepart,lieuArrivee);});
 
 let covoituragesForm=document.getElementById("covoituragesForm");
 let id1=document.getElementById("id1");
 let param=new URL(document.location).searchParams;
 let idUser;
 if (isConnected()){      
-idUser=getIdUser();
+getIdUser();
 }
 lieuDepart.value=param.get("lieuDepart");
 lieuArrivee.value=param.get("lieuArrivee");
@@ -21,14 +21,16 @@ dateDepart.value=param.get("dateDepart");
 
 
 
-
-let prixMinimum, prixMaximum, DureeMaximum, DureeMinimum;
-let PrixInput=document.getElementById("PrixInput");;
-let DureeInput=document.getElementById("DureeInput");
-let NoteInput=document.getElementById("NoteInput");
-let EnergieInput=document.getElementById("EnergieInput");
-let btnFiltrer=document.getElementById("btnFiltrer");
+let prixMinimum, prixMaximum, DureeMaximum, DureeMinimum, energie, duree, note, prix, covoiturages, dateDepart1;
+const PrixInput=document.getElementById("PrixInput");;
+const DureeInput=document.getElementById("DureeInput");
+const NoteInput=document.getElementById("NoteInput");
+const EnergieInput=document.getElementById("EnergieInput");
+const btnFiltrer=document.getElementById("btnFiltrer");
+const btnToutReinitialiser= document.getElementById("btnToutReinitialiser");
 btnFiltrer.addEventListener("click", filtrerResultats);
+btnToutReinitialiser.addEventListener("click", ()=>{EnergieInput.checked==false;DureeInput.value='';NoteInput.value='';PrixInput.value=''});
+
 btnCovoiturages.click();
 
 function getPrixEtDureeMaximumEtMinimum(){
@@ -53,10 +55,10 @@ function getPrixEtDureeMaximumEtMinimum(){
         prixMaximum=Object.entries(result['1'])['0']['1'];
         PrixInput.setAttribute("min",prixMinimum);
         PrixInput.setAttribute("max",prixMaximum);
-        DureeMaximum=Object.entries(result['2'])['0']['1'];
-        DureeMinimum=Object.entries(result['3'])['0']['1'];
-        DureeInput.setAttribute("max",DureeMaximum.split(":")[0]);
-        DureeInput.setAttribute("min",DureeMinimum.split(":")[0]);
+        DureeMaximum=Object.entries(result['2'])['0']['1'].split(":")[0];
+        DureeMinimum=Object.entries(result['3'])['0']['1'].split(":")[0];
+        DureeInput.setAttribute("max",DureeMaximum);
+        DureeInput.setAttribute("min",DureeMinimum);
         console.log(result);
     })
     .catch(error =>{
@@ -90,35 +92,7 @@ function getIdUser(){
         console.error("erreur lors de la récupération des données utilisateur", error);
     });
 }
-function getCovoiturages(){
-    let myHeaders = new Headers();
-    //myHeaders.append("X-AUTH-TOKEN", getToken());
 
-    let requestOptions = {
-        method: 'GET',
-        headers: myHeaders,
-        redirect: 'follow'
-    };
-
-     fetch(apiUrl+"covoiturage/Covoiturages/" + lieuDepart.value + "/"+ lieuArrivee.value +"/" + dateDepart.value, requestOptions)
-    .then(response =>{
-        if(response.ok){
-            return response.json();
-        }
-        else{
-            console.log("Impossible de récupérer les informations des covoiturages");
-            id1.textContent="Il n'y a pas de covoiturages disponibles à cette date.";
-        }
-    })
-      .then(result => {
-        console.log(result);
-        setCovoiturages(result);
-
-})
-    .catch(error =>{
-        console.error("erreur lors de la récupération des données des covoiturages", error);
-    });
-}
 function setCovoiturages(covoiturages){
     while (id1.firstChild) {
         id1.removeChild(id1.firstChild);
@@ -174,7 +148,8 @@ function setCovoiturages(covoiturages){
         newDiv7.innerHTML=i['lieuDepart'];
         newDiv8.innerHTML="Durée : " + toHours(new Date(i['dateArrivee'].replace("00:00",i['heureArrivee']))-new Date(i['dateDepart'].replace("00:00",i['heureDepart']))) ;
         newDiv9.innerHTML="Prix : " + i['prixPersonne'];
-        newDiv11.innerHTML=i['voiture']['user']['pseudo'] +"<br>" + i['voiture']['user']['pseudo'];
+        let noteChauffeur=i['noteChauffeur']!=null?i['noteChauffeur']:'';
+        newDiv11.innerHTML=i['voiture']['user']['pseudo'] +"<br>" + i['voiture']['user']['pseudo']  +"<br>"+ "Note : " + noteChauffeur + '/5';
         newDiv12.innerHTML="Arrivée :";
         newDiv13.innerHTML=new Intl.DateTimeFormat("fr-FR").format(new Date(i['dateArrivee']));
         newDiv14.innerHTML=i['heureArrivee'];
@@ -235,6 +210,87 @@ function setCovoiturages(covoiturages){
     parentDiv.insertBefore(sp1, id1.nextSibling);
 }
 function filtrerResultats(){
+    let covoiturages1=[];
+    energie=EnergieInput.checked==true?"Electrique":'';
+    prix=PrixInput.value!=''?PrixInput.value:prixMaximum
+    note=NoteInput.value!=''?NoteInput.value:0;
+    duree=DureeInput.value!=''?DureeInput.value:DureeMaximum ;
+      for(let i of covoiturages){
+        if ((energie=="Electrique" && i['energie']=="Electrique") || energie==''){
+            let date1= i['dateDepart'].replace('00:00:00+02:00',i['heureDepart']);    
+            let date2= i['dateArrivee'].replace('00:00:00+02:00',i['heureArrivee']);
+            let heure=(new Date(date2)-new Date(date1))/3600000;
+            if (i['prixPersonne']<=prix && i['noteChauffeur']>=note && heure<=duree){ console.log("o");covoiturages1.push(i); }
+      }
+}
+}
+
+function ItineraireLePlusProche(){
+
+    let myHeaders = new Headers();
+    let requestOptions = {
+        method: 'GET',
+        headers: myHeaders,
+        redirect: 'follow'
+    };    
+     fetch(apiUrl+"covoiturage/CovoituragesSansDate/" + lieuDepart.value + "/"+ lieuArrivee.value ,requestOptions)
+    .then(response =>{
+        if(response.ok){
+            return response.json();
+        }
+        else{
+            console.log("Impossible de récupérer les informations des itinéraires sans date");
+            id1.textContent="Il n'y a aucun itinéraire disponible.";
+        }})
+      .then(result => {
+        console.log(result);
+        if (result){
+            let duree=Infinity;
+            for(let i of result){
+            if (duree>new Date(i['dateDepart'].replace('00:00:00+02:00',i['heureDepart'])) - new Date(dateDepart1)){
+            duree=new Date(i['dateDepart'].replace('00:00:00+02:00',i['heureDepart'])) - new Date(dateDepart1);
+            covoiturages=i;}}
+        }
+
+        let newDiv=document.createElement("div");
+        let newDiv1=document.createElement("div"); 
+        let newDiv2=document.createElement("div");
+        let newDiv3=document.createElement("p");
+        newDiv.classList.add("card", "mb-3");
+        newDiv1.classList.add("card-body","shadow", "p-3",  "bg-body-tertiary", "rounded");
+        newDiv2.classList.add("container5");
+        newDiv2.classList.add("text-center");
+        newDiv2.classList.add("text-center");
+
+        newDiv.appendChild(newDiv1);
+        newDiv1.appendChild(newDiv2);
+        newDiv.appendChild(newDiv1);
+        newDiv3.textContent="Il n'y a aucun covoiturage disponible à cette date. Voulez vous modifier la date de voyage à la date du premier itinéraire le plus proche ?";
+        let newDiv4 = document.createElement("a");
+        
+        newDiv4.classList.add("a");
+        newDiv4.textContent=new Intl.DateTimeFormat('fr-FR').format(new Date(covoiturages['dateDepart']));
+   
+        newDiv4.addEventListener("click", ()=>{dateDepart.value= covoiturages['dateDepart'].replace('T00:00:00+02:00','');getCovoiturages()});
+        
+        console.log('o');
+        newDiv2.appendChild(newDiv3);
+        newDiv2.appendChild(newDiv4);
+        newDiv1.appendChild(newDiv2);
+        newDiv.appendChild(newDiv1);
+        id1.appendChild(newDiv);
+
+
+})
+    .catch(error =>{
+        console.log(error);
+        console.error("erreur lors de la récupération des données des covoiturages", error);
+    });
+}
+
+
+
+function getCovoiturages(){
     let myHeaders = new Headers();
     //myHeaders.append("X-AUTH-TOKEN", getToken());
 
@@ -243,27 +299,31 @@ function filtrerResultats(){
         headers: myHeaders,
         redirect: 'follow'
     };
+      
+     fetch(apiUrl+"covoiturage/Covoiturages/" + lieuDepart.value + "/"+ lieuArrivee.value +"/" + dateDepart.value ,requestOptions)
 
-let energie;
-      energie=EnergieInput.checked==true?"Electrique":"Fuel";
-      console.log(DureeInput.value + ":00" );
-     fetch(apiUrl+"covoiturage/Covoiturage/" + lieuDepart.value + "/"+ lieuArrivee.value +"/" + dateDepart.value+"/" 
-        +PrixInput.value +"/" + DureeInput.value+ ":00/" + NoteInput.value + "/"+ energie,requestOptions)
     .then(response =>{
         if(response.ok){
             return response.json();
         }
         else{
             console.log("Impossible de récupérer les informations des covoiturages");
-            id1.textContent="Il n'y a pas de covoiturages disponibles à cette date.";
+            dateDepart1=dateDepart.value;
+            while (id1.firstChild) {
+        id1.removeChild(id1.firstChild);
+      }
+            ItineraireLePlusProche();
         }
-    })
+        
+        }
+    )
       .then(result => {
         console.log(result);
-        setCovoiturages(result);
+        if (result){setCovoiturages(result);covoiturages=result;getPrixEtDureeMaximumEtMinimum();}
 
 })
     .catch(error =>{
+        console.log(error);
         console.error("erreur lors de la récupération des données des covoiturages", error);
     });
 }
@@ -280,4 +340,36 @@ function validateForm(){
 }
 function validateRequired(input){
     return input.value != '';
+}
+nombreDeparts();
+function nombreDeparts(){
+    let myHeaders = new Headers();
+    //myHeaders.append("X-AUTH-TOKEN", getToken());
+
+    let requestOptions = {
+        method: 'GET',
+        headers: myHeaders,
+        redirect: 'follow'
+    };
+      
+     fetch(apiUrl+"covoiturage/nombreDeparts"  ,requestOptions)
+
+    .then(response =>{
+        if(response.ok){
+            return response.json();
+        }
+        else{
+            console.log("Impossible de récupérer les nombre de covoiturages");
+        }
+        
+        }
+    )
+      .then(result => {
+        console.log(result);
+
+})
+    .catch(error =>{
+        console.log(error);
+        console.error("erreur lors de la récupération des données des covoiturages", error);
+    });
 }
