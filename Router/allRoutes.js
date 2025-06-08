@@ -13,6 +13,9 @@ export const allRoutes = [
     new Route("/contact", "Contact", "/pages/contact.html", ["client"],"/js/contact.js"),
     new Route("/covoiturages", "Covoiturages", "/pages/covoiturages.html", ["client"],"/js/covoiturages.js"),
     new Route("/mentionslegales", "Mentions légales", "/pages/mentionslegales.html", ["client"]),
+    new Route("/employe", "Covoiturages", "/pages/employe.html", ["client"],"/js/employe.js"),
+    new Route("/admin", "Covoiturages", "/pages/admin.html", ["client"],"/js/admin.js"),
+    new Route("/charts", "Covoiturages", "/pages/charts.html", ["client"],["pages/js/scripts.js","https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js","pages/chart-area-demo.js"]),
 
 
     ];

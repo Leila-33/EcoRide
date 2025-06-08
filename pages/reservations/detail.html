@@ -53,26 +53,22 @@
 
 
 
-<div class="container" id="detail" >
-    <div class="modal" tabindex="-1" id='myModalAnnulerCovoiturage'>
+    <div class="modal" tabindex="-1" id='myModalAnnulerCovoiturage' aria-lablledby="myModalAnnulerCovoiturage" aria-hidden="true">
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title">Supprimer</h5>
+              <h5 class="modal-title">Annuler</h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" id="annulerCovoiturage">
               <p>Voulez-vous vraiment annuler ce covoiturage ?</p>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <button type="button" class="btn btn--bs-red"  data-bs-dismiss="modal"id="supprimerVehicule">Supprimer</button>
+              <button type="button" class="btn btn--bs-red"  data-bs-dismiss="modal"id="btnSupprimerCovoiturage">Annuler</button>
             </div>
           </div>
         </div>
       </div>
-</div>
-<div class="container">
     <div class="modal" tabindex="-1" id='myModalParticiperCovoiturage'>
         <div class="modal-dialog">
           <div class="modal-content">
@@ -85,15 +81,13 @@
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-              <button type="button" class="btn btn--bs-red"  data-bs-dismiss="modal"id="participerCovoiturage">Participer</button>
+              <button type="button" class="btn btn-primary"  data-bs-dismiss="modal"id="btnParticiperCovoiturage">Participer</button>
             </div>
           </div>
         </div>
       </div>
-</div>
 
 
-<div class="container" id="" >
     <div class="modal" tabindex="-1" id='myModalLaisserCommentaire'>
         <div class="modal-dialog">
           <div class="modal-content">
@@ -105,13 +99,11 @@
               <textarea class="form-control"  id="CommentaireInput" min="1" name="CommentaireInput"></textarea>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-primary"  data-bs-dismiss="modal"id="envoyerCommentaire">Envoyer</button>
+              <button type="button" class="btn btn-primary"  data-bs-dismiss="modal"id="btnEnvoyerCommentaire">Envoyer</button>
             </div>
           </div>
         </div>
       </div>
-</div>
-<div class="container" id="" >
     <div class="modal" tabindex="-1" id='myModalLaisserAvis'>
         <div class="modal-dialog">
           <div class="modal-content">
@@ -127,9 +119,8 @@
               <textarea class="form-control"  id="AvisInput" name="Avis"></textarea>
             </div></form>
             <div class="modal-footer">
-              <button type="button" class="btn btn-primary"  data-bs-dismiss="modal"id="envoyerAvis">Envoyer</button>
+              <button type="button" class="btn btn-primary"  data-bs-dismiss="modal"id="btnEnvoyerAvis">Envoyer</button>
             </div>
           </div>
         </div>
       </div>
-</div>

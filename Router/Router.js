@@ -50,15 +50,17 @@ else {
   document.getElementById("main-page").innerHTML = html;
 
   // Ajout du contenu JavaScript
-  if (actualRoute.pathJS != "") {
+  actualRoute.pathJS.forEach(pathJS=>{
+  if (pathJS != "") {
     // Création d'une balise script
     var scriptTag = document.createElement("script");
     scriptTag.setAttribute("type", "text/javascript");
-    scriptTag.setAttribute("src", actualRoute.pathJS);
+    scriptTag.setAttribute("defer","");
+    scriptTag.setAttribute("src", pathJS);
 
     // Ajout de la balise script au corps du document
     document.querySelector("body").appendChild(scriptTag);
-  }
+  }})
 
   // Changement du titre de la page
   document.title = actualRoute.title + " - " + websiteName;

@@ -6,7 +6,6 @@ btnPassager.addEventListener("change", updateRolePassager);
 let mesInfos=document.getElementById("mesInfos");
 let imgInfos=document.getElementById("imgInfos");
 const inputPhoto = document.querySelector("input[type=file]");
-const labelNomPrenom = document.getElementById("nomPrenom");
 const inputNom = document.getElementById("NomInput");
 const inputPreNom = document.getElementById("PrenomInput");
 const inputPseudo = document.getElementById("PseudoInput");
@@ -31,9 +30,10 @@ btnInfos1.addEventListener("click", ()=>{btnInfos1.classList.add("d-none");});
 btnInfos.disabled=true;
 let btnClass="";
 let ListElement="";
-let Chauffeur1=0;
-let addVoiture=0;4
+let addVoiture=0;
+let Chauffeur;
 let idUser=0;
+let vehiculesLength=0;
 
 //while (Chauffeur1==0){btnChauffeur.checked=false;}
 //Mes véhicules
@@ -58,7 +58,6 @@ const btnSupprimerVehicule = document.getElementById("supprimerVehicule");
 btnSupprimerVehicule.addEventListener("click", supprimerVehicule);
 btnAjoutVehicule.addEventListener("click", ()=>{btnAjoutVehicule.classList.add("d-none");});
 btnVehicule.addEventListener("click", ()=>{updateVehicule(vehiculeForm);btnAjoutVehicule.classList.remove("d-none");});
-
 btnVehicule.disabled=true;
 
 
@@ -85,11 +84,11 @@ inputNbPlaces1.addEventListener("change", validateFormChauffeur);
 formCheck1.addEventListener("change", validateFormChauffeur);
 btnEnregistrerPreference.disabled=true;
 btnEnregistrerPreference.addEventListener("click", function(){
-    Chauffeur1=1;
+    Chauffeur=1;
     btnChauffeur.checked=true;
     updateRoleChauffeur();
     updateVehicule(vehiculeForm1); 
-    createConfiguration(); dataForm = new FormData(formCheck1);
+    dataForm = new FormData(formCheck1);
     for (let i of dataForm){updatePreferences(i[0],i[1]);} });
 
 
@@ -108,6 +107,7 @@ btnSupprimerPreference.addEventListener("click", supprimerPreference);
 inputValeur.addEventListener("keyup", validatePreferencesForm);
 inputPropriete.addEventListener("keyup", validatePreferencesForm);
 btnPreferences.disabled=true;
+let animauxEtFumeurs;
 
 //Saisir un voyage
 const vehiculeForm2 = document.getElementById("vehiculeForm2");
@@ -149,16 +149,12 @@ btnEnregistrerVoyage.addEventListener("click", updateVoyage);
 
 
 btnEnregistrerVoyage.disabled=true;
-//btnEnregistrerVehicule.addEventListener("keyup", addVehiculeVoyage)
 
 // Mes voyages enregistrés
 const btnMesVoyages= document.getElementById("btnMesVoyages");
 const accordionBody = document.getElementById("accordionBody");
-function addVehiculeVoyage(){
-    let dataForm = new FormData(vehiculeForm2);
-    vehiculeVoyage.innerHTML="Voiture de voyage" + '<br>'+i['immatriculation'] + ' ' + i['datePremiereImmatriculation'] + '<br>' + i['marque']['libelle'] + ' ' + i['modele'] + ' ' + i['couleur'] + '<br>' + i['nbPlace'] +'places' + ' ' + i['energie'];
+const accordionBodyChauffeur = document.getElementById("accordionBodyChauffeur");
 
-}
 //Fonction permettant de valider tout le formulaire apparaissant en activant le mode "Chauffeur"
 function validateFormChauffeur(){
     const PlaqueOk = validateRequired(inputPlaque1);
@@ -195,7 +191,7 @@ function validateForm(){
     }
 }
 
-
+//Fonction permettant de valider tout le formulaire "Saisir un voyage"
 function validateFormVoyage(){
     const lieuDepartOk = validateRequired(inputLieuDepart);
     const lieuArriveeOk = validateRequired(inputLieuArrivee);
@@ -205,21 +201,37 @@ function validateFormVoyage(){
     const heureArriveeOk = validateRequired(inputHeureArrivee);
     const prixOk = validateRequired(inputPrix);
     const NbPlaceOk = validateRequired(inputNbPlace);
+    const datesOk=validateDates(inputDateDepart,inputDateArrivee,inputHeureDepart,inputHeureArrivee)
     let voitureValidated=false;
+    //Si 'autre véhicule' est selectionné, vérifier les champs du véhicule
     if (addVoiture==1){voitureValidated=validateFormVehicule(inputPlaque2,inputDateImmatriculation2,inputMarque2,inputModele2,inputCouleur2,inputNbPlaces2,null);
-    if (lieuDepartOk && lieuArriveeOk && dateDepartOk && dateArriveeOk && heureDepartOk && heureArriveeOk && prixOk && NbPlaceOk && voitureValidated ){
+    if (lieuDepartOk && lieuArriveeOk && dateDepartOk && dateArriveeOk && heureDepartOk && heureArriveeOk && prixOk && NbPlaceOk && voitureValidated && datesOk){
         btnEnregistrerVoyage.disabled=false;
     }
     else{
         btnEnregistrerVoyage.disabled=true;
     }}
-    else{ if (lieuDepartOk && lieuArriveeOk && dateDepartOk && dateArriveeOk && heureDepartOk && heureArriveeOk && prixOk){
+    else{ if (lieuDepartOk && lieuArriveeOk && dateDepartOk && dateArriveeOk && heureDepartOk && heureArriveeOk && prixOk && datesOk){
         btnEnregistrerVoyage.disabled=false;
     }
     else{
         btnEnregistrerVoyage.disabled=true;
     }}
 }
+
+function validateDates(inputDateDepart,inputDateArrivee,inputHeureDepart,inputHeureArrivee){
+    if(new Date(inputDateDepart.value)-new Date(inputDateArrivee.value)>0){
+        inputDateArrivee.classList.remove("is-valid");
+        inputDateArrivee.classList.add("is-invalid");
+        return false;
+    }else if ((new Date(inputDateDepart.value)-new Date(inputDateArrivee.value)==0) &&
+       (new Date(inputDateDepart.value + "T" + inputHeureDepart.value)-new Date(inputDateDepart.value + "T" + inputHeureArrivee.value)>0)){
+        inputHeureArrivee.classList.remove("is-valid");
+        inputHeureArrivee.classList.add("is-invalid")
+        return false;}
+    else{return true;}
+}
+
 //Fonction permettant de valider tout le formulaire "Mes véhicules"
 function validateFormVehicule(inputPlaque,inputDateImmatriculation,inputMarque,inputModele,inputCouleur,inputNbPlaces,btnVehicule){
     const PlaqueOk = validateRequired(inputPlaque);
@@ -280,6 +292,7 @@ function getInfosUser(){
     .then(result => {
         setUser(result);
         getCovoiturages();
+        getCovoituragesChauffeur();
 
     })
     .catch(error =>{
@@ -293,6 +306,7 @@ function setUser(user){
     imgInfos.src='data:'+user['photoMime'] + ';base64,' +user['photo'];
     mesInfos.innerHTML=user['pseudo']+'<br>' + user['nom'] + " " + user['prenom'] +'<br>'+user['dateNaissance'] +'<br>'+ user['email']+'<br>' + user['telephone']+'<br>'+ user['adresse'];
     idUser=user['id'];
+    Credit=user['credit']['total'];
     NomInput.value=user['nom'];
     PrenomInput.value=user['prenom'];
     PseudoInput.value=user['pseudo'];
@@ -300,11 +314,10 @@ function setUser(user){
     EmailInput.value=user['email'];
     TelephoneInput.value=user['telephone']; 
     AdresseInput.value= user['adresse'];
-    //PhotoInput.value= user['photo'];
 
 
 }
-
+//Enregistrer les informations personnelles
 function updateInfos(){
     let dataForm = new FormData(infosForm); 
     let myHeaders = new Headers();
@@ -325,7 +338,6 @@ function updateInfos(){
         "adresse": dataForm.get("Adresse"),
         "password": dataForm.get("mdp")
     });
-
     let requestOptions = {
         method: 'PUT',
         headers: myHeaders,
@@ -343,6 +355,7 @@ function updateInfos(){
     .catch(error => console.log('error', error));
 }) ;   reader.readAsDataURL(photo);
 }
+//Enregistrer un nouveau vehicule
 function updateVehicule(vehiculeForm){
     let dataForm = new FormData(vehiculeForm);
     let myHeaders = new Headers();
@@ -356,9 +369,7 @@ function updateVehicule(vehiculeForm){
         "couleur": dataForm.get("Couleur"),
         "date_premiere_immatriculation": dataForm.get("DateImmatriculation"),
         "nb_place": Number(dataForm.get("NbPlaces")),
-
     });
-
     let requestOptions = {
         method: 'POST',
         headers: myHeaders,
@@ -366,7 +377,7 @@ function updateVehicule(vehiculeForm){
         redirect: 'follow'
     };
 
-    fetch(apiUrl+"addVoiture", requestOptions)
+    fetch(apiUrl+"voiture/addVoiture", requestOptions)
     .then(response => {
         if(response.ok){
             return response.json();
@@ -377,6 +388,7 @@ function updateVehicule(vehiculeForm){
     })
     .catch(error => console.log('error', error));
 }
+//Obtenir les voitures
 function getVehicules(){
     let myHeaders = new Headers();
     myHeaders.append("X-AUTH-TOKEN", getToken());
@@ -386,8 +398,7 @@ function getVehicules(){
         headers: myHeaders,
         redirect: 'follow'
     };
-
-     fetch(apiUrl+"allVoitures", requestOptions)
+     fetch(apiUrl+"voiture/allVoitures", requestOptions)
     .then(response =>{
         if(response.ok){
             return response.json();
@@ -398,13 +409,14 @@ function getVehicules(){
     })
       .then(result => {
         setVehicules(result);
-         console.log(voitures.firstChild);
-    if (voitures.firstChild==null){Chauffeur1=0;btnChauffeur.checked=false;updateRoleChauffeur();}
+        if (voitures.firstChild && animauxEtFumeurs==2){Chauffeur=1;}
+        //S'il y a au moins une voiture enregistrée et les preferences animaux et fumeurs, Chauffeur=1
     })
     .catch(error =>{
         console.error("erreur lors de la récupération des données des véhicules", error);
     });
 }
+// Afficher les voitures
 function setVehicules(vehicules){
     while (voitures.firstChild) {
         voitures.removeChild(voitures.firstChild);
@@ -412,9 +424,7 @@ function setVehicules(vehicules){
       while (inputVehicules.firstChild) {
         inputVehicules.removeChild(inputVehicules.firstChild);
       }
-    /*if (!(vehicules.length>0)){
-        vehicules=[vehicules];
-    };*/
+       vehiculesLength=vehicules.length;
     if (vehicules.length>0){ 
     for (let i of vehicules){
         console.log(vehicules);
@@ -443,7 +453,7 @@ function setVehicules(vehicules){
         newDiv2.appendChild(btn);
         let theFirstChild = voitures.firstChild;
         let theLastChild = voitures.lastChild;
-
+        // Modale pour supprimer une voiture
         btn.onclick=function(ev){ btnClass= i['id'];
         const myyModal = new bootstrap.Modal('#myModal');
         myyModal.show();
@@ -463,6 +473,8 @@ function setVehicules(vehicules){
     let parentDiv = voitures.parentNode;
     parentDiv.insertBefore(sp1, voitures.nextSibling);
 }}
+
+//Supprimer une voiture
 function supprimerVehicule(){
     ListElement.remove();
     let myHeaders = new Headers();
@@ -484,29 +496,47 @@ function supprimerVehicule(){
     })
     .then(result => {
         getVehicules();
+    if (voitures.firstChild==null){Chauffeur1=0;btnChauffeur.checked=false;updateRoleChauffeur();}
 
        })
        .catch(error => console.log('error', error));
    }
 
+
+   function afficherTitres(i){
+    if (i==1){
+   // Les items de l'accordion "Mes vehicules", "Mes préférences", "Saisir un voyage", "Mes voyages enregistrés - Chauffeur" apparaissent.
+        document.getElementById("chauffeur").classList.remove("d-none");
+        document.getElementById("preferences").classList.remove("d-none");
+        document.getElementById("voyage").classList.remove("d-none");
+        document.getElementById("voyagesChauffeur").classList.remove("d-none");}
+    else{
+    // Supprimer le rôle "Chauffeur"
+        document.getElementById("chauffeur").classList.add("d-none");
+        document.getElementById("voyage").classList.add("d-none");
+        document.getElementById("preferences").classList.add("d-none");
+        document.getElementById("voyagesChauffeur").classList.add("d-none");
+
+    }
+   }
+//Mode "Chauffeur"
 function updateRoleChauffeur(e){
     let myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
     myHeaders.append("X-AUTH-TOKEN", getToken()); 
+    /*S'il n'y a pas les préférences animaux et fumeurs enregistrées ou s'il n'y a pas de véhicule, le mode
+    "Chauffeur" est désactivé.*/
     if (btnChauffeur.checked){
-    if (Chauffeur1==0){ btnChauffeur.checked=false;
+    if (Chauffeur==0){ btnChauffeur.checked=false;
         const myyModal = new bootstrap.Modal('#myModalChauffeur');
         myyModal.show();}
-    else{ 
-        document.getElementById("chauffeur").classList.remove("d-none");
-        document.getElementById("preferences").classList.remove("d-none");
-        document.getElementById("voyage").classList.remove("d-none");
+    else{ afficherTitres(1);        
         let raw = JSON.stringify({
             "libelle": "chauffeur"});
         let requestOptions = {
             method: 'POST',
             headers: myHeaders,
-            body: raw,
+            body: raw, 
             redirect: 'follow'     
         };
     fetch(apiUrl+"role", requestOptions)
@@ -518,10 +548,7 @@ function updateRoleChauffeur(e){
     .then(result => {      
     })
     .catch(error => console.log('error', error));}}
-    else {
-        document.getElementById("chauffeur").classList.add("d-none");
-        document.getElementById("voyage").classList.add("d-none");
-        document.getElementById("preferences").classList.add("d-none");
+    else { afficherTitres(2);
         let requestOptions = {
             method: 'DELETE',
             headers: myHeaders,
@@ -537,12 +564,14 @@ function updateRoleChauffeur(e){
         })
         .catch(error => console.log('error', error));}
     }
-
+// Ajouter ou supprimer le rôle "Passager"
     function updateRolePassager(e){
         let myHeaders = new Headers(); 
         myHeaders.append("Content-Type", "application/json");
         myHeaders.append("X-AUTH-TOKEN", getToken());  
         if (btnPassager.checked){
+        document.getElementById("voyagesPassager").classList.remove("d-none");
+
             let raw = JSON.stringify({
                 "libelle": "passager"});
             let requestOptions = {
@@ -561,6 +590,8 @@ function updateRoleChauffeur(e){
         })
         .catch(error => console.log('error', error));}
         else {
+        document.getElementById("voyagesPassager").classList.add("d-none");
+
             let requestOptions = {
                 method: 'DELETE',
                 headers: myHeaders,
@@ -577,6 +608,7 @@ function updateRoleChauffeur(e){
             .catch(error => console.log('error', error));}
         }
         
+        //Afficher les roles
     function getRoles(){
         let myHeaders = new Headers();
         myHeaders.append("X-AUTH-TOKEN", getToken()); 
@@ -591,50 +623,33 @@ function updateRoleChauffeur(e){
                 return response.json();
             }
             else{
-                console.log("Impossible de récupérer les informations utilisateur");
+                console.log("Impossible de récupérer les roles");
             }
         })
         .then(result => {
             console.log(result);
-            let mesVehicules=0;
+            let estChauffeur=0;
+            let estPassager=0;
             for (let i of result){
-                if (i['libelle']=="chauffeur"){btnChauffeur.checked=true; mesVehicules=1;}
-                if (i['libelle']=="passager"){btnPassager.checked=true};
+                if (i['libelle']=="chauffeur"){btnChauffeur.checked=true; estChauffeur=1;}
+                if (i['libelle']=="passager"){btnPassager.checked=true; estPassager=1;}
         }
-        if (mesVehicules==0){
-            document.getElementById("chauffeur").classList.add("d-none");
-            document.getElementById("voyage").classList.add("d-none");
-            document.getElementById("preferences").classList.add("d-none");}
-        else{ document.getElementById("chauffeur").classList.remove("d-none");
-        document.getElementById("voyage").classList.remove("d-none");
-        document.getElementById("preferences").classList.remove("d-none");
+        if (estChauffeur==0){
+            afficherTitres(2); } // Cache les titres
+        else{ afficherTitres(1); // Affiche les titres
+
+        if (estPassager==1){
+        document.getElementById("voyagesPassager").classList.remove("d-none");}
+        else {document.getElementById("voyagesPassager").classList.add("d-none");}
     }})  
         .catch(error =>{
             console.error("erreur lors de la récupération des données utilisateur", error);
         });
     }
     
-function createConfiguration(){
-    let myHeaders = new Headers();
-    myHeaders.append("X-AUTH-TOKEN", getToken());
-    myHeaders.append("Content-Type", "application/json");
-    let requestOptions = {
-        method: 'POST',
-        headers: myHeaders,
-        redirect: 'follow'
-    };
-    fetch(apiUrl+"configuration", requestOptions)
-    .then(response => {
-        if(response.ok){
-            return response.json();
-        }
-    })
-    .then(result => {
-      console.log(result);
-    })
-    .catch(error => console.log('error', error));
-}
 
+
+//Ajouter une préférence
     function updatePreferences(propriete,valeur){
         let myHeaders = new Headers();  
         myHeaders.append("Content-Type", "application/json");
@@ -658,7 +673,7 @@ function createConfiguration(){
         })
         .catch(error => console.log('error', error));
     }
-
+//Obtenir les préférences
       function getPreferences(){
         let myHeaders = new Headers();
         myHeaders.append("X-AUTH-TOKEN", getToken()); 
@@ -677,14 +692,16 @@ function createConfiguration(){
             }
         })
         .then(result => {
-            console.log(result);
             setPreferences(result)
+            console.log(result);
+            if (voitures.firstChild && animauxEtFumeurs==2){Chauffeur=1;}
+
       })  
         .catch(error =>{
             console.error("erreur lors de la récupération des données utilisateur", error);
         });
     }
-    
+    //Afficher les préférences
     function setPreferences(parametres){
         while (preference.firstChild) {
             preference.removeChild(preference.firstChild);
@@ -695,7 +712,7 @@ function createConfiguration(){
             if (parametres){ 
                 let animauxEtFumeurs=0;
             for (let i of parametres){
-                if (i['propriete']=="fumeurs" || i['propriete']=="animaux"){;animauxEtFumeurs++;}
+                if (i['propriete']=="fumeurs" || i['propriete']=="animaux"){animauxEtFumeurs++;}
                         let newDiv = document.createElement("div");
                         let newDiv1 = document.createElement("div");
                         let newDiv2 = document.createElement("div");
@@ -715,39 +732,32 @@ function createConfiguration(){
                 
                         newDiv2.appendChild(btn);
                         let theFirstChild = preference.firstChild;
-                        let theLastChild = preference.lastChild;
                 
                         btn.onclick=function(ev){ btnClass= i['id'];
                         const myyModal = new bootstrap.Modal('#myModal1');
                         myyModal.show();
-                        ListElement=newDiv;
-                
+                        ListElement=newDiv;               
                         }
-                
- 
                 preference.insertBefore(newDiv, theFirstChild);
-        
-                }   if (animauxEtFumeurs!=2){Chauffeur1=0;btnChauffeur.checked=false;updateRoleChauffeur();console.log(animauxEtFumeurs);}
-    }
+                }  console.log(animauxEtFumeurs);
+            } 
             let sp1 = document.createElement("div");
             sp1.classList.add("mb-3");
             let parentDiv = preference.parentNode;
             parentDiv.insertBefore(sp1, preference.nextSibling);
         }
 
+
 function supprimerPreference(){
     ListElement.remove();
     let myHeaders = new Headers();
     myHeaders.append("X-AUTH-TOKEN", getToken());
     myHeaders.append("Content-Type", "application/json");
-  
-
     let requestOptions = {
         method: 'DELETE',
         headers: myHeaders,
         redirect: 'follow'
     };
-
     fetch(apiUrl+"parametre/"+btnClass, requestOptions)
     .then(response => {
         if(response.ok){
@@ -756,18 +766,34 @@ function supprimerPreference(){
     })
     .then(result => {
         getPreferences();
-       })
+        if (animauxEtFumeurs!=2){Chauffeur=0;btnChauffeur.checked=false;updateRoleChauffeur();}
+    }
+       )
        .catch(error => console.log('error', error));
-   } function updateVoyage(){
+   } 
+   
+   //Ajouter un voyage 
+   function updateVoyage(){
     let dataForm = new FormData(vehiculeForm3);
     let myHeaders = new Headers();
     myHeaders.append("X-AUTH-TOKEN", getToken());
     myHeaders.append("Content-Type", "application/json");
-    /*if (addVoiture==1){
-        console.log(updateVehicule(vehiculeForm2)); 
-
-    }*/
-    let raw = JSON.stringify({
+    let raw;
+    if (addVoiture){
+    updateVehicule(vehiculeForm2);    
+        raw = JSON.stringify({
+        "date_depart": dataForm.get("dateDepart"),
+        "heure_depart": dataForm.get("heureDepart"),
+        "lieu_depart":dataForm.get("lieuDepart"),
+        "date_arrivee": dataForm.get("dateArrivee"),
+        "heure_arrivee": dataForm.get("heureArrivee"),
+        "lieu_arrivee":dataForm.get("lieuArrivee"),
+        "statut": "en attente",
+        "nb_place": Number(dataForm.get("nbPlace")),
+        "prix_personne": Number(dataForm.get("prix")),
+        "voiture":{"immatriculation" : toString(Number(vehiculesLength)-1)},
+    });} else{ 
+        raw = JSON.stringify({
         "date_depart": dataForm.get("dateDepart"),
         "heure_depart": dataForm.get("heureDepart"),
         "lieu_depart":dataForm.get("lieuDepart"),
@@ -778,9 +804,7 @@ function supprimerPreference(){
         "nb_place": Number(dataForm.get("nbPlace")),
         "prix_personne": Number(dataForm.get("prix")),
         "voiture":{"immatriculation" : toString(Number(dataForm.get("inputVehicules"))-1)},
-        "reponses":[""],
- 
-    });
+    });}
 
     let requestOptions = {
         method: 'POST',
@@ -788,7 +812,6 @@ function supprimerPreference(){
         body: raw,
         redirect: 'follow'
     };
-
     fetch(apiUrl+"covoiturage", requestOptions)
     .then(response => {
         if(response.ok){
@@ -796,11 +819,12 @@ function supprimerPreference(){
         }
     })
     .then(result => {
-        getCovoiturages();
+        getCovoituragesChauffeur();
         btnMesVoyages.click();
     })
     .catch(error => console.log('error', error));
 }
+//Obtenir les covoiturages "passager"
 function getCovoiturages(){
     let myHeaders = new Headers();
     myHeaders.append("X-AUTH-TOKEN", getToken());
@@ -822,22 +846,85 @@ function getCovoiturages(){
     })
       .then(result => {
         console.log(result);
+        setCovoiturages(result[0],accordionBody);
 
-        setCovoiturages(result);
-        console.log(result);
+        if (result[1]){  
+            let newDiv = document.createElement("div");
+            let newDiv1 = document.createElement("div");
+            let text = document.createElement("p");
+            text.textContent="Mes covoiturages passés"
+            
+            text.classList.add("text-center");
+            newDiv.classList.add("card", "mb-3");
+            newDiv1.classList.add("card-body", "p-3", "rounded");
+            newDiv.appendChild(text);
+            newDiv.appendChild(newDiv1);
+        let theLastChild = accordionBody.lastChild;
+        if (theLastChild){theLastChild=theLastChild.nextSibling}
+        accordionBody.insertBefore(newDiv, theLastChild);
+
+            setCovoiturages(result[1],newDiv1);
+
+            ;}
+
     })
     .catch(error =>{
         console.error("erreur lors de la récupération des données des véhicules", error);
     });
 }
-function setCovoiturages(covoiturages){
-    while (accordionBody.firstChild) {
-        accordionBody.removeChild(accordionBody.firstChild);
+
+//Obtenir les covoiturages "passager"
+
+
+//Obtenir les covoiturages "chauffeur"
+function getCovoituragesChauffeur(){
+    let myHeaders = new Headers();
+    myHeaders.append("X-AUTH-TOKEN", getToken());
+    let requestOptions = {
+        method: 'GET',
+        headers: myHeaders,
+        redirect: 'follow'
+    };
+     fetch(apiUrl+"covoiturage/allCovoituragesChauffeur/" + idUser, requestOptions)
+    .then(response =>{
+        if(response.ok){
+            return response.json();
+        }
+        else{
+            console.log("Impossible de récupérer les informations des véhicules");
+        }
+    })
+      .then(result => {
+        console.log(result);
+        setCovoiturages(result[0],accordionBodyChauffeur);
+
+        if (result[1]){  
+            let newDiv = document.createElement("div");
+            let newDiv1 = document.createElement("div");
+            let text = document.createElement("p");
+            text.textContent="Mes covoiturages passés"
+            
+            text.classList.add("text-center");
+            newDiv.classList.add("card", "mb-3");
+            newDiv1.classList.add("card-body", "p-3", "rounded");
+            newDiv.appendChild(text);
+            newDiv.appendChild(newDiv1);
+            let theLastChild = accordionBodyChauffeur.lastChild;
+            if (theLastChild){theLastChild=theLastChild.nextSibling}
+            accordionBodyChauffeur.insertBefore(newDiv, theLastChild);
+            setCovoiturages(result[1],newDiv1);
+
+            ;}
+    })
+    .catch(error =>{
+        console.error("erreur lors de la récupération des données des véhicules", error);
+    });
+}
+//Afficher les covoiturages
+function setCovoiturages(covoiturages,accordion){
+    while (accordion.firstChild) {
+        accordion.removeChild(accordion.firstChild);
       }
- 
-    /*if (!(vehicules.length>0)){
-        vehicules=[vehicules];
-    };*/
     if (covoiturages.length>0){ 
     for (let i of covoiturages){
         let index=Number(covoiturages.indexOf(i))+1;
@@ -923,45 +1010,19 @@ function setCovoiturages(covoiturages){
 
         let btn=document.createElement("a");
         btn.classList.add("btn","btn-primary");
-        let Chauffeur = idUser ==(i['voiture']['user']['id']) ? true : false ;
-        btn.setAttribute("href","/detail" +"?id=" + i['id'] + "&idUser=" + idUser + "&Chauffeur=" + Chauffeur);
+        btn.setAttribute("href","/detail" +"?id=" + i['id']);
         btn.appendChild(document.createTextNode('Détail'));
         newDiv10.appendChild(btn);
-        let theFirstChild = accordionBody.firstChild;
-        let theLastChild = accordionBody.lastChild;
-
-        btn.onclick=function(ev){
-            btnClass= i['id'];
- 
-
-            /*btnId= i['id'];
-            let newDiv = document.createElement("div");
-            let newDiv1 = document.createElement("div");
-            let newDiv2 = document.createElement("div");
-            
-        newDiv.classList.add("card", "mb-3");
-        newDiv1.classList.add("card-body","shadow", "p-3",  "bg-body-tertiary", "rounded");
-        newDiv2.classList.add("container1")
-        newDiv1.appendChild(newDiv2);
-        newDiv.appendChild(newDiv1);
-        detail=document.getElementById("detail");
-        let theFirstChild = detail.firstChild;
-        console.log("o");
- 
-        ListElement=newDiv;*/
-
-        }  
-       // if (theFirstChild==null){
-        accordionBody.insertBefore(newDiv, theFirstChild);
-       // else{accordionBody.insertBefore(newDiv, theLastChild.nextSibling)};
-    } 
-
- 
+        let theFirstChild = accordion.firstChild;
+        let theLastChild = accordion.lastChild;
+        accordion.insertBefore(newDiv, theFirstChild);
+    }  
     let sp1 = document.createElement("div");
     sp1.classList.add("mb-3");
-    let parentDiv = accordionBody.parentNode;
-    parentDiv.insertBefore(sp1, accordionBody.nextSibling);
+    let parentDiv = accordion.parentNode;
+    parentDiv.insertBefore(sp1, accordion.nextSibling);
 }}
+//Afficher la durée
 function toHours(time){
 let hours=Math.floor(time/(3600000)); 
 let minutes=time/(60000)-hours*60;

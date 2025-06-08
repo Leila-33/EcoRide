@@ -1,10 +1,14 @@
 
 let param=new URL(document.location).searchParams;
-const supprimerVehicule = document.getElementById("supprimerVehicule");
-supprimerVehicule.addEventListener("click",supprimerCovoiturage);
+const btnSupprimerCovoiturage = document.getElementById("btnSupprimerCovoiturage");
+//btnSupprimerCovoiturage.addEventListener("click",function(){supprimerCovoiturage(),});
 const confirmerParticiper = document.getElementById("confirmerParticiper");
-const participerCovoiturage = document.getElementById("participerCovoiturage");
-   idUser=param.get("idUser");
+const btnParticiperCovoiturage = document.getElementById("btnParticiperCovoiturage");
+const annulerCovoiturage = document.getElementById("annulerCovoiturage");
+ btnParticiperCovoiturage.addEventListener("click", ()=>{ console.log('covoiturage')});
+const myModalParticiperCovoiturage = new bootstrap.Modal('#myModalParticiperCovoiturage');
+const myModalAnnulerCovoiturage = new bootstrap.Modal('#myModalAnnulerCovoiturage');
+btnSupprimerCovoiturage.addEventListener("click",function(){supprimerCovoiturage(),myModalAnnulerCovoiturage.hide()});
 
 const id0 = document.getElementById("id0");
 const id1 = document.getElementById("id1");
@@ -27,58 +31,35 @@ const id17 = document.getElementById("id17");
 const id18 = document.getElementById("id18");
 
 
-const btnResponseUserOui = document.getElementById("btnResponseUserOui");
-const btnResponseUserNon = document.getElementById("btnResponseUserNon");
 const responseUser = document.getElementById("responseUser");
 let statut=0;
 let idChauffeur=0;
-let btnStatut, credit;
+let btnStatut, prix, users, nbPlace, idUser, credit, Chauffeur, dateDepart;
+btnStatut=document.createElement("button");
+btnStatut.classList.add("btnDetail", "btn", "btn-primary","my-auto");
+id0.appendChild(btnStatut);
+
 let btnAnnuler=document.createElement("button");
+btnAnnuler.appendChild(document.createTextNode('Annuler'));
+btnAnnuler.classList.add("btnDetail1", "btn", "btn-primary","my-auto");
+
+//Modal "Laisser un avis"
 avisForm=document.getElementById("avisForm")
-envoyerAvis=document.getElementById("envoyerAvis");
-envoyerCommentaire=document.getElementById("envoyerCommentaire");
+btnEnvoyerAvis=document.getElementById("btnEnvoyerAvis");
+btnEnvoyerCommentaire=document.getElementById("btnEnvoyerCommentaire");
 let userResponse;
-let userResponse1;
 
-
-function paiement(prix){
-    console.log(prix);
-   let myHeaders = new Headers();
-    myHeaders.append("X-AUTH-TOKEN", getToken());
-   let raw = JSON.stringify({
-        "date_operation": new Date(Date()).toISOString().slice(0,10),
-        "operation": prix});
-    let requestOptions = {
-        method: 'POST',
-        body: raw,
-        headers: myHeaders,
-        redirect: 'follow'
-    };
-     fetch(apiUrl+"credit/" + Number(prix), requestOptions)
-    .then(response =>{
-        if(response.ok){
-            return response.json();
-        }
-        else{
-            console.log("Impossible de récupérer les informations utilisateur");
-        }
-    })
-    .then(result => {
-        console.log(result);
-
-
-    })
-    .catch(error =>{
-        console.error("erreur lors de la récupération des données utilisateur", error);
-    });
-}
-
-
-
+if (isConnected()){      
 getIdUser();
+}else{getCovoiturage();}
+
+
+
+
 function getIdUser(){
     let myHeaders = new Headers();
     myHeaders.append("X-AUTH-TOKEN", getToken());
+    myHeaders.append("Content-Type", "application/json");
 
     let requestOptions = {
         method: 'GET',
@@ -95,9 +76,10 @@ function getIdUser(){
         }
     })
     .then(result => {
-        console.log(result);
-        credit= result["credit"];
+        idUser = result['id'];
+        credit = result['credit'];
         getCovoiturage();
+
 
 
     })
@@ -105,16 +87,146 @@ function getIdUser(){
         console.error("erreur lors de la récupération des données utilisateur", error);
     });
 }
+function getReponse(){
+    let myHeaders = new Headers();
+    myHeaders.append("X-AUTH-TOKEN", getToken());
+    myHeaders.append("Content-Type", "application/json");
+
+    let requestOptions = {
+        method: 'GET',
+        headers: myHeaders,
+        redirect: 'follow'
+    };
+     fetch(apiUrl+"reponse/show/" + param.get("id"), requestOptions)
+    .then(response =>{
+        if(response.ok){
+            return response.json();
+        }
+        else{
+            console.log("Impossible de récupérer les informations utilisateur");
+        }
+    })
+    .then(result => {
+        console.log(result);
+        userResponse=result;
+        setQuestionPassager();
+
+    })
+    .catch(error =>{
+        console.error("erreur lors de la récupération des données utilisateur", error);
+    });
+}
+
+function paiement(prix){
+    console.log(prix);
+   let myHeaders = new Headers();
+    myHeaders.append("X-AUTH-TOKEN", getToken());
+    myHeaders.append("Content-Type", "application/json");
+
+   let raw = JSON.stringify({
+        "date_operation": new Date(Date()).toISOString().slice(0,10),
+        "operation": prix});
+    let requestOptions = {
+        method: 'POST',
+        body: raw,
+        headers: myHeaders,
+        redirect: 'follow'
+    };
+     fetch(apiUrl+"credit", requestOptions)
+    .then(response =>{
+        if(response.ok){
+            return response.json();
+        }
+        else{
+            console.log("Impossible de récupérer les informations utilisateur");
+        }
+    })
+    .then(result => {
+        console.log(result);
+
+
+    })
+    .catch(error =>{
+        console.error("erreur lors de la récupération des données utilisateur", error);
+    });
+}
+
+function paiement(prix, id1, id2){
+    console.log(prix);
+   let myHeaders = new Headers();
+    myHeaders.append("X-AUTH-TOKEN", getToken());
+    myHeaders.append("Content-Type", "application/json");
+
+   let raw = JSON.stringify({
+        "date_operation": new Date(Date()).toISOString().slice(0,10),
+        "operation": prix});
+    let requestOptions = {
+        method: 'POST',
+        body: raw,
+        headers: myHeaders,
+        redirect: 'follow'
+    };
+     fetch(apiUrl+"credit/payer/" + id1 +"/" + id2, requestOptions)
+    .then(response =>{
+        if(response.ok){
+            return response.json();
+        }
+        else{
+            console.log("Impossible de récupérer les informations utilisateur");
+        }
+    })
+    .then(result => {
+        console.log(result);
+
+
+    })
+    .catch(error =>{
+        console.error("erreur lors de la récupération des données utilisateur", error);
+    });
+}
+function paiementEcoride(prix){
+   let myHeaders = new Headers();
+    myHeaders.append("X-AUTH-TOKEN", getToken());
+    myHeaders.append("Content-Type", "application/json");
+
+   let raw = JSON.stringify({
+        "date_operation": new Date(Date()).toISOString().slice(0,10),
+        "operation": prix});
+    let requestOptions = {
+        method: 'POST',
+        body: raw,
+        headers: myHeaders,
+        redirect: 'follow'
+    };
+     fetch(apiUrl+"credit/payerEcoride/", requestOptions)
+    .then(response =>{
+        if(response.ok){
+            return response.json();
+        }
+        else{
+            console.log("Impossible de payer");
+        }
+    })
+    .then(result => {
+        console.log(result);
+
+
+    })
+    .catch(error =>{
+        console.error("erreur lors de la récupération des données utilisateur", error);
+    });
+}
+//Obtenir le covoiturage
 function getCovoiturage(){
-        let myHeaders = new Headers();
-        //myHeaders.append("X-AUTH-TOKEN", getToken());
-    
+
+        let myHeaders = new Headers();         
+        myHeaders.append("Content-Type", "application/json");
+   
         let requestOptions = {
             method: 'GET',
             headers: myHeaders,
             redirect: 'follow'
-        };
-    
+        }; 
          fetch(apiUrl+"covoiturage/c/" + parseInt(param.get("id")), requestOptions)
         .then(response =>{
             if(response.ok){
@@ -125,15 +237,18 @@ function getCovoiturage(){
             }
         })
           .then(result => {
-            setCovoiturages(result);
-            getAvis()
+            console.log(result);
+            Chauffeur = idUser == result['idChauffeur'] ? true : false ;
 
+            setCovoiturage(result);
+            getAvis()
         })
         .catch(error =>{
             console.error("erreur lors de la récupération des données des véhicules", error);
         });
     }
-    function setCovoiturages(covoiturages){
+    //Afficher le covoiturage
+    function setCovoiturage(covoiturages){
           i=covoiturages;
             let place=i['nbPlace']>1?" places restantes":" place restante";
             id1.setAttribute("src",'data:'+i['voiture']['user']['photoMime'] + ';base64,' +i['voiture']['user']['photo']);
@@ -154,87 +269,103 @@ function getCovoiturage(){
             id15.innerHTML="Voiture : "
             id16.innerHTML=i["voiture"]["marque"]["libelle"] +" " +i["voiture"]["modele"] + " " +i["voiture"]["couleur"];;
             id17.innerHTML="Préférences du conducteur:"; 
-            for (l of i["voiture"]["user"]["configurations"][0]["parametres"]){ 
+            for (l of i["voiture"]["user"]["parametres"]){ 
             let newDiv= document.createElement("p");
-            ll=i["voiture"]["user"]["configurations"][0]["parametres"].indexOf(l)+4
+            ll=i["voiture"]["user"]["parametres"].indexOf(l)+4
             lll=ll>8?6:5;
             newDiv.innerHTML+=l['propriete'] + ' : ' + l['valeur'];
             newDiv.setAttribute("style","grid-column:" + ll + "/" +Number(ll+1) +";grid-row:" +lll + "/" + Number(lll+1) +";");
             id0.appendChild(newDiv);           
             } 
-            idChauffeur=i['voiture']['user']['id'];
+            idChauffeur=i['idChauffeur'];
+            prix=i['prixPersonne'];
+            users=i['users'];
+            nbPlace=i['nbPlace'];
+            dateDepart=new Intl.DateTimeFormat("fr-FR").format(new Date(i['dateDepart']));
+            console.log(dateDepart);
+            // Personne connecté
             if (isConnected()){
             statut=i["statut"];
-            userResponse=i["reponses"];
-            userResponse1=i["reponses1"];
-             /*if (param.get("Chauffeur")){
-            setStatutButton(1);
+             /*if (Chauffeur==true){
+    setStatutButton();
             
    // }else{*/
-   idUser=param.get("idUser");
-    setStatutButton(1, i['prix_Personne'], i['users']);
 
-    } else{setStatutButton(3);}
-           // if (statut=='en attente'){  tous les covoiturages montrés sont déjà en attente
-      let sp1 = document.createElement("div");
+       setStatutButton();
+// Personne non connectée
+    }  else{setStatutButton();}
+       let sp1 = document.createElement("div");
         sp1.classList.add("mb-3");
         let parentDiv = id0.parentNode;
-        parentDiv.insertBefore(spi1, id0.nextSibling);}
+        parentDiv.insertBefore(sp1, id0.nextSibling);}
     
-
-        function  setStatutButton(i,prix, users){
-            let btnStatut=document.createElement("button");
-            btnStatut.classList.add("btnDetail", "btn", "btn-primary","my-auto");
-            id0.appendChild(btnStatut); 
-            if (i==1){
-                //Chauffeur
+// Afficher le bouton indiquant le statut
+        function  setStatutButton(){
+    
+            //Chauffeur
+        if (Chauffeur==true){
+            console.log('chauffeur');
                 switch (statut){
             case "en attente":
-                btnStatut.appendChild(document.createTextNode('Démarrer')); 
-                btnAnnuler.classList.add("btnDetail1", "btn", "btn-primary","my-auto");
-                btnAnnuler.appendChild(document.createTextNode('Annuler'));
-                btnAnnuler.addEventListener("click", ()=>{
-                    const myModalAnnulerCovoiturage = new bootstrap.Modal('#myModalAnnulerCovoiturage');
-                    myModalAnnulerCovoiturage.show();})
+                btnStatut.textContent='Démarrer'; 
+                btnAnnuler.addEventListener("click", ()=>{myModalAnnulerCovoiturage.show();})
                 id0.appendChild(btnAnnuler);
                 break;
             case "en cours":
-                btnStatut.appendChild(document.createTextNode('Arrivé à destination')); break;
+                btnStatut.textContent='Arrivé à destination'; break;
             case "terminé": 
-                btnStatut.appendChild(document.createTextNode('Terminé'));break;} 
-            btnStatut.addEventListener("click",()=>{clickStatutAndButton(1)});}
-          // Passager connecté
-          else if(i==2){
-            if (i["users"].includes(idUser)){
-                btnStatut.addEventListener("click",()=>{clickStatutAndButton()});}
+                btnStatut.textContent='Terminé';break;} 
+            btnStatut.addEventListener("click",()=>{clickStatutAndButton()});}
+          // Utilisateur connecté
+          else if (isConnected()){
+            btnStatut.remove();
+            btnStatut=document.createElement("button");
+            btnStatut.classList.add("btnDetail", "btn", "btn-primary","my-auto");
+            id0.appendChild(btnStatut);
+            if (includes(users,idUser)==true){// Participant
                 switch (statut){
-                    case "en attente":
-                        btnStatut.appendChild(document.createTextNode('En attente'));
+                    case "en attente":                       
+                        btnStatut.textContent='En attente';
+                        let credits=credit>1?"credits":"credit"
+                        btnAnnuler.addEventListener("click", ()=>{
+                        annulerCovoiturage.textContent="En annulant, vous confirmez le remboursement de "+ prix +" "+ credits+ " sur votre compte.";
+                        myModalAnnulerCovoiturage.show();})
+                        id0.appendChild(btnAnnuler);
+                        break;
                     case "en cours":
-                        btnStatut.appendChild(document.createTextNode('En cours'));
+                        btnStatut.textContent='En cours';
+                        break;
                     case "terminé": 
-                        btnStatut.appendChild(document.createTextNode('Arrivé à destination'));} 
-                        setQuestionPassager();}
-            else if (statut=='en attente' && (!i["users"].includes(idUser))){
-                btnStatut.appendChild(document.createTextNode('Participer'));
+                        btnStatut.textContent='Arrivé à destination';               
+                        getReponse();  
+                        break;}}
+                        //Non participant
+            else if (statut=='en attente' && (!includes(users,idUser))){
+                btnStatut.textContent='Participer';
+                //Si credit insuffisant
                 if (credit<l){btnStatut.disabled=true;
                     let creditInsuffisant=document.createElement("p");
                     creditInsuffisant.classList.add("item18","mx-auto");
                     creditInsuffisant.appendChild(document.createTextNode('Credit insuffisant'));
-                    id0.appendChild(creditInsuffisant);} 
-                else {        
-                    btnStatut.addEventListener("click",()=>{
+                    id0.appendChild(creditInsuffisant);}
+                //Si nombre de place insuffisant
+                else if (nbPlace==0){btnStatut.disabled=true;}
+                else {     
                     let credits=credit>1?"credits":"credit"
+
+                    btnStatut.addEventListener("click",()=>{
                     confirmerParticiper.textContent="En participant, vous confirmez le débit de "+ prix +" "+ credits+ " de votre compte.";
-                    const myModalParticiperCovoiturage = new bootstrap.Modal('#myModalParticiperCovoiturage');
                     myModalParticiperCovoiturage.show();})
-                    participerCovoiturage.addEventListener("click",
-                    ()=>{paiement(-prix);
-                    ajouterParticipant();          
-                    btnStatut.appendChild(document.createTextNode('En attente')); });
-        }}}
+                    
+                    btnParticiperCovoiturage.onclick=function(){myModalParticiperCovoiturage.hide();
+                    paiement(prix,idUser,9);
+                    ajouterParticipant();
+               
+                     };
+        }}}  
         // Personne non connectée
-            else{  btnStatut.appendChild(document.createTextNode('Participer')); 
+            else{  btnStatut.textContent='Participer';
+ 
         btnStatut.addEventListener("click",()=>{window.location.replace("/signin")});}
         }
            
@@ -242,12 +373,19 @@ function getCovoiturage(){
 
 
 
-    
+    function includes(a,l){
+        for(let i of a){
+            if (i['id']==l){return true;}
+        }
+        return false;
+
+    }
      
 
 
     function setQuestionPassager(){
- if (!userResponse || userResponse[param.get("idUser")]==""){
+        console.log(userResponse);
+ if (!userResponse){
             responseUser.textContent="Le trajet s'est-il bien passé ?"
             let btnResponseUserOui=document.createElement("button");
             let btnResponseUserNon=document.createElement("button");
@@ -258,26 +396,27 @@ function getCovoiturage(){
             id0.appendChild(btnResponseUserOui);
             id0.appendChild(btnResponseUserNon);
             btnResponseUserOui.addEventListener("click",()=>{
-                setReponse("reponse","oui");
+                setReponse1("oui");
                 btnResponseUserOui.remove();btnResponseUserNon.remove();responseUser.remove();  
-                setBoutons(2);
+                setBoutons(2); // Soumettre un avis
+                paiement(prix,9,idChauffeur);
             })
             btnResponseUserNon.addEventListener("click",()=>{
                 btnResponseUserOui.remove();btnResponseUserNon.remove();responseUser.remove();
-                setReponse("reponse","non");
-                setBoutons(1);
+                setReponse1("non");
+                setBoutons(1); // Laisser un commentaire
             });
-        } else if (userResponse[param.get("idUser")]=="oui" && (!userResponse1 || userResponse1[param.get("idUser")]=="")){
-                setBoutons(2);
+        } else if (userResponse["reponse1"]=="oui" && (userResponse["reponse2"]=="")){
+                setBoutons(2); // Soumettre un avis
 
               
-        } else if (userResponse[param.get("idUser")]=="non" && (!userResponse1 || userResponse1[param.get("idUser")]=="")){
-                setBoutons(1);
+        } else if (userResponse["reponse1"]=="non" && (userResponse["reponse2"]=="")){
+                setBoutons(1); // Laisser un commentaire
         }
          
 
 
-    }
+    } // Afficher les boutons "Laisser un commentaire" et "Soumetre un avis"
         function setBoutons(i){
             if (i==1){
             let btnLaisserCommentaire=document.createElement("button");
@@ -287,7 +426,9 @@ function getCovoiturage(){
             btnLaisserCommentaire.addEventListener("click",()=>{   
             const myModalLaisserCommentaire = new bootstrap.Modal('#myModalLaisserCommentaire');
             myModalLaisserCommentaire.show();});
-            envoyerCommentaire.addEventListener("click",()=>{setReponse("reponse1","oui");btnLaisserCommentaire.remove();});}
+            btnEnvoyerCommentaire.addEventListener("click",()=>{setReponse2("oui");btnLaisserCommentaire.remove();
+            LaisserCommentaire()            
+                       });}
             else{let btnSoumettreAvis=document.createElement("button");
                 btnSoumettreAvis.classList.add("btn","btn-primary","btnResponseUserOui");
                 btnSoumettreAvis.appendChild(document.createTextNode('Soumettre un avis'));
@@ -295,48 +436,55 @@ function getCovoiturage(){
                 btnSoumettreAvis.addEventListener("click",()=>{
                     const myModalLaisserAvis = new bootstrap.Modal('#myModalLaisserAvis');
                     myModalLaisserAvis.show();});
-                envoyerAvis.addEventListener("click",()=>{setReponse("reponse1","oui");btnSoumettreAvis.remove();
-                //enregistre ravis
-                let dataForm = new FormData(avisForm);
-                let raw = JSON.stringify({
-                "note": dataForm.get("Note"),
-                "commentaire": dataForm.get("Avis"),
-                "idChauffeur": idChauffeur,
-                "statut":"en attente"});
-                let myHeaders = new Headers();
-            myHeaders.append("X-AUTH-TOKEN", getToken());
-            myHeaders.append("Content-Type", "application/json");
-            let requestOptions = {
-            method: 'POST',
-            headers: myHeaders,
-            body: raw,
-            redirect: 'follow'  };
-            fetch(apiUrl+"avis", requestOptions)
-            .then(response => { if(response.ok){ return response; }})
-            .then(result =>{getAvis();})
-            .catch(error => console.log('error', error));
-                       })}}
+                btnEnvoyerAvis.addEventListener("click",()=>{setReponse2("oui");btnSoumettreAvis.remove();
+                    LaisserAvis();
+                })}}
+                //enregistrer avis
+                
+              
         
 
         
 
 
 
-            function setReponse(reponses,reponse){
+            function setReponse1(reponse){
                let myHeaders = new Headers();
                myHeaders.append("X-AUTH-TOKEN", getToken());
                myHeaders.append("Content-Type", "application/json");
-               if (reponses=='reponse'){
-               raw = JSON.stringify({"reponse" : reponse});}
-               else{
-              raw = JSON.stringify({"reponse1" : reponse});}
+               raw = JSON.stringify({"reponse1" : reponse,
+                "reponse2" : "",
+                 "commentaire" : ""})
+
+              let requestOptions = {
+              method: 'POST',
+              headers: myHeaders,
+              body: raw,
+              redirect: 'follow'
+                        };              
+                fetch(apiUrl+"reponse/setReponse1/" + param.get("id"), requestOptions)
+                    .then(response => {
+                        if(response.ok){
+                            return response
+                            }
+                        })
+                        .then(result => {
+                        })
+                        .catch(error => console.log('error', error));
+                    }
+            function setReponse2(reponse){
+               let myHeaders = new Headers();
+               myHeaders.append("X-AUTH-TOKEN", getToken());
+               myHeaders.append("Content-Type", "application/json");
+               raw = JSON.stringify({"reponse2" : reponse})
+
               let requestOptions = {
               method: 'PUT',
               headers: myHeaders,
               body: raw,
               redirect: 'follow'
                         };              
-                fetch(apiUrl+"covoiturage/reponses/" + parseInt(param.get("id")), requestOptions)
+                fetch(apiUrl+"reponse/editReponse2/" + param.get("id"), requestOptions)
                     .then(response => {
                         if(response.ok){
                             return response
@@ -355,17 +503,99 @@ function getCovoiturage(){
             method: 'DELETE',
             headers: myHeaders,
             redirect: 'follow'  };
-            fetch(apiUrl+"covoiturage/"+ parseInt(param.get("id")), requestOptions)
+            let nom;
+            if (Chauffeur==true){nom="covoiturage/";}
+            else{nom="covoiturage/removeUser/";}
+            fetch(apiUrl + nom + parseInt(param.get("id")), requestOptions)
             .then(response => { if(response.ok){ return response; }})
-            .then(result => { window.location.replace("/account");})
-            .catch(error => console.log('error', error));
-                       }
+            .then(result => { if (Chauffeur==true){window.location.replace("/account");
+                mailAnnulerCovoiturage();
+            }
+        else{btnAnnuler.remove();
+            console.log(id0)
+            paiement(prix, idUser,);
+            getCovoiturage();
+        } })
+            .catch(error => console.log('error', error));}
 
-        
-            
-    
+    function mailAnnulerCovoiturage(){
+    let myHeaders = new Headers();
+    myHeaders.append("X-AUTH-TOKEN", getToken());
+    myHeaders.append("Content-Type", "application/json");
+
+  let raw = JSON.stringify({
+        "email": 'Le covoiturage du ' + new Date(Date()).toISOString().slice(0,10) + ' a été annulé.'
+    });
+    let requestOptions = {
+        method: 'POST',
+        body: raw,
+        headers: myHeaders,
+        redirect: 'follow'
+    };
+     fetch(apiUrl+"mailer/covoiturageAnnule/" + parseInt(param.get("id")), requestOptions)
+    .then(response =>{
+        if(response.ok){
+            return response.json();
+        }
+        else{
+            console.log("Impossible d'envoyer un mail");
+        }
+    })
+    .then(result => {
+
+    })
+    .catch(error =>{
+        console.error("erreur lors de la récupération des données utilisateur", error);
+    });
+
+
+        }
+
+       function LaisserCommentaire(){      
+    let myHeaders = new Headers();
+    myHeaders.append("X-AUTH-TOKEN", getToken());
+     myHeaders.append("Content-Type", "application/json");
+
+   CommentaireInput=document.getElementById("CommentaireInput");
+    let  raw = JSON.stringify({"commentaire": CommentaireInput.value});
+    let requestOptions = {
+        method: 'PUT',
+        body: raw,
+        headers: myHeaders,
+        redirect: 'follow'
+    };
+        fetch(apiUrl+"reponse/editCommentaire/" + param.get("id"), requestOptions)    
+        .then(response => { if(response.ok){ return response; }})
+                .then(result =>{})
+                .catch(error => console.log('error', error))
+
+}
+
+       function LaisserAvis(){      
+    let myHeaders = new Headers();
+    myHeaders.append("X-AUTH-TOKEN", getToken());
+     myHeaders.append("Content-Type", "application/json");
+ let dataForm = new FormData(avisForm);
+                raw = JSON.stringify({
+                "note": dataForm.get("Note"),
+                "commentaire": dataForm.get("Avis"),
+                "idChauffeur": idChauffeur,
+                "statut":"en attente"});
+    let requestOptions = {
+        method: 'POST',
+        body: raw,
+        headers: myHeaders,
+        redirect: 'follow'
+    };
+       fetch(apiUrl+"avis", requestOptions)
+                .then(response => { if(response.ok){ return response; }})
+                .then(result =>{getAvis();})
+                .catch(error => console.log('error', error));}
+                        
+              
+    // Mettre à jour le statut et le bouton Statut en fonction du clic
     function clickStatutAndButton(){
-        if (param.get("Chauffeur")){
+        if (Chauffeur==true){
             let raw=0;
         switch (statut){
         case "en attente":
@@ -379,6 +609,7 @@ function getCovoiturage(){
             btnStatut.firstChild.textContent='Terminé';
             statut="terminé";
             setQuestionPassager();
+            mailFinTrajet();
             break;
                } 
            if (raw!=0){
@@ -398,11 +629,46 @@ function getCovoiturage(){
                 }
 
                 }
+                
+        function mailFinTrajet(){
+    let myHeaders = new Headers();
+    myHeaders.append("X-AUTH-TOKEN", getToken());
+     myHeaders.append("Content-Type", "application/json");
 
+ let raw = JSON.stringify({
+        "email": 'Rendez-vous sur votre espace personnel pour valider votre trajet. '
+    });
+    let requestOptions = {
+        method: 'POST',
+        body: raw,
+        headers: myHeaders,
+        redirect: 'follow'
+    };
+     fetch(apiUrl+"mailer/email/" + parseInt(param.get("id")) + "/" + dateDepart, requestOptions)
+    .then(response =>{
+        if(response.ok){
+            return response.json();
+        }
+        else{
+            console.log("Impossible d'envoyer un mail");
+        }
+    })
+    .then(result => {
+
+    })
+    .catch(error =>{
+        console.error("erreur lors de la récupération des données utilisateur", error);
+    });
+
+
+        }
+
+// Obtenir les avis
     function getAvis(){
         let myHeaders = new Headers();
         //myHeaders.append("X-AUTH-TOKEN", getToken());
-    
+         myHeaders.append("Content-Type", "application/json");
+
         let requestOptions = {
             method: 'GET',
             headers: myHeaders,
@@ -424,6 +690,7 @@ function getCovoiturage(){
             console.error("erreur lors de la récupération des données des avis", error);
         });
     }
+    //Afficher les avis
      function setAvis(avis){
             id18.setAttribute("style", "display:grid; grid-template-columns:100px 100px 1fr; grid-template-rows: repeat(" + Number(avis.length+1)+ ", minmax(0, 100px)");
           for(let i of avis){
@@ -446,6 +713,7 @@ function getCovoiturage(){
 function ajouterParticipant(){
     let myHeaders = new Headers();
     myHeaders.append("X-AUTH-TOKEN", getToken());
+     myHeaders.append("Content-Type", "application/json");
 
     let requestOptions = {
         method: 'PUT',
@@ -461,10 +729,7 @@ function ajouterParticipant(){
             console.log("Impossible de récupérer les informations utilisateur");
         }
     })
-    .then(result => {
-        console.log(result);
-        credit= result["credit"];
-        getCovoiturage();
+    .then(result => {getCovoiturage();
 
 
     })

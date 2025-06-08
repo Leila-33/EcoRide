@@ -14,6 +14,7 @@ let param=new URL(document.location).searchParams;
 let idUser;
 if (isConnected()){      
 getIdUser();
+console.log('true');
 }
 lieuDepart.value=param.get("lieuDepart");
 lieuArrivee.value=param.get("lieuArrivee");
@@ -149,7 +150,7 @@ function setCovoiturages(covoiturages){
         newDiv8.innerHTML="Durée : " + toHours(new Date(i['dateArrivee'].replace("00:00",i['heureArrivee']))-new Date(i['dateDepart'].replace("00:00",i['heureDepart']))) ;
         newDiv9.innerHTML="Prix : " + i['prixPersonne'];
         let noteChauffeur=i['noteChauffeur']!=null?i['noteChauffeur']:'';
-        newDiv11.innerHTML=i['voiture']['user']['pseudo'] +"<br>" + i['voiture']['user']['pseudo']  +"<br>"+ "Note : " + noteChauffeur + '/5';
+        newDiv11.innerHTML=i['voiture']['user']['pseudo']  +"<br>"+ "Note : " + noteChauffeur + '/5';
         newDiv12.innerHTML="Arrivée :";
         newDiv13.innerHTML=new Intl.DateTimeFormat("fr-FR").format(new Date(i['dateArrivee']));
         newDiv14.innerHTML=i['heureArrivee'];
@@ -179,12 +180,8 @@ function setCovoiturages(covoiturages){
 
         let btn=document.createElement("a");
         btn.classList.add("btn","btn-primary");
-        if (isConnected()){
-        let Chauffeur = idUser ==(i['voiture']['user']['id']) ? true : false ;
-        btn.setAttribute("href","/detail" +"?id=" + i['id'] + "&idUser=" + idUser + "&Chauffeur=" + Chauffeur);}
-        else{
-        btn.setAttribute("href","/detail" + "?id=" + i['id']);}
-     
+        btn.setAttribute("href","/detail" +"?id=" + i['id']);
+   
 
         btn.appendChild(document.createTextNode('Détail'));
         newDiv10.appendChild(btn);

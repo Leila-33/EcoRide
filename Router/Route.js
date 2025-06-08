@@ -3,7 +3,7 @@ export default class Route {
       this.url = url;
       this.title = title;
       this.pathHtml = pathHtml;
-      this.pathJS = pathJS;
+      this.pathJS = Array.isArray(pathJS)?pathJS:[pathJS];
       this.authorize = authorize;
     }
 }
