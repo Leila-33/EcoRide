@@ -28,11 +28,11 @@ const LoadContentPage = async () => {
   const actualRoute = getRouteByUrl(path);
 
   // Vérifier les droits d'accès à la page
- /* const allRolesArray = actualRoute.authorize;
+  const allRolesArray = actualRoute.authorize;
 
   if (allRolesArray.length>0){
     if(allRolesArray.includes("disconnected")){
-      if(isConnected()){
+      if(window.AppData.isConnected()){
         window.location.replace("/");
       
     }
@@ -43,7 +43,7 @@ else {
     window.location.replace("/");
   }
 }
-}*/
+}
   // Récupération du contenu HTML de la route
   const html = await fetch(actualRoute.pathHtml).then((data) => data.text());
   // Ajout du contenu HTML à l'élément avec l'ID "main-page"
@@ -65,7 +65,7 @@ else {
   // Changement du titre de la page
   document.title = actualRoute.title + " - " + websiteName;
 //Afficher et masquer les éléments en fonction du rôle
- // showAndHideElementsForRoles();
+  window.AppData.showAndHideElementsForRoles();
 };
   
 // Fonction pour gérer les événements de routage (clic sur les liens)

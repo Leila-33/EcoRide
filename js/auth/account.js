@@ -1,1032 +1,925 @@
+/* global bootstrap */
 const btnPassager = document.getElementById("passagerCheck");
 const btnChauffeur = document.getElementById("chauffeurCheck");
-btnChauffeur.addEventListener("change", updateRoleChauffeur);
-btnPassager.addEventListener("change", updateRolePassager);
-//Mes informations personelles
-let mesInfos=document.getElementById("mesInfos");
-let imgInfos=document.getElementById("imgInfos");
-const inputPhoto = document.querySelector("input[type=file]");
-const inputNom = document.getElementById("NomInput");
-const inputPreNom = document.getElementById("PrenomInput");
-const inputPseudo = document.getElementById("PseudoInput");
-const inputDateDeNaissance = document.getElementById("DateDeNaissanceInput");
-const inputMail = document.getElementById("EmailInput");
-const inputTelephone = document.getElementById("TelephoneInput");
-const inputAdresse = document.getElementById("AdresseInput");
-const inputPassword = document.getElementById("PasswordInput");
-const inputValidationPassword = document.getElementById("ValidatePasswordInput");
-const btnInfos = document.getElementById("btnInfos");
-const btnInfos1 = document.getElementById("btnInfos1");
-const infosForm = document.getElementById("infosForm1");
-inputPhoto.addEventListener("change", validateForm); 
-inputNom.addEventListener("keyup", validateForm); 
-inputPreNom.addEventListener("keyup", validateForm);
-inputPseudo.addEventListener("keyup", validateForm);
-inputTelephone.addEventListener("keyup", validateForm);
-inputPassword.addEventListener("keyup", validateForm);
-inputValidationPassword.addEventListener("keyup", validateForm);
-btnInfos.addEventListener("click",()=>{ updateInfos;btnInfos1.classList.remove("d-none");});
-btnInfos1.addEventListener("click", ()=>{btnInfos1.classList.add("d-none");});
-btnInfos.disabled=true;
-let btnClass="";
-let ListElement="";
-let addVoiture=0;
-let Chauffeur;
-let idUser=0;
-let vehiculesLength=0;
+btnChauffeur.addEventListener("change", async () => window.AppData.withLoader(() => updateRole("chauffeur")));
+btnPassager.addEventListener("change", async () => window.AppData.withLoader(() => updateRole("passager")));
+window.AppData.notRespondedCovoiturages = window.AppData.notRespondedCovoiturages || [];
 
-//while (Chauffeur1==0){btnChauffeur.checked=false;}
-//Mes véhicules
-let voitures = document.getElementById("voitures");
-const myModal = document.getElementById("myModal");
+// Fonction permettant d'afficher dans une popover le nombre de covoiturages à valider 
+function showPopover(result, element) {
+    const link = document.getElementById('validations');
+    bootstrap.Popover.getInstance(link)?.dispose();
+    const popoverInstance = new bootstrap.Popover(link, {
+        trigger: 'manual', placement: 'bottom', html: true, customClass: 'custom-popover',
+        content: `Vous avez <b>${result}</b> ${window.AppData.pluralize(result, 'covoiturage')} à valider.`
+    });
+    popoverInstance.show();
+    // Si le clic est en dehors de la popup, la popup se ferme sinon elle se ferme et l'utilisateur est redirigé
+    // vers le premier covoiturage non validé
+    function handleClickOutside(e) {
+        const popoverEl = document.querySelector('.popover');
+        if (popoverEl && popoverEl.contains(e.target)) {
+            element.scrollIntoView({ behavior: "smooth", block: 'start' });
+        }
+        popoverInstance.hide();
+        document.removeEventListener('click', handleClickOutside);
+    }
+    setTimeout(() => { document.addEventListener('click', handleClickOutside); }, 0);
+}
+
+
+
+//Mes informations personelles
+const Nom = document.getElementById("Nom");
+const DateDeNaissance = document.getElementById("DateDeNaissance");
+const Email = document.getElementById("Email");
+const Telephone = document.getElementById("Telephone");
+const Adresse = document.getElementById("Adresse");
+const imgInfos = document.getElementById("imgInfos");
+const mesInfos1 = document.getElementById("mesInfos1");
+const imgInfos1 = document.getElementById("imgInfos1");
+
+//Modale "Modifier mes informations personelles"
+const infosForm = document.getElementById("infosForm");
+window.AppData.inputPhoto = document.querySelector("input[type=file]")
+window.AppData.inputNom = document.getElementById("NomInput");
+window.AppData.inputPrenom = document.getElementById("PrenomInput");
+window.AppData.inputPseudo = document.getElementById("PseudoInput");
+window.AppData.inputEmail = document.getElementById("EmailInput");
+window.AppData.emailFeedback = document.getElementById("emailFeedback");
+window.AppData.inputDateDeNaissance = document.getElementById("DateDeNaissanceInput");
+window.AppData.dateNaissanceFeedback = document.getElementById("dateNaissanceFeedback");
+window.AppData.inputAdresse = document.getElementById("AdresseInput");
+window.AppData.inputTelephone = document.getElementById("TelephoneInput");
+window.AppData.btnInscription = document.getElementById("btnInscription");
+const btnDeletePhoto = document.getElementById("btnDeletePhoto");
+const today = new Date().toISOString().split("T")[0];
+window.AppData.inputDateDeNaissance.setAttribute('max', today);
+window.AppData.inputPhoto.addEventListener("change", () => { window.AppData.validateForm("modification") });
+[window.AppData.inputNom, window.AppData.inputPrenom, window.AppData.inputDateDeNaissance, window.AppData.inputTelephone].forEach(input => {
+    input.addEventListener("input", () => { window.AppData.validateForm("modification") });
+})
+window.AppData.btnInscription.addEventListener("click", async () => await window.AppData.withLoader(updateInfos));
+window.AppData.btnInscription.disabled = true;
+btnDeletePhoto.addEventListener('click', () => { btnDeletePhoto.disabled = true; deletePhoto = true; imgInfos1.src = ""; });
+let ListElement = [];
+let idUser = null, deletePhoto = false, vehiculesLength = 0;
+// Modale "Modifier mon mot de passe"
+const passwordForm = document.getElementById("passwordForm");
+const currentPassword = document.getElementById("currentPasswordInput");
+window.AppData.inputPassword = document.getElementById("PasswordInput");
+window.AppData.passwordFeedback = document.getElementById("passwordFeedback");
+window.AppData.inputValidationPassword = document.getElementById("ValidatePasswordInput");
+window.AppData.passwordConfirmationFeedback = document.getElementById("passwordConfirmationFeedback");
+const btnChangePassword = document.getElementById("btnChangePassword");
+btnChangePassword.disabled = true;
+[currentPassword, window.AppData.inputPassword, window.AppData.inputValidationPassword].forEach(input => {
+    input.addEventListener("input", validateFormPassword);
+})
+btnChangePassword.addEventListener("click", async () => await window.AppData.withLoader(editPassword));
+// Mes crédits
+const credits = document.getElementById("credits");
+
+// Mes voitures
+const MesVoitures = document.getElementById("MesVoitures");
+const voitures = document.getElementById("voitures");
+// Modale "myModalAjouterVoiture"
 const vehiculeForm = document.getElementById("vehiculeForm");
 const inputPlaque = document.getElementById("PlaqueInput");
 const inputDateImmatriculation = document.getElementById("DateImmatriculationInput");
+const dateImmatriculationFeedbackVoiture = document.getElementById("dateImmatriculationFeedbackVoiture");
 const inputMarque = document.getElementById("MarqueInput");
 const inputModele = document.getElementById("ModeleInput");
 const inputCouleur = document.getElementById("CouleurInput");
 const inputNbPlaces = document.getElementById("NbPlacesInput");
 const btnVehicule = document.getElementById("btnVehicule");
-const btnAjoutVehicule = document.getElementById("btnAjoutVehicule");
-inputPlaque.addEventListener("keyup", ()=>{validateFormVehicule(inputPlaque,inputDateImmatriculation,inputMarque,inputModele,inputCouleur,inputNbPlaces,btnVehicule);}); 
-inputDateImmatriculation.addEventListener("keyup", ()=>{validateFormVehicule(inputPlaque,inputDateImmatriculation,inputMarque,inputModele,inputCouleur,inputNbPlaces,btnVehicule);});
-inputMarque.addEventListener("keyup", ()=>{validateFormVehicule(inputPlaque,inputDateImmatriculation,inputMarque,inputModele,inputCouleur,inputNbPlaces,btnVehicule);});
-inputModele.addEventListener("keyup", ()=>{validateFormVehicule(inputPlaque,inputDateImmatriculation,inputMarque,inputModele,inputCouleur,inputNbPlaces,btnVehicule);});
-inputCouleur.addEventListener("keyup", ()=>{validateFormVehicule(inputPlaque,inputDateImmatriculation,inputMarque,inputModele,inputCouleur,inputNbPlaces,btnVehicule);});
-inputNbPlaces.addEventListener("change", ()=>{validateFormVehicule(inputPlaque,inputDateImmatriculation,inputMarque,inputModele,inputCouleur,inputNbPlaces,btnVehicule);});
-const btnSupprimerVehicule = document.getElementById("supprimerVehicule");
-btnSupprimerVehicule.addEventListener("click", supprimerVehicule);
-btnAjoutVehicule.addEventListener("click", ()=>{btnAjoutVehicule.classList.add("d-none");});
-btnVehicule.addEventListener("click", ()=>{updateVehicule(vehiculeForm);btnAjoutVehicule.classList.remove("d-none");});
-btnVehicule.disabled=true;
+btnVehicule.addEventListener("click", async () => await window.AppData.withLoader(() => addVoiture(vehiculeForm)));
+btnVehicule.disabled = true;
+[inputPlaque, inputDateImmatriculation, inputMarque, inputModele, inputCouleur, inputNbPlaces].forEach(input => {
+    input.addEventListener("input", () => { validateFormVehicule(inputPlaque, inputDateImmatriculation, inputMarque, inputModele, inputCouleur, inputNbPlaces, btnVehicule, dateImmatriculationFeedbackVoiture); });
+})
+// Modale "myModalSupprimerVoiture"
+const btnSupprimerVoiture = document.getElementById("supprimerVoiture");
+const myModalSupprimerVoiture = new bootstrap.Modal('#myModalSupprimerVoiture');
+btnSupprimerVoiture.addEventListener("click", async () => {
+    const id = btnSupprimerVoiture.dataset.id;
+    await window.AppData.withLoader(() => supprimerVoiture(id));
+});
 
 
-//Modal "Veuillez enregistrer un véhicule et vos préférences"
+
+//Modale "Veuillez enregistrer une voiture et vos préférences"
 const vehiculeForm1 = document.getElementById("vehiculeForm1");
 const inputPlaque1 = document.getElementById("PlaqueInput1");
 const inputDateImmatriculation1 = document.getElementById("DateImmatriculationInput1");
+const dateImmatriculationFeedbackChauffeur = document.getElementById("dateImmatriculationFeedbackChauffeur");
 const inputMarque1 = document.getElementById("MarqueInput1");
 const inputModele1 = document.getElementById("ModeleInput1");
 const inputCouleur1 = document.getElementById("CouleurInput1");
 const inputNbPlaces1 = document.getElementById("NbPlacesInput1");
-const flexRadioDefault1= document.getElementById("flexRadioDefault1");
-const flexRadioDefault2= document.getElementById("flexRadioDefault2");
-const flexRadioDefault3= document.getElementById("flexRadioDefault3");
-const flexRadioDefault4= document.getElementById("flexRadioDefault4");
-const formCheck1= document.getElementById("formCheck1");
+const flexRadioDefault1 = document.getElementById("flexRadioDefault1");
+const flexRadioDefault2 = document.getElementById("flexRadioDefault2");
+const flexRadioDefault3 = document.getElementById("flexRadioDefault3");
+const flexRadioDefault4 = document.getElementById("flexRadioDefault4");
+const preferenceChauffeur = document.getElementById("preferenceChauffeur");
+const formPreferenceChauffeur = document.getElementById("formPreferenceChauffeur");
+const btnPreferencesChauffeur = document.getElementById("btnPreferencesChauffeur");
+const formCheck1 = document.getElementById("formCheck1");
 const btnEnregistrerPreference = document.getElementById("enregistrerPreference");
-inputPlaque1.addEventListener("keyup", validateFormChauffeur);
-inputDateImmatriculation1.addEventListener("keyup", validateFormChauffeur);
-inputMarque1.addEventListener("keyup", validateFormChauffeur);
-inputModele1.addEventListener("keyup", validateFormChauffeur);
-inputCouleur1.addEventListener("keyup", validateFormChauffeur);
-inputNbPlaces1.addEventListener("change", validateFormChauffeur);
-formCheck1.addEventListener("change", validateFormChauffeur);
-btnEnregistrerPreference.disabled=true;
-btnEnregistrerPreference.addEventListener("click", function(){
-    Chauffeur=1;
-    btnChauffeur.checked=true;
-    updateRoleChauffeur();
-    updateVehicule(vehiculeForm1); 
-    dataForm = new FormData(formCheck1);
-    for (let i of dataForm){updatePreferences(i[0],i[1]);} });
+btnPreferencesChauffeur.addEventListener("click", function () {
+    const dataForm = new FormData(formPreferenceChauffeur);
+    let proprieteValeur = ListElement.find(el => el.propriete === dataForm.get("propriete"));
+    if (proprieteValeur) {
+        proprieteValeur.valeur = dataForm.get("valeur")
+    }
+    else {
+        ListElement.push({ "propriete": dataForm.get("propriete"), "valeur": dataForm.get("valeur") })
+    };
+    setPreferences(preferenceChauffeur, ListElement);
+});
 
 
-//Mes préférences
-let preference = document.getElementById("preference");
-let preferenceForm = document.getElementById("preferenceForm");
+[inputPlaque1, inputDateImmatriculation1, inputMarque1, inputModele1, inputCouleur1, inputNbPlaces1, formCheck1].forEach(input => {
+    input.addEventListener("input", validateFormChauffeur);
+});
+btnEnregistrerPreference.disabled = true;
+btnEnregistrerPreference.addEventListener("click", async function () {
+    // L'utilisateur peut être chauffeur
+    await window.AppData.withLoader(async () => {
+        btnChauffeur.checked = true;
+        if (!voitures.firstChild) { await addVoiture(vehiculeForm1); }
+        if (animauxEtFumeurs != 2) {
+            const dataForm = new FormData(formCheck1);
+            const promises = [];
+            for (let i of dataForm) { promises.push(updatePreferences(i[0], i[1])); }
+            for (let i of ListElement) { promises.push(updatePreferences(i['propriete'], i['valeur'])); }
+            await Promise.all(promises);
+        }
+        await updateRole("chauffeur");
+        ListElement.length = 0;
+    })
+});
+
+const inputProprieteChauffeur = document.getElementById("proprieteInputChauffeur")
+const inputValeurChauffeur = document.getElementById("valeurInputChauffeur");
+[inputValeurChauffeur, inputProprieteChauffeur].forEach(input => { input.addEventListener("input", () => { validatePreferencesForm(btnPreferencesChauffeur, inputProprieteChauffeur, inputValeurChauffeur) }) });
+
+
+
+// Mes préférences
+const MesPreferences = document.getElementById("MesPreferences");
+const preference = document.getElementById("preference");
+const preferenceForm = document.getElementById("preferenceForm");
+let NbParametres;
+// Modale "myModalAjouterPreference"
 const inputPropriete = document.getElementById("proprieteInput")
 const inputValeur = document.getElementById("valeurInput");
-const btnPreferences1 = document.getElementById("btnPreferences1");
 const btnPreferences = document.getElementById("btnPreferences");
+[inputValeur, inputPropriete].forEach(input => { input.addEventListener("input", () => { validatePreferencesForm(btnPreferences, inputPropriete, inputValeur) }) });
+btnPreferences.addEventListener("click", async function () {
+    let dataForm = new FormData(preferenceForm);
+    await window.AppData.withLoader(() => updatePreferences(dataForm.get("propriete"), dataForm.get("valeur")));
+});
+btnPreferences.disabled = true;
+// Modale "myModalSupprimerPreference"
+const myModalSupprimerPreference = new bootstrap.Modal('#myModalSupprimerPreference');
 const btnSupprimerPreference = document.getElementById("supprimerPreference");
-btnPreferences.addEventListener("click", function(){let dataForm = new FormData(preferenceForm);
-updatePreferences(dataForm.get("propriete"),dataForm.get("valeur"));btnPreferences1.classList.remove("d-none");});
-btnPreferences1.addEventListener("click", function(){btnPreferences1.classList.add("d-none");});
-btnSupprimerPreference.addEventListener("click", supprimerPreference);
-inputValeur.addEventListener("keyup", validatePreferencesForm);
-inputPropriete.addEventListener("keyup", validatePreferencesForm);
-btnPreferences.disabled=true;
-let animauxEtFumeurs;
+btnSupprimerPreference.onclick = async () => {
+    const id = btnSupprimerPreference.dataset.id;
+    await window.AppData.withLoader(() => supprimerPreference(id))
+};
+let animauxEtFumeurs; // Variable permettant de savoir si l'utilisateur a renseigné les préférences "animaux" et "fumeurs"
 
 //Saisir un voyage
-const vehiculeForm2 = document.getElementById("vehiculeForm2");
-const inputLieuDepart=document.getElementById("lieuDepart");
-const inputLieuArrivee=document.getElementById("lieuArrivee");
-const inputDateDepart=document.getElementById("dateDepart");
-const inputDateArrivee=document.getElementById("dateArrivee");
-const inputHeureDepart=document.getElementById("heureDepart");
-const inputHeureArrivee=document.getElementById("heureArrivee");
-const inputPrix=document.getElementById("prixInput");
+const saisirUnVoyage = document.getElementById("saisirUnVoyage");
+const MesVoyagesPassager = document.getElementById("MesVoyagesPassager");
+const MesVoyagesChauffeur = document.getElementById("MesVoyagesChauffeur");
+window.AppData.selected = false; // Variable permettant de savoir si l'utilisateur a cliqué sur une ville suggérée
+const voitureForm = document.getElementById("voitureForm");
+const voyageForm = document.getElementById("voyageForm");
+const inputLieuDepart = document.getElementById("lieuDepart");
+const inputLieuArrivee = document.getElementById("lieuArrivee");
+const inputDateDepart = document.getElementById("dateDepart");
+const inputDateArrivee = document.getElementById("dateArrivee");
+const inputHeureDepart = document.getElementById("heureDepart");
+const inputHeureArrivee = document.getElementById("heureArrivee");
+const Depart = document.getElementById("Depart"); // Les villes retournées par la fonction d'autocompletion s'affichent ici
+const Arrivee = document.getElementById("Arrivee"); // Les villes retournées par la fonction d'autocompletion s'affichent ici
+const inputPrix = document.getElementById("prixInput");
 const inputNbPlace = document.getElementById("nbPlaceInput");
-const inputVehicules=document.getElementById("inputVehicules");
+const tomorrowDate = new Date();
+tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+const tomorrow = tomorrowDate.toISOString().split("T")[0];
+inputDateDepart.setAttribute('min', tomorrow);
+inputDateDepart.addEventListener('input', () => { inputDateArrivee.setAttribute('min', inputDateDepart.value); });
+[inputDateDepart, inputDateArrivee, inputHeureDepart].forEach(input => {
+    input.addEventListener('input', () => {
+        if (inputDateDepart.value && inputDateDepart.value == inputDateArrivee.value) { inputHeureArrivee.setAttribute('min', inputHeureDepart.value); }
+        else { inputHeureArrivee.removeAttribute('min'); }
+    })
+});
+inputLieuDepart.addEventListener("input", () => { window.AppData.selected = false; window.AppData.debouncedGetVilles(inputLieuDepart, Depart); });
+inputLieuArrivee.addEventListener("input", () => { window.AppData.selected = false; window.AppData.debouncedGetVilles(inputLieuArrivee, Arrivee); });
+
+const inputVehicules = document.getElementById("inputVehicules");
 const inputPlaque2 = document.getElementById("PlaqueInput2");
 const inputDateImmatriculation2 = document.getElementById("DateImmatriculationInput2");
+[inputDateImmatriculation, inputDateImmatriculation1, inputDateImmatriculation2].forEach(item => item.setAttribute('max', today));
+const dateImmatriculationFeedbackVoyage = document.getElementById("dateImmatriculationFeedbackVoyage");
 const inputMarque2 = document.getElementById("MarqueInput2");
 const inputModele2 = document.getElementById("ModeleInput2");
-const inputCouleur2= document.getElementById("CouleurInput2");
+const inputCouleur2 = document.getElementById("CouleurInput2");
 const inputNbPlaces2 = document.getElementById("NbPlacesInput2");
-const btnEnregistrerVoyage=document.getElementById("enregistrerVoyage");
-inputLieuDepart.addEventListener("change", validateFormVoyage);
-inputLieuArrivee.addEventListener("change", validateFormVoyage);
-inputDateDepart.addEventListener("change", validateFormVoyage);
-inputDateArrivee.addEventListener("change", validateFormVoyage);
-inputHeureDepart.addEventListener("change", validateFormVoyage);
-inputHeureArrivee.addEventListener("change", validateFormVoyage);
-inputPrix.addEventListener("change", validateFormVoyage);
-inputNbPlace.addEventListener("change", validateFormVoyage);
-inputPlaque2.addEventListener("keyup", validateFormVoyage);
-inputDateImmatriculation2.addEventListener("keyup", validateFormVoyage);
-inputMarque2.addEventListener("keyup", validateFormVoyage);
-inputModele2.addEventListener("keyup", validateFormVoyage);
-inputCouleur2.addEventListener("keyup", validateFormVoyage);
-inputNbPlaces2.addEventListener("change", validateFormVoyage);
-inputVehicules.addEventListener("change",function(){
-    if (inputVehicules.value=="autre"){ vehiculeForm2.classList.remove("d-none");addVoiture=1;}
-    else{vehiculeForm2.classList.add("d-none");addVoiture=0;}
-    validateFormVoyage();});
-btnEnregistrerVoyage.addEventListener("click", updateVoyage);
+const btnEnregistrerVoyage = document.getElementById("enregistrerVoyage");
+[inputLieuDepart, inputLieuArrivee, inputDateDepart, inputDateArrivee, inputHeureDepart, inputHeureArrivee, inputPrix, inputNbPlace, inputPlaque2,
+    inputDateImmatriculation2, inputMarque2, inputModele2, inputCouleur2, inputNbPlaces2, inputVehicules]
+    .forEach(input => { input.addEventListener("input", validateFormVoyage); });
+let addedVoiture = 0; // Variable permettant de savoir si l'utilisateur a selectionné une voiture (addedVoiture=0) ou 'autre' (addedVoiture=1) dans le formulaire "Saisir un voyage"
+inputVehicules.addEventListener("input", function () {
+    if (inputVehicules.value == "autre") { voitureForm.classList.remove("d-none"); addedVoiture = 1; }
+    else { voitureForm.classList.add("d-none"); addedVoiture = 0; }
+});
+btnEnregistrerVoyage.addEventListener("click", async () => { await window.AppData.withLoader(() => addVoyage()) });
+btnEnregistrerVoyage.disabled = true;
+// Modale "myModalSupprimerCovoiturage"
+const btnSupprimerCovoiturage = document.getElementById("btnSupprimerCovoiturage");
+btnSupprimerCovoiturage.onclick = async () => {
+    const id = btnSupprimerCovoiturage.dataset.id;
+    const estChauffeur = btnSupprimerCovoiturage.dataset.chauffeur === "true";
+    await window.AppData.withLoader(() => supprimerCovoiturage(id, estChauffeur));
+};
+const myModalSupprimerCovoiturage = new bootstrap.Modal('#myModalSupprimerCovoiturage');
 
-
-btnEnregistrerVoyage.disabled=true;
 
 // Mes voyages enregistrés
-const btnMesVoyages= document.getElementById("btnMesVoyages");
-const accordionBody = document.getElementById("accordionBody");
-const accordionBodyChauffeur = document.getElementById("accordionBodyChauffeur");
+const voyagesPassager = document.getElementById("voyagesPassager");
+const voyagesChauffeur = document.getElementById("voyagesChauffeur");
 
-//Fonction permettant de valider tout le formulaire apparaissant en activant le mode "Chauffeur"
-function validateFormChauffeur(){
-    const PlaqueOk = validateRequired(inputPlaque1);
-    const DateImmatriculationOk = validateDate(inputDateImmatriculation1);
-    const MarqueOk = validateRequired(inputMarque1);
-    const ModeleOk = validateRequired(inputModele1);
-    const CouleurOk = validateRequired(inputCouleur1);
-    const NbPlacesOk = validateRequired(inputNbPlaces1);
-    const choix1Ok= flexRadioDefault1.checked || flexRadioDefault2.checked; 
-    const choix2Ok= flexRadioDefault3.checked || flexRadioDefault4.checked; 
-    if (PlaqueOk && DateImmatriculationOk && MarqueOk && ModeleOk && CouleurOk && NbPlacesOk && choix1Ok && choix2Ok ){
-        btnEnregistrerPreference.disabled=false;
-    }
-    else{
-        btnEnregistrerPreference.disabled=true;
-    }
+
+//Fonction permettant de valider le formulaire apparaissant en activant le mode "Chauffeur"
+function validateFormPassword() {
+    const currentPasswordOk = window.AppData.validateRequired(currentPassword);
+    const passwordOk = window.AppData.validatePassword(window.AppData.inputPassword);
+    const passwordConfirmOk = window.AppData.validateConfirmationPassword(window.AppData.inputPassword, window.AppData.inputValidationPassword);
+    btnChangePassword.disabled = !(currentPasswordOk && passwordOk && passwordConfirmOk);
 }
 
 
-//Fonction permettant de valider tout le formulaire "Mes informations personnelles"
-function validateForm(){
-    const PhotoOk = validatePhoto(inputPhoto);
-    const nomOk = validateRequired(inputNom);
-    const prenomOk = validateRequired(inputPreNom);
-    const pseudoOk = validateRequired(inputPseudo);
-    const TelephoneOk = validateTelephone(inputTelephone);
-    const passwordOk = validatePassword(inputPassword);
-    const passwordConfirmOk = validateConfirmationPassword(inputPassword,inputValidationPassword);
-    if (PhotoOk && nomOk && prenomOk && pseudoOk && TelephoneOk && passwordOk && passwordConfirmOk){
-        btnInfos.disabled=false;
-    }
-    else{
-        btnInfos.disabled=true;
-    }
+//Fonction permettant de valider le formulaire apparaissant en activant le mode "Chauffeur"
+function validateFormChauffeur() {
+    let voitureOk, choixPreferencesOk;
+    voitureOk = !voitures.firstChild ? validateFormVehicule(inputPlaque1, inputDateImmatriculation1, inputMarque1, inputModele1, inputCouleur1, inputNbPlaces1, null, dateImmatriculationFeedbackChauffeur) : true;
+    choixPreferencesOk = (animauxEtFumeurs == 2) || ((flexRadioDefault1.checked || flexRadioDefault2.checked) && (flexRadioDefault3.checked || flexRadioDefault4.checked));
+    btnEnregistrerPreference.disabled = !(voitureOk && choixPreferencesOk);
 }
 
-//Fonction permettant de valider tout le formulaire "Saisir un voyage"
-function validateFormVoyage(){
-    const lieuDepartOk = validateRequired(inputLieuDepart);
-    const lieuArriveeOk = validateRequired(inputLieuArrivee);
-    const dateDepartOk = validateRequired(inputDateDepart);
-    const dateArriveeOk = validateRequired(inputDateArrivee);
-    const heureDepartOk = validateRequired(inputHeureDepart);
-    const heureArriveeOk = validateRequired(inputHeureArrivee);
-    const prixOk = validateRequired(inputPrix);
-    const NbPlaceOk = validateRequired(inputNbPlace);
-    const datesOk=validateDates(inputDateDepart,inputDateArrivee,inputHeureDepart,inputHeureArrivee)
-    let voitureValidated=false;
-    //Si 'autre véhicule' est selectionné, vérifier les champs du véhicule
-    if (addVoiture==1){voitureValidated=validateFormVehicule(inputPlaque2,inputDateImmatriculation2,inputMarque2,inputModele2,inputCouleur2,inputNbPlaces2,null);
-    if (lieuDepartOk && lieuArriveeOk && dateDepartOk && dateArriveeOk && heureDepartOk && heureArriveeOk && prixOk && NbPlaceOk && voitureValidated && datesOk){
-        btnEnregistrerVoyage.disabled=false;
-    }
-    else{
-        btnEnregistrerVoyage.disabled=true;
-    }}
-    else{ if (lieuDepartOk && lieuArriveeOk && dateDepartOk && dateArriveeOk && heureDepartOk && heureArriveeOk && prixOk && datesOk){
-        btnEnregistrerVoyage.disabled=false;
-    }
-    else{
-        btnEnregistrerVoyage.disabled=true;
-    }}
+// Fonction permettant de valider le formulaire "Saisir un voyage"
+function validateFormVoyage() {
+    const lieuDepartOk = window.AppData.validateNomVille(inputLieuDepart);
+    const lieuArriveeOk = window.AppData.validateNomVille(inputLieuArrivee) && inputLieuDepart.value.trim() != inputLieuArrivee.value.trim();
+    const prixOk = window.AppData.validatePrix(inputPrix);
+    const NbPlaceOk = window.AppData.validateNbPlaces(inputNbPlace);
+    const datesOk = validateDates(inputDateDepart, inputDateArrivee, inputHeureDepart, inputHeureArrivee)
+    // Si 'autre véhicule' est selectionné, vérifier les champs du formulaire du véhicule
+    let voitureValidated = (addedVoiture === 1) ? validateFormVehicule(inputPlaque2, inputDateImmatriculation2, inputMarque2, inputModele2, inputCouleur2, inputNbPlaces2, null, dateImmatriculationFeedbackVoyage) : true;
+    btnEnregistrerVoyage.disabled = !(lieuDepartOk && lieuArriveeOk && prixOk && NbPlaceOk && voitureValidated && datesOk);
 }
 
-function validateDates(inputDateDepart,inputDateArrivee,inputHeureDepart,inputHeureArrivee){
-    if(new Date(inputDateDepart.value)-new Date(inputDateArrivee.value)>0){
-        inputDateArrivee.classList.remove("is-valid");
-        inputDateArrivee.classList.add("is-invalid");
-        return false;
-    }else if ((new Date(inputDateDepart.value)-new Date(inputDateArrivee.value)==0) &&
-       (new Date(inputDateDepart.value + "T" + inputHeureDepart.value)-new Date(inputDateDepart.value + "T" + inputHeureArrivee.value)>0)){
-        inputHeureArrivee.classList.remove("is-valid");
-        inputHeureArrivee.classList.add("is-invalid")
-        return false;}
-    else{return true;}
-}
 
-//Fonction permettant de valider tout le formulaire "Mes véhicules"
-function validateFormVehicule(inputPlaque,inputDateImmatriculation,inputMarque,inputModele,inputCouleur,inputNbPlaces,btnVehicule){
-    const PlaqueOk = validateRequired(inputPlaque);
-    const DateImmatriculationOk = validateDate(inputDateImmatriculation);
-    const MarqueOk = validateRequired(inputMarque);
-    const ModeleOk = validateRequired(inputModele);
-    const CouleurOk = validateRequired(inputCouleur);
-    const NbPlacesOk = validateRequired(inputNbPlaces);
-    if (btnVehicule!=null){
-    if (PlaqueOk && DateImmatriculationOk && MarqueOk && ModeleOk && CouleurOk && NbPlacesOk){
-        btnVehicule.disabled=false;
-    }
-    else{
-        btnVehicule.disabled=true;
-    }}
-    return PlaqueOk && DateImmatriculationOk && MarqueOk && ModeleOk && CouleurOk && NbPlacesOk;
-
-}
-//Fonction permettant de valider tout le formulaire "Mes préférences"
-function validatePreferencesForm(){
-    const proprieteOk = validateRequired(inputPropriete);
-    const valeurOk = validateRequired(inputValeur);
-    if (proprieteOk && valeurOk ){
-        btnPreferences.disabled=false;
-    }
-    else{
-        btnPreferences.disabled=true;
-    }
-}
-
-//Affiche les infomations de l'utilisateur
-getRoles(); 
-getInfosUser();
-getVehicules();
-getPreferences();
-
-
-
-
-function getInfosUser(){
-    let myHeaders = new Headers();
-    myHeaders.append("X-AUTH-TOKEN", getToken());
-
-    let requestOptions = {
-        method: 'GET',
-        headers: myHeaders,
-        redirect: 'follow'
-    };
-     fetch(apiUrl+"account/me", requestOptions)
-    .then(response =>{
-        if(response.ok){
-            return response.json();
-        }
-        else{
-            console.log("Impossible de récupérer les informations utilisateur");
-        }
+/* Fonction permettant de valider les dates et heures comme suit :
+- si (un champ est manquant) {invalide}
+- si (date de départ > date d'arrivée) {invalide}
+- si (date de départ == date d'arrivée) && (heure de départ >= heure d'arrivée) {invalide}
+- sinon {valide}  
+*/
+function validateDates(inputDateDepart, inputDateArrivee, inputHeureDepart, inputHeureArrivee) {
+    const dateDepartFeedback = document.getElementById('dateDepartFeedback')
+    const dateArriveeFeedback = document.getElementById('dateArriveeFeedback');
+    const heureArriveeFeedback = document.getElementById('heureArriveeFeedback');
+    dateDepartFeedback.textContent = "";
+    dateArriveeFeedback.textContent = "";
+    heureArriveeFeedback.textContent = "";
+    [inputDateDepart, inputDateArrivee, inputHeureArrivee, inputHeureDepart].forEach(input => {
+        input.classList.remove('is-valid');
+        input.classList.remove('is-invalid');
     })
-    .then(result => {
-        setUser(result);
-        getCovoiturages();
-        getCovoituragesChauffeur();
-
-    })
-    .catch(error =>{
-        console.error("erreur lors de la récupération des données utilisateur", error);
+    let isValid = true;
+    [inputDateDepart, inputDateArrivee, inputHeureArrivee, inputHeureDepart].forEach(input => {
+        if (!input.value) {
+            input.classList.remove('is-valid', 'is-invalid');
+            isValid = false;
+        }
     });
+    if (!isValid) return false;
+    const now = new Date().toISOString().split("T")[0];;
+    const dateDepart = inputDateDepart.value;
+    const dateArrivee = inputDateArrivee.value;
+    if (dateDepart <= now) {
+        inputDateDepart.classList.add('is-invalid');
+        dateDepartFeedback.textContent = "La date de départ doit être postérieure à aujourd'hui.";
+        isValid = false;
+    }
+    if (dateArrivee <= now) {
+        inputDateArrivee.classList.add('is-invalid');
+        dateArriveeFeedback.textContent = "La date d'arrivée doit être postérieure à aujourd'hui.";
+        isValid = false;
+    }
+    if (dateDepart > dateArrivee) {
+        inputDateArrivee.classList.add('is-invalid');
+        dateArriveeFeedback.textContent = "La date d'arrivée doit être égale à ou après la date de départ.";
+        return false;
+    }
+    const dateTimeDepart = new Date(`${inputDateDepart.value}T${inputHeureDepart.value}`);
+    const dateTimeArrivee = new Date(`${inputDateArrivee.value}T${inputHeureArrivee.value}`);
+    if (dateTimeDepart >= dateTimeArrivee) {
+        inputHeureArrivee.classList.add('is-invalid');
+        heureArriveeFeedback.textContent = "L'heure d'arrivée doit être après l'heure de départ.";
+        return false;
+    }
+    if (isValid) {
+        [inputDateDepart, inputDateArrivee, inputHeureArrivee, inputHeureDepart].forEach(input => {
+            input.classList.add('is-valid');
+            input.classList.remove('is-invalid');
+            isValid = true;
+        });
+    }
+    return isValid;
 }
 
-function setUser(user){
-    mesInfos=document.getElementById("mesInfos");
-    imgInfos=document.getElementById("imgInfos"); 
-    imgInfos.src='data:'+user['photoMime'] + ';base64,' +user['photo'];
-    mesInfos.innerHTML=user['pseudo']+'<br>' + user['nom'] + " " + user['prenom'] +'<br>'+user['dateNaissance'] +'<br>'+ user['email']+'<br>' + user['telephone']+'<br>'+ user['adresse'];
-    idUser=user['id'];
-    Credit=user['credit']['total'];
-    NomInput.value=user['nom'];
-    PrenomInput.value=user['prenom'];
-    PseudoInput.value=user['pseudo'];
-    DateDeNaissanceInput.value=user['dateNaissance'];
-    EmailInput.value=user['email'];
-    TelephoneInput.value=user['telephone']; 
-    AdresseInput.value= user['adresse'];
 
-
+//Fonction permettant de valider le formulaire "Mes voitures"
+function validateFormVehicule(inputPlaque, inputDateImmatriculation, inputMarque, inputModele, inputCouleur, inputNbPlaces, btnVehicule, dateImmatriculationFeedback) {
+    const PlaqueOk = window.AppData.validateRequired(inputPlaque);
+    const DateImmatriculationOk = window.AppData.validateDate(inputDateImmatriculation, dateImmatriculationFeedback, "La date d'immatriculation ne doit pas être dans le futur.", (inputDate, today) => inputDate <= today);
+    const MarqueOk = window.AppData.validateRequired(inputMarque);
+    const ModeleOk = window.AppData.validateRequired(inputModele);
+    const CouleurOk = window.AppData.validateRequired(inputCouleur);
+    const NbPlacesOk = window.AppData.validateNbPlaces(inputNbPlaces);
+    const formValid = PlaqueOk && DateImmatriculationOk && MarqueOk && ModeleOk && CouleurOk && NbPlacesOk;
+    if (btnVehicule) {
+        btnVehicule.disabled = !(formValid);
+    }
+    return formValid;
 }
-//Enregistrer les informations personnelles
-function updateInfos(){
-    let dataForm = new FormData(infosForm); 
-    let myHeaders = new Headers();
-    myHeaders.append("X-AUTH-TOKEN", getToken());
-    myHeaders.append("Content-Type", "application/json");
+//Fonction permettant de valider le formulaire "Mes préférences"
+function validatePreferencesForm(btnPreferences, inputPropriete, inputValeur) {
+    const proprieteOk = window.AppData.validateRequired(inputPropriete);
+    const valeurOk = window.AppData.validateRequired(inputValeur);
+    btnPreferences.disabled = !(proprieteOk && valeurOk);
+}
+
+
+// Fonction permettant d'afficher les informations de l'utilisateur dans la carte
+// "Mes informations personnelles" et dans la modale "Modifier mes informations personnelles"
+function setUser(user) {
+    [imgInfos, imgInfos1].forEach(img => { img.src = user['photo'] ? `http://localhost:8000/${user['photo']}` : ""; img.alt = "Photo de profil" });
+    btnDeletePhoto.disabled = user['photo'] ? false : true;
+    deletePhoto = false;
+    mesInfos1.textContent = user['pseudo'];
+    Nom.textContent = `${user['nom']} ${user['prenom']}`;
+    let dateNaissance = '';
+    if (user['dateNaissance']) {
+        const d = new Date(user['dateNaissance']);
+        if (!isNaN(d.getTime())) {
+            dateNaissance = new Intl.DateTimeFormat("fr-FR").format(d)
+        }
+    }
+    DateDeNaissance.textContent = `Date de naissance : ${dateNaissance}`;
+    Email.textContent = `Email : ${user['email']}`;
+    Telephone.textContent = `Téléphone : ${user['telephone']}`;
+    Adresse.textContent = `Adresse : ${user['adresse']}`
+
+    idUser = user['id'];
+    window.AppData.inputNom.value = user['nom'];
+    window.AppData.inputPrenom.value = user['prenom'];
+    window.AppData.inputPseudo.value = user['pseudo'];
+    window.AppData.inputDateDeNaissance.value = user['dateNaissance'];
+    window.AppData.inputEmail.value = user['email'];
+    window.AppData.inputTelephone.value = user['telephone'];
+    window.AppData.inputAdresse.value = user['adresse'];
+}
+
+
+
+
+async function updateInfos() {
+    const dataForm = new FormData(infosForm);
     let photo = dataForm.get("Photo");
-    const reader = new FileReader();
-    reader.addEventListener("load", function(event){
-        const b64Img = event.target.result.split(',')[1];
-    
+    let b64Img = null;
+    if (photo && photo.size > 0) {
+        b64Img = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (event) => resolve(event.target.result.split(',')[1]);
+            reader.readAsDataURL(photo);
+        });
+    }
 
-    let raw = JSON.stringify({
+    let body = {
         "photo": b64Img,
+        "delete_photo": deletePhoto,
         "nom": dataForm.get("Nom"),
         "prenom": dataForm.get("Prenom"),
-        "date_naissance":dataForm.get("DateDeNaissance"),
+        "dateNaissance": dataForm.get("DateDeNaissance"),
         "telephone": dataForm.get("Telephone"),
         "adresse": dataForm.get("Adresse"),
         "password": dataForm.get("mdp")
-    });
-    let requestOptions = {
-        method: 'PUT',
-        headers: myHeaders,
-        body: raw,
-        redirect: 'follow'
     };
-    fetch(apiUrl+"account/edit", requestOptions)
-    .then(response => {
-        if(response.ok){
-            return response.json();
-        }
-    })
-    .then(result => { console.log(result);    
-    })
-    .catch(error => console.log('error', error));
-}) ;   reader.readAsDataURL(photo);
+    const result = await window.AppData.apiFetch("account/edit", "PUT", body);
+    if (!result.ok) {
+        console.error("Erreur lors de la mise à jour des données utilisateur", result.message);
+        window.AppData.showToast(`Erreur lors de la mise à jour des données utilisateur ${result.message}`);
+        return;
+    }
+    const userResult = await window.AppData.getInfosUser();
+    window.AppData.showToast("Profil mis à jour avec succès", "success");
+    setUser(userResult);
 }
-//Enregistrer un nouveau vehicule
-function updateVehicule(vehiculeForm){
+
+async function editPassword() {
+    let dataForm = new FormData(passwordForm);
+    let body = {
+        "currentPassword": dataForm.get("currentPassword"),
+        "password": dataForm.get("password")
+    };
+    const result = await window.AppData.apiFetch("editPassword", "PUT", body);
+    if (!result.ok) {
+        console.error(`Impossible de mettre à jour le mot de passe.`, result.message);
+        window.AppData.showToast(result.message || 'Erreur', "danger");
+        return false;
+    }
+    window.AppData.showToast("Mot de passe changé avec succès", "success");
+    return true;
+
+}
+// Enregistrer une nouvelle voiture
+async function addVoiture(vehiculeForm) {
     let dataForm = new FormData(vehiculeForm);
-    let myHeaders = new Headers();
-    myHeaders.append("X-AUTH-TOKEN", getToken());
-    myHeaders.append("Content-Type", "application/json");
-    let raw = JSON.stringify({
-        "marque": {"libelle": dataForm.get("Marque")},
+    let body = {
+        "marque": { "libelle": dataForm.get("Marque") },
         "modele": dataForm.get("Modele"),
-        "immatriculation":dataForm.get("Plaque"),
+        "immatriculation": dataForm.get("Plaque"),
         "energie": dataForm.get("Energie"),
         "couleur": dataForm.get("Couleur"),
-        "date_premiere_immatriculation": dataForm.get("DateImmatriculation"),
-        "nb_place": Number(dataForm.get("NbPlaces")),
-    });
-    let requestOptions = {
-        method: 'POST',
-        headers: myHeaders,
-        body: raw,
-        redirect: 'follow'
+        "datePremiereImmatriculation": dataForm.get("DateImmatriculation"),
+        "nbPlaces": Number(dataForm.get("NbPlaces")),
     };
-
-    fetch(apiUrl+"voiture/addVoiture", requestOptions)
-    .then(response => {
-        if(response.ok){
-            return response.json();
-        }
-    })
-    .then(result => {
-      getVehicules();
-    })
-    .catch(error => console.log('error', error));
+    const result = await window.AppData.apiFetch("voiture/addVoiture", "POST", body);
+    if (result.data) {
+        window.AppData.showToast("Voiture ajoutée avec succès", "success");
+        await getVoitures();
+        return result.data['id'];
+    }
+    else {
+        console.error("Erreur lors de l'ajout de la voiture", result.message);
+        window.AppData.showToast(`Erreur lors de l'ajout de la voiture: ${result.message}`, "danger");
+        return false;
+    }
 }
+
 //Obtenir les voitures
-function getVehicules(){
-    let myHeaders = new Headers();
-    myHeaders.append("X-AUTH-TOKEN", getToken());
-
-    let requestOptions = {
-        method: 'GET',
-        headers: myHeaders,
-        redirect: 'follow'
-    };
-     fetch(apiUrl+"voiture/allVoitures", requestOptions)
-    .then(response =>{
-        if(response.ok){
-            return response.json();
+async function getVoitures() {
+    const result = await window.AppData.apiFetch("voiture/allVoitures");
+    if (!result.ok) {
+        console.error("Impossible de récupérer les informations des voitures", result.message);
+        return;
+    }
+    setVoitures(result.data);
+    if (result.data.length == 0) {
+        if (btnChauffeur.checked) {
+            btnChauffeur.checked = false;
+            await updateRole("chauffeur");
         }
-        else{
-            console.log("Impossible de récupérer les informations des véhicules");
-        }
-    })
-      .then(result => {
-        setVehicules(result);
-        if (voitures.firstChild && animauxEtFumeurs==2){Chauffeur=1;}
-        //S'il y a au moins une voiture enregistrée et les preferences animaux et fumeurs, Chauffeur=1
-    })
-    .catch(error =>{
-        console.error("erreur lors de la récupération des données des véhicules", error);
-    });
+    }
 }
+
 // Afficher les voitures
-function setVehicules(vehicules){
-    while (voitures.firstChild) {
-        voitures.removeChild(voitures.firstChild);
-      }
-      while (inputVehicules.firstChild) {
-        inputVehicules.removeChild(inputVehicules.firstChild);
-      }
-       vehiculesLength=vehicules.length;
-    if (vehicules.length>0){ 
-    for (let i of vehicules){
-        console.log(vehicules);
-        let index=Number(vehicules.indexOf(i))+1;
-        let opt = document.createElement("option");
-        opt.text="Voiture " + index;
-        opt.value=index;
-        inputVehicules.add(opt,null);
-        let newDiv = document.createElement("div");
-        let newDiv1 = document.createElement("div");
-        let newDiv2 = document.createElement("div");
-        let newDiv3 = document.createElement("div");
-
-        newDiv.classList.add("col");
-        newDiv1.classList.add("card");
-        newDiv2.classList.add("card-body","shadow", "p-3",  "bg-body-tertiary", "rounded","mb-3");
-        newDiv3.classList.add("text-center");
-        newDiv3.innerHTML="Voiture "+ index +'<br>'+'<br>'+ i['immatriculation'] + ' ' + i['datePremiereImmatriculation'] + '<br>' + i['marque']['libelle'] + ' ' + i['modele'] + ' ' + i['couleur'] + '<br>' + i['nbPlace'] +'places' + ' ' + i['energie'];
-        let btn=document.createElement("button");
-        btn.classList.add("btn","btn-primary");
-        btn.appendChild(document.createTextNode('Supprimer'));
-        newDiv2.appendChild(newDiv3);
-        newDiv1.appendChild(newDiv2);
-        newDiv.appendChild(newDiv1);
-
-        newDiv2.appendChild(btn);
-        let theFirstChild = voitures.firstChild;
-        let theLastChild = voitures.lastChild;
-        // Modale pour supprimer une voiture
-        btn.onclick=function(ev){ btnClass= i['id'];
-        const myyModal = new bootstrap.Modal('#myModal');
-        myyModal.show();
-        ListElement=newDiv;
-
-        }  
-        if (theFirstChild==null){ voitures.insertBefore(newDiv, theFirstChild);}
-        else{voitures.insertBefore(newDiv, theLastChild.nextSibling)};
-    } 
-    opt = document.createElement("option");
-    opt.text="Autre voiture";
-    opt.value='autre'
-    inputVehicules.add(opt,null); 
- 
-    let sp1 = document.createElement("div");
-    sp1.classList.add("mb-3");
-    let parentDiv = voitures.parentNode;
-    parentDiv.insertBefore(sp1, voitures.nextSibling);
-}}
-
-//Supprimer une voiture
-function supprimerVehicule(){
-    ListElement.remove();
-    let myHeaders = new Headers();
-    myHeaders.append("X-AUTH-TOKEN", getToken());
-    myHeaders.append("Content-Type", "application/json");
-  
-
-    let requestOptions = {
-        method: 'DELETE',
-        headers: myHeaders,
-        redirect: 'follow'
-    };
-
-    fetch(apiUrl+"voiture/"+btnClass, requestOptions)
-    .then(response => {
-        if(response.ok){
-            return response;
-        }
-    })
-    .then(result => {
-        getVehicules();
-    if (voitures.firstChild==null){Chauffeur1=0;btnChauffeur.checked=false;updateRoleChauffeur();}
-
-       })
-       .catch(error => console.log('error', error));
-   }
-
-
-   function afficherTitres(i){
-    if (i==1){
-   // Les items de l'accordion "Mes vehicules", "Mes préférences", "Saisir un voyage", "Mes voyages enregistrés - Chauffeur" apparaissent.
-        document.getElementById("chauffeur").classList.remove("d-none");
-        document.getElementById("preferences").classList.remove("d-none");
-        document.getElementById("voyage").classList.remove("d-none");
-        document.getElementById("voyagesChauffeur").classList.remove("d-none");}
-    else{
-    // Supprimer le rôle "Chauffeur"
-        document.getElementById("chauffeur").classList.add("d-none");
-        document.getElementById("voyage").classList.add("d-none");
-        document.getElementById("preferences").classList.add("d-none");
-        document.getElementById("voyagesChauffeur").classList.add("d-none");
-
+function setVoitures(vehicules) {
+    voitures.innerHTML = "";
+    inputVehicules.innerHTML = "";
+    vehiculesLength = vehicules.length;
+    if (vehiculesLength > 0) {
+        vehicules.forEach((i, idx) => {
+            const index = idx + 1;
+            inputVehicules.add(new Option(`Voiture ${index}`, i['id']));
+            const newDiv = window.AppData.createEl("div", ['col']);
+            const card = window.AppData.createEl("div", ["card", "image-card"]);
+            const cardBody = window.AppData.createEl("div", ["card-body", "shadow-sm", "p-3", "bg-body-tertiary", "rounded"]);
+            const newDiv3 = window.AppData.createEl("div", ["text-center"], `Voiture ${index}`);
+            const newDiv31 = window.AppData.createEl("div", ["text-center"], `${i['immatriculation']} ${new Intl.DateTimeFormat("fr-FR").format(new Date(i['datePremiereImmatriculation']))}`);
+            const newDiv32 = window.AppData.createEl("div", ["text-center"], `${i['marque']['libelle']} ${i['modele']} ${i['couleur']}`);
+            const newDiv33 = window.AppData.createEl("div", ["text-center"], `${i['nbPlaces']} ${window.AppData.pluralize(i['nbPlaces'], "place")} ${i['energie']}`);
+            const actionDiv = window.AppData.createEl("div", ["action-image-buttons"]);
+            const icon = window.AppData.createEl("i", ["bi", "bi-trash"]);
+            const btnSupprimer = window.AppData.makeButton(actionDiv, "", [], () => {
+                btnSupprimerVoiture.dataset.id = i['id'];
+                myModalSupprimerVoiture.show();
+            }); // Modale pour supprimer une voiture
+            btnSupprimer.setAttribute('title', "Supprimer");
+            btnSupprimer.appendChild(icon);
+            [actionDiv, newDiv3, newDiv31, newDiv32, newDiv33].forEach(child => { cardBody.appendChild(child); });
+            card.appendChild(cardBody);
+            newDiv.appendChild(card);
+            voitures.appendChild(newDiv);
+        });
+        inputVehicules.add(new Option("Autre voiture", 'autre'));
+        voitures.after(window.AppData.createEl("div", ["mb-3"]));
     }
-   }
-//Mode "Chauffeur"
-function updateRoleChauffeur(e){
-    let myHeaders = new Headers();
-    myHeaders.append("Content-Type", "application/json");
-    myHeaders.append("X-AUTH-TOKEN", getToken()); 
+}
+
+// Supprimer une voiture
+async function supprimerVoiture(id) {
+    if (!id) {
+        console.error('ID de voiture invalide.');
+        return;
+    }
+    const result = await window.AppData.apiFetch(`voiture/${id}`, "DELETE");
+    if (!result.ok) {
+        console.error('Erreur lors de la suppression de la voiture.', result.message);
+        window.AppData.showToast(`Erreur lors de la suppression de la voiture: ${result.message}`, "danger");
+        return;
+    }
+    await getVoitures();
+}
+
+// Afficher ou cacher les cartes "Mes voitures", "Mes préférences", "Saisir un voyage", "Mes voyages enregistrés - Chauffeur".
+function afficherCartes(i) {
+    const cartes = [MesVoitures, MesPreferences, saisirUnVoyage, MesVoyagesChauffeur];
+    cartes.forEach(carte => carte.classList.toggle("d-none", !i));
+}
+
+// Ajouter ou supprimer le rôle "Chauffeur"
+async function updateRole(role) {
     /*S'il n'y a pas les préférences animaux et fumeurs enregistrées ou s'il n'y a pas de véhicule, le mode
-    "Chauffeur" est désactivé.*/
-    if (btnChauffeur.checked){
-    if (Chauffeur==0){ btnChauffeur.checked=false;
-        const myyModal = new bootstrap.Modal('#myModalChauffeur');
-        myyModal.show();}
-    else{ afficherTitres(1);        
-        let raw = JSON.stringify({
-            "libelle": "chauffeur"});
-        let requestOptions = {
-            method: 'POST',
-            headers: myHeaders,
-            body: raw, 
-            redirect: 'follow'     
-        };
-    fetch(apiUrl+"role", requestOptions)
-    .then(response => {
-        if(response.ok){
-            return response.json();
-        } 
-    })
-    .then(result => {      
-    })
-    .catch(error => console.log('error', error));}}
-    else { afficherTitres(2);
-        let requestOptions = {
-            method: 'DELETE',
-            headers: myHeaders,
-            redirect: 'follow'     
-        };
-        fetch(apiUrl+"role/chauffeur", requestOptions)
-        .then(response => {
-            if(response.ok){
-                return response.json();
-            } 
-        })
-        .then(result => {      
-        })
-        .catch(error => console.log('error', error));}
+    "Chauffeur" est désactivé et une modale apparait pour permettre à l'utilisateur d'enregistrer une voiture
+    et ses préférences. */
+    const isChauffeur = role === "chauffeur";
+    const isPassager = role === "passager";
+    const btn = isChauffeur ? btnChauffeur : btnPassager;
+    console.log(window.AppData.notRespondedCovoiturages);
+    if (isPassager && !btn.checked && window.AppData.notRespondedCovoiturages.length > 0) {
+        alert("Vous devez valider vos covoiturages avant de pouvoir désactiver le mode passager.");
+        btn.checked = true;
+        return;
     }
-// Ajouter ou supprimer le rôle "Passager"
-    function updateRolePassager(e){
-        let myHeaders = new Headers(); 
-        myHeaders.append("Content-Type", "application/json");
-        myHeaders.append("X-AUTH-TOKEN", getToken());  
-        if (btnPassager.checked){
-        document.getElementById("voyagesPassager").classList.remove("d-none");
+    const hasVoiture = !!voitures.firstChild;
+    const preferencesOk = animauxEtFumeurs === 2;
+    if (isChauffeur && btn.checked && (!hasVoiture || !preferencesOk)) {
+        // Si une voiture est enregistrée, pas besoin de renseigner une voiture dans la modale
+        vehiculeForm1.classList.toggle("d-none", hasVoiture);
+        // Si les préférences animaux et fumeurs sont enregistrées, pas besoin de les renseigner dans la modale
+        formCheck1.classList.toggle("d-none", preferencesOk);
+        btnChauffeur.checked = false;
+        new bootstrap.Modal('#myModalChauffeur').show();
+        return;
+    }
+    const method = btn.checked ? 'POST' : 'DELETE';
+    const endpoint = btn.checked ? "roleEntity" : `roleEntity/${role}`;
+    const body = btn.checked ? { "libelle": role } : null;
 
-            let raw = JSON.stringify({
-                "libelle": "passager"});
-            let requestOptions = {
-                method: 'POST',
-                headers: myHeaders,
-                body: raw,
-                redirect: 'follow'     
-            };
-        fetch(apiUrl+"role", requestOptions)
-        .then(response => {
-            if(response.ok){
-                return response.json();
-            } 
-        })
-        .then(result => {      
-        })
-        .catch(error => console.log('error', error));}
-        else {
-        document.getElementById("voyagesPassager").classList.add("d-none");
+    const result = await window.AppData.apiFetch(endpoint, method, body);
+    if (!result.ok) {
+        console.error(`Impossible de mettre à jour le rôle ${role}.`, result.message);
+        return;
+    }
+    // Afficher ou cacher les cartes du mode "Chauffeur"
+    if (isChauffeur) afficherCartes(btn.checked);
+    else if (isPassager) { MesVoyagesPassager.classList.toggle("d-none", !btn.checked); }
+}
 
-            let requestOptions = {
-                method: 'DELETE',
-                headers: myHeaders,
-                redirect: 'follow'     
-            };
-            fetch(apiUrl+"role/passager", requestOptions)
-            .then(response => {
-                if(response.ok){
-                    return response.json();
-                } 
-            })
-            .then(result => {      
-            })
-            .catch(error => console.log('error', error));}
-        }
-        
-        //Afficher les roles
-    function getRoles(){
-        let myHeaders = new Headers();
-        myHeaders.append("X-AUTH-TOKEN", getToken()); 
-        let requestOptions = {
-            method: 'GET',
-            headers: myHeaders,
-            redirect: 'follow'
-        };  
-         fetch(apiUrl+"role", requestOptions)
-        .then(response =>{
-            if(response.ok){
-                return response.json();
+
+
+
+// Afficher les rôles
+async function getRoles() {
+    const roles = await window.AppData.apiFetch("roleEntity");
+    if (!roles) {
+        console.error("Impossible de récupérer les rôles.");
+        return;
+    }
+    const estChauffeur = roles.data.some(r => r.libelle === "chauffeur");
+    const estPassager = roles.data.some(r => r.libelle === "passager");
+    btnChauffeur.checked = estChauffeur;
+    afficherCartes(estChauffeur);
+    btnPassager.checked = estPassager;
+    MesVoyagesPassager.classList.toggle("d-none", !estPassager)
+}
+
+
+
+// Ajouter une préférence
+async function updatePreferences(propriete, valeur) {
+    if (NbParametres >= 10) {
+        alert("Le nombre maximal de préférences enregistrés est de 10.");
+        return false;
+    }
+
+    let body = {
+        "propriete": propriete,
+        "valeur": valeur
+    };
+    const success = await window.AppData.apiFetch("parametre", "POST", body);
+    if (!success.ok) {
+        console.error("Erreur lors de l'ajout de la préférence.", success.message);
+        window.AppData.showToast(`Erreur lors de l'ajout de la préférence: ${success.message}`, "danger");
+        return false;
+    }
+    window.AppData.showToast("Préférence ajoutée avec succès", "success");
+    const result = await window.AppData.getInfosUser();
+    setPreferences(preference, result['parametres']);
+    return true;
+}
+
+
+//Afficher les préférences
+function setPreferences(div, parametres) {
+    div.innerText = "";
+    if (!parametres || parametres.length == 0) { return; }
+    NbParametres = parametres.length;
+    animauxEtFumeurs = parametres.filter(p => ["fumeurs", "animaux"].includes(p.propriete)).length;
+    parametres.forEach(i => {
+        const newDiv = window.AppData.createEl("div", ['col']);
+        const card = window.AppData.createEl("div", ["card", "image-card"]);
+        const cardBody = window.AppData.createEl("div", ["card-body", "shadow-sm", "p-3", "bg-body-tertiary", "rounded"]);
+        const textDiv = window.AppData.createEl("div", ["text-center"], `${i['propriete']} : ${i['valeur']}`);
+        const actionDiv = window.AppData.createEl("div", ["action-image-buttons"]);
+        const icon = window.AppData.createEl("i", ["bi", "bi-trash"]);
+        const btnSupprimer = window.AppData.makeButton(actionDiv, "", [], async () => {
+            if (div == preference) {
+                btnSupprimerPreference.dataset.id = i['id'];
+                myModalSupprimerPreference.show();
             }
-            else{
-                console.log("Impossible de récupérer les roles");
+            else {
+                newDiv.remove();
+                ListElement = ListElement.filter(item => item.propriete !== i['propriete']);
             }
-        })
-        .then(result => {
-            console.log(result);
-            let estChauffeur=0;
-            let estPassager=0;
-            for (let i of result){
-                if (i['libelle']=="chauffeur"){btnChauffeur.checked=true; estChauffeur=1;}
-                if (i['libelle']=="passager"){btnPassager.checked=true; estPassager=1;}
-        }
-        if (estChauffeur==0){
-            afficherTitres(2); } // Cache les titres
-        else{ afficherTitres(1); // Affiche les titres
-
-        if (estPassager==1){
-        document.getElementById("voyagesPassager").classList.remove("d-none");}
-        else {document.getElementById("voyagesPassager").classList.add("d-none");}
-    }})  
-        .catch(error =>{
-            console.error("erreur lors de la récupération des données utilisateur", error);
         });
-    }
-    
-
-
-//Ajouter une préférence
-    function updatePreferences(propriete,valeur){
-        let myHeaders = new Headers();  
-        myHeaders.append("Content-Type", "application/json");
-        myHeaders.append("X-AUTH-TOKEN", getToken()); 
-            let raw = JSON.stringify({
-                "propriete":propriete,
-                "valeur": valeur});   
-            let requestOptions = {
-                method: 'POST',
-                headers: myHeaders,
-                body: raw,
-                redirect: 'follow'     
-            };
-        fetch(apiUrl+"parametre", requestOptions)
-        .then(response => {
-            if(response.ok){
-                return response.json();
-            } 
-        })
-        .then(result => { getPreferences();   
-        })
-        .catch(error => console.log('error', error));
-    }
-//Obtenir les préférences
-      function getPreferences(){
-        let myHeaders = new Headers();
-        myHeaders.append("X-AUTH-TOKEN", getToken()); 
-        let requestOptions = {
-            method: 'GET',
-            headers: myHeaders,
-            redirect: 'follow'
-        };
-         fetch(apiUrl+"parametre", requestOptions)
-        .then(response =>{
-            if(response.ok){
-                return response.json();
-            }
-            else{
-                console.log("Impossible de récupérer les informations utilisateur");
-            }
-        })
-        .then(result => {
-            setPreferences(result)
-            console.log(result);
-            if (voitures.firstChild && animauxEtFumeurs==2){Chauffeur=1;}
-
-      })  
-        .catch(error =>{
-            console.error("erreur lors de la récupération des données utilisateur", error);
-        });
-    }
-    //Afficher les préférences
-    function setPreferences(parametres){
-        while (preference.firstChild) {
-            preference.removeChild(preference.firstChild);
-          }
-            if (parametres.length==0){
-                parametres=[parametres];
-            };
-            if (parametres){ 
-                let animauxEtFumeurs=0;
-            for (let i of parametres){
-                if (i['propriete']=="fumeurs" || i['propriete']=="animaux"){animauxEtFumeurs++;}
-                        let newDiv = document.createElement("div");
-                        let newDiv1 = document.createElement("div");
-                        let newDiv2 = document.createElement("div");
-                        let newDiv3 = document.createElement("div");
-                
-                        newDiv.classList.add("col");
-                        newDiv1.classList.add("card");
-                        newDiv2.classList.add("card-body","shadow", "p-3",  "bg-body-tertiary", "rounded","mb-3");
-                        newDiv3.classList.add("text-center");
-                        newDiv3.innerHTML=i['propriete'] + ' : ' + i['valeur'];
-                        let btn=document.createElement("button");
-                        btn.classList.add("btn","btn-primary");
-                        btn.appendChild(document.createTextNode('Supprimer'));
-                        newDiv2.appendChild(newDiv3);
-                        newDiv1.appendChild(newDiv2);
-                        newDiv.appendChild(newDiv1);
-                
-                        newDiv2.appendChild(btn);
-                        let theFirstChild = preference.firstChild;
-                
-                        btn.onclick=function(ev){ btnClass= i['id'];
-                        const myyModal = new bootstrap.Modal('#myModal1');
-                        myyModal.show();
-                        ListElement=newDiv;               
-                        }
-                preference.insertBefore(newDiv, theFirstChild);
-                }  console.log(animauxEtFumeurs);
-            } 
-            let sp1 = document.createElement("div");
-            sp1.classList.add("mb-3");
-            let parentDiv = preference.parentNode;
-            parentDiv.insertBefore(sp1, preference.nextSibling);
-        }
-
-
-function supprimerPreference(){
-    ListElement.remove();
-    let myHeaders = new Headers();
-    myHeaders.append("X-AUTH-TOKEN", getToken());
-    myHeaders.append("Content-Type", "application/json");
-    let requestOptions = {
-        method: 'DELETE',
-        headers: myHeaders,
-        redirect: 'follow'
-    };
-    fetch(apiUrl+"parametre/"+btnClass, requestOptions)
-    .then(response => {
-        if(response.ok){
-            return response;
-        }
-    })
-    .then(result => {
-        getPreferences();
-        if (animauxEtFumeurs!=2){Chauffeur=0;btnChauffeur.checked=false;updateRoleChauffeur();}
-    }
-       )
-       .catch(error => console.log('error', error));
-   } 
-   
-   //Ajouter un voyage 
-   function updateVoyage(){
-    let dataForm = new FormData(vehiculeForm3);
-    let myHeaders = new Headers();
-    myHeaders.append("X-AUTH-TOKEN", getToken());
-    myHeaders.append("Content-Type", "application/json");
-    let raw;
-    if (addVoiture){
-    updateVehicule(vehiculeForm2);    
-        raw = JSON.stringify({
-        "date_depart": dataForm.get("dateDepart"),
-        "heure_depart": dataForm.get("heureDepart"),
-        "lieu_depart":dataForm.get("lieuDepart"),
-        "date_arrivee": dataForm.get("dateArrivee"),
-        "heure_arrivee": dataForm.get("heureArrivee"),
-        "lieu_arrivee":dataForm.get("lieuArrivee"),
-        "statut": "en attente",
-        "nb_place": Number(dataForm.get("nbPlace")),
-        "prix_personne": Number(dataForm.get("prix")),
-        "voiture":{"immatriculation" : toString(Number(vehiculesLength)-1)},
-    });} else{ 
-        raw = JSON.stringify({
-        "date_depart": dataForm.get("dateDepart"),
-        "heure_depart": dataForm.get("heureDepart"),
-        "lieu_depart":dataForm.get("lieuDepart"),
-        "date_arrivee": dataForm.get("dateArrivee"),
-        "heure_arrivee": dataForm.get("heureArrivee"),
-        "lieu_arrivee":dataForm.get("lieuArrivee"),
-        "statut": "en attente",
-        "nb_place": Number(dataForm.get("nbPlace")),
-        "prix_personne": Number(dataForm.get("prix")),
-        "voiture":{"immatriculation" : toString(Number(dataForm.get("inputVehicules"))-1)},
-    });}
-
-    let requestOptions = {
-        method: 'POST',
-        headers: myHeaders,
-        body: raw,
-        redirect: 'follow'
-    };
-    fetch(apiUrl+"covoiturage", requestOptions)
-    .then(response => {
-        if(response.ok){
-            return response.json();
-        }
-    })
-    .then(result => {
-        getCovoituragesChauffeur();
-        btnMesVoyages.click();
-    })
-    .catch(error => console.log('error', error));
-}
-//Obtenir les covoiturages "passager"
-function getCovoiturages(){
-    let myHeaders = new Headers();
-    myHeaders.append("X-AUTH-TOKEN", getToken());
-
-    let requestOptions = {
-        method: 'GET',
-        headers: myHeaders,
-        redirect: 'follow'
-    };
-
-     fetch(apiUrl+"covoiturage/allCovoiturages", requestOptions)
-    .then(response =>{
-        if(response.ok){
-            return response.json();
-        }
-        else{
-            console.log("Impossible de récupérer les informations des véhicules");
-        }
-    })
-      .then(result => {
-        console.log(result);
-        setCovoiturages(result[0],accordionBody);
-
-        if (result[1]){  
-            let newDiv = document.createElement("div");
-            let newDiv1 = document.createElement("div");
-            let text = document.createElement("p");
-            text.textContent="Mes covoiturages passés"
-            
-            text.classList.add("text-center");
-            newDiv.classList.add("card", "mb-3");
-            newDiv1.classList.add("card-body", "p-3", "rounded");
-            newDiv.appendChild(text);
-            newDiv.appendChild(newDiv1);
-        let theLastChild = accordionBody.lastChild;
-        if (theLastChild){theLastChild=theLastChild.nextSibling}
-        accordionBody.insertBefore(newDiv, theLastChild);
-
-            setCovoiturages(result[1],newDiv1);
-
-            ;}
-
-    })
-    .catch(error =>{
-        console.error("erreur lors de la récupération des données des véhicules", error);
+        btnSupprimer.setAttribute('title', "Supprimer");
+        btnSupprimer.appendChild(icon);
+        cardBody.appendChild(actionDiv);
+        cardBody.appendChild(textDiv);
+        card.appendChild(cardBody);
+        newDiv.appendChild(card);
+        div.prepend(newDiv);
     });
+    div.after(window.AppData.createEl("div", ["mb-3"]));
 }
 
-//Obtenir les covoiturages "passager"
+
+async function supprimerPreference(id) {
+    if (!id) {
+        console.error("ID de la préférence invalide.");
+        return;
+    }
+    const success = await window.AppData.apiFetch(`parametre/${id}`, "DELETE");
+    if (!success.ok) {
+        console.error('Erreur lors de la suppression de la préférence.');
+        window.AppData.showToast(`Erreur lors de la suppression de la préférence: ${success.message}`, "danger");
+        return null;
+    }
+    const result = await window.AppData.getInfosUser();
+    setPreferences(preference, result['parametres']);
+    if (animauxEtFumeurs !== 2 && btnChauffeur.checked) {
+        btnChauffeur.checked = false;
+        await updateRole("chauffeur");
+    }
+    return true;
+}
 
 
-//Obtenir les covoiturages "chauffeur"
-function getCovoituragesChauffeur(){
-    let myHeaders = new Headers();
-    myHeaders.append("X-AUTH-TOKEN", getToken());
-    let requestOptions = {
-        method: 'GET',
-        headers: myHeaders,
-        redirect: 'follow'
+
+// Ajouter un voyage 
+async function addVoyage() {
+    let dataForm = new FormData(voyageForm);
+    let nom;
+    const baseVoyage = {
+        "dateDepart": dataForm.get("dateDepart"),
+        "heureDepart": dataForm.get("heureDepart"),
+        "lieuDepart": dataForm.get("lieuDepart"),
+        "dateArrivee": dataForm.get("dateArrivee"),
+        "heureArrivee": dataForm.get("heureArrivee"),
+        "lieuArrivee": dataForm.get("lieuArrivee"),
+        "statut": "en attente",
+        "nbPlaces": Number(dataForm.get("nbPlaces")),
+        "prixPersonne": String(dataForm.get("prix")),
     };
-     fetch(apiUrl+"covoiturage/allCovoituragesChauffeur/" + idUser, requestOptions)
-    .then(response =>{
-        if(response.ok){
-            return response.json();
+    if (addedVoiture) {
+        nom = await addVoiture(voitureForm);
+        if (!nom) {
+            console.error("Impossible d'ajouter la voiture");
+            return;
         }
-        else{
-            console.log("Impossible de récupérer les informations des véhicules");
-        }
-    })
-      .then(result => {
-        console.log(result);
-        setCovoiturages(result[0],accordionBodyChauffeur);
-
-        if (result[1]){  
-            let newDiv = document.createElement("div");
-            let newDiv1 = document.createElement("div");
-            let text = document.createElement("p");
-            text.textContent="Mes covoiturages passés"
-            
-            text.classList.add("text-center");
-            newDiv.classList.add("card", "mb-3");
-            newDiv1.classList.add("card-body", "p-3", "rounded");
-            newDiv.appendChild(text);
-            newDiv.appendChild(newDiv1);
-            let theLastChild = accordionBodyChauffeur.lastChild;
-            if (theLastChild){theLastChild=theLastChild.nextSibling}
-            accordionBodyChauffeur.insertBefore(newDiv, theLastChild);
-            setCovoiturages(result[1],newDiv1);
-
-            ;}
-    })
-    .catch(error =>{
-        console.error("erreur lors de la récupération des données des véhicules", error);
-    });
+    }
+    else if (dataForm.get("inputVehicules")) {
+        nom = dataForm.get("inputVehicules");
+    }
+    else {
+        throw new Error("Erreur : Veuillez sélectionner une voiture.");
+    }
+    const result = await window.AppData.apiFetch(`covoiturage/${nom}`, "POST", baseVoyage);
+    if (!result.ok) {
+        console.error("Erreur lors de l'ajout du voyage.", result.message);
+        window.AppData.showToast(`Erreur lors de l'ajout du voyage: ${result.message}`, "danger");
+        return null;
+    }
+    window.AppData.showToast("Covoiturage ajouté avec succès", "success");
+    const res = await getCovoiturages("chauffeur");
+    if (res) MesVoyagesChauffeur.scrollIntoView({ behavior: "smooth", block: 'start' });
 }
-//Afficher les covoiturages
-function setCovoiturages(covoiturages,accordion){
-    while (accordion.firstChild) {
-        accordion.removeChild(accordion.firstChild);
-      }
-    if (covoiturages.length>0){ 
-    for (let i of covoiturages){
-        let index=Number(covoiturages.indexOf(i))+1;
-      
-        let newDiv = document.createElement("div");
+// Supprimer un covoiturage
+async function supprimerCovoiturage(id, estChauffeur) {
+    if (!id) {
+        console.error("ID du covoiturage invalide.");
+        return;
+    }
+    let endpoint = estChauffeur ? "covoiturage/" : "covoiturage/removeUser/"
+    const result = await window.AppData.apiFetch(endpoint + id, "DELETE");
+    if (!result.ok) {
+        console.error('Erreur lors de la suppression du covoiturage.', result.message);
+        window.AppData.showToast(`Erreur lors de la suppression du covoiturage: ${result.message}`, "danger");
+        return null;
+    }
+    getCovoiturages(estChauffeur ? "chauffeur" : "passager");
+}
+
+// Obtenir les covoiturages "passager" ou "chauffeur" suivant le rôle
+async function getCovoiturages(role) {
+    let url = role === "passager" ? "covoiturage/allCovoiturages" : `covoiturage/allCovoiturages/${idUser}`;
+    let div = role === "passager" ? voyagesPassager : voyagesChauffeur;
+    let result = await window.AppData.apiFetch(url);
+    if (!result.ok) {
+        console.error(result.message);
+        return;
+    }
+    result = result.data;
+    await setCovoiturages(result["actifs"], div);
+    if (Array.isArray(result["termines"]) && result["termines"].length > 0) {
+        let newDiv = window.AppData.createEl("div", ["mb-3", "bg-body-tertiary"]);
         let newDiv1 = document.createElement("div");
-        let newDiv2 = document.createElement("div");
-        let newDiv3 = document.createElement("img");
-        let newDiv4 = document.createElement("p");
-        let newDiv5 = document.createElement("p");
-        let newDiv6 = document.createElement("p");
-        let newDiv7 = document.createElement("p");
-        let newDiv8 = document.createElement("div");
-        let newDiv9 = document.createElement("p");
-        let newDiv10 = document.createElement("p");
-        let newDiv11 = document.createElement("p");
-        let newDiv12 = document.createElement("p");
-        let newDiv13= document.createElement("p");
-        let newDiv14= document.createElement("p");
-        let newDiv15= document.createElement("p");
-        let newDiv16= document.createElement("p");
-        let newDiv17= document.createElement("p");
-
-
-        newDiv.classList.add("card", "mb-3");
-        newDiv1.classList.add("card-body","shadow", "p-3",  "bg-body-tertiary", "rounded");
-        newDiv2.classList.add("container1");
-        newDiv3.classList.add("item1", "mx-auto", "my-auto");
-        newDiv4.classList.add("item2", "my-auto");
-        newDiv5.classList.add("item3", "my-auto");
-        newDiv6.classList.add("item4", "text-center", "my-auto");
-        newDiv7.classList.add("item5", "my-auto");
-        newDiv8.classList.add("item6", "my-auto");
-        newDiv9.classList.add("item7", "my-auto");
-        newDiv11.classList.add("item8","text-center");
-        newDiv12.classList.add("item9");
-        newDiv13.classList.add("item10");
-        newDiv14.classList.add("item11", "text-center");
-        newDiv15.classList.add("item12");
-        newDiv16.classList.add("item13");
-        newDiv17.classList.add("item14");
-
-        let place=i['nbPlace']>1?" places restantes":" place restante";
-        newDiv3.setAttribute("src",'data:'+i['voiture']['user']['photoMime'] + ';base64,' +i['voiture']['user']['photo']);
-        newDiv4.innerHTML="Départ :";
-        newDiv5.innerHTML=new Intl.DateTimeFormat("fr-FR").format(new Date(i['dateDepart']));
-        newDiv6.innerHTML=i['heureDepart'];
-        newDiv7.innerHTML=i['lieuDepart'];
-        newDiv8.innerHTML="Durée : " + toHours(new Date(i['dateArrivee'].replace("00:00",i['heureArrivee']))-new Date(i['dateDepart'].replace("00:00",i['heureDepart']))) ;
-        newDiv9.innerHTML="Prix : " + i['prixPersonne'];
-        newDiv11.innerHTML=i['voiture']['user']['pseudo'] +"<br>" + i['voiture']['user']['pseudo'];
-        newDiv12.innerHTML="Arrivée :";
-        newDiv13.innerHTML=new Intl.DateTimeFormat("fr-FR").format(new Date(i['dateArrivee']));
-        newDiv14.innerHTML=i['heureArrivee'];
-        newDiv15.innerHTML=i['lieuArrivee'];
-        newDiv16.innerHTML=i['nbPlace'] + place;
-        newDiv17.innerHTML=i['energie']=="Fuel"? "Trajet non écologique" : "Trajet écologique";
-
-  
-        newDiv10.classList.add( "btnDetail");
-
- 
-     
-        newDiv2.appendChild(newDiv3);
-        newDiv2.appendChild(newDiv4);
-        newDiv2.appendChild(newDiv5);
-        newDiv2.appendChild(newDiv6);
-
-        newDiv2.appendChild(newDiv7);
-        newDiv2.appendChild(newDiv8);
-        newDiv2.appendChild(newDiv9);
-        newDiv2.appendChild(newDiv10);
-        newDiv2.appendChild(newDiv11);
-
-        newDiv2.appendChild(newDiv12);
-        newDiv2.appendChild(newDiv13);
-        newDiv2.appendChild(newDiv14);
-        newDiv2.appendChild(newDiv15);
-        newDiv2.appendChild(newDiv16);
-        newDiv2.appendChild(newDiv17);
-        newDiv1.appendChild(newDiv2);
+        let text = window.AppData.createEl("p", ["text-center"], "Mes covoiturages passés");
+        newDiv.appendChild(text);
         newDiv.appendChild(newDiv1);
-
-        let btn=document.createElement("a");
-        btn.classList.add("btn","btn-primary");
-        btn.setAttribute("href","/detail" +"?id=" + i['id']);
-        btn.appendChild(document.createTextNode('Détail'));
-        newDiv10.appendChild(btn);
-        let theFirstChild = accordion.firstChild;
-        let theLastChild = accordion.lastChild;
-        accordion.insertBefore(newDiv, theFirstChild);
-    }  
-    let sp1 = document.createElement("div");
-    sp1.classList.add("mb-3");
-    let parentDiv = accordion.parentNode;
-    parentDiv.insertBefore(sp1, accordion.nextSibling);
-}}
-//Afficher la durée
-function toHours(time){
-let hours=Math.floor(time/(3600000)); 
-let minutes=time/(60000)-hours*60;
-if (minutes<10){minutes="0"+minutes;}
-return hours+ "h" + minutes;
+        div.appendChild(newDiv);
+        await setCovoiturages(result["termines"], newDiv1);
+    }
+    return result;
 
 }
+
+
+//Afficher les covoiturages
+async function setCovoiturages(covoiturages, div) {
+    div.innerText = "";
+    if (!Array.isArray(covoiturages) || covoiturages.length === 0) return;
+    let tasks = [];
+    for (let i of covoiturages) {
+        const card = window.AppData.createEl("div", ["card", "mb-3"]);
+        const cardBody = window.AppData.createEl("div", ["card-body", "shadow-sm", "p-3", "bg-body-tertiary", "rounded"]);
+        const container = window.AppData.createEl("div", ["container1"]);
+        const img = window.AppData.createEl("img", ["item1", "mx-auto", "my-auto"]);
+        img.src = `http://localhost:8000/${i['chauffeur']['photo']}`;
+
+        const depart = window.AppData.createEl("p", ["item2", "my-auto"], "Départ :");
+        const dateDepart1 = window.AppData.createEl("p", ["item3", "my-auto"], new Intl.DateTimeFormat("fr-FR").format(new Date(i['dateDepart'])));
+        const heureDepart = window.AppData.createEl("p", ["item4", "text-center", "my-auto"], i['heureDepart']);
+        const lieuDepart = window.AppData.createEl("p", ["item5", "my-auto"], i['lieuDepart']);
+
+        const arrivee = window.AppData.createEl("p", ["item9", "text-center"], "Arrivée :");
+        const dateArrivee = window.AppData.createEl("p", ["item10"], new Intl.DateTimeFormat("fr-FR").format(new Date(i['dateArrivee'])));
+        const heureArrivee = window.AppData.createEl("p", ["item11", "text-center"], i['heureArrivee']);
+        const lieuArrivee = window.AppData.createEl("p", ["item12"], i['lieuArrivee']);
+
+        const duree = window.AppData.createEl("p", ["item6", "my-auto"], `Durée : ${window.AppData.toHours(new Date(i['dateArrivee'].replace("00:00", i['heureArrivee'])) - new Date(i['dateDepart'].replace("00:00", i['heureDepart'])))}`);
+        const prix = window.AppData.createEl("p", ["item7", "my-auto"], `Prix : ${window.AppData.formatPrix(i['prixPersonne'])} crédits`);
+        const pseudo = window.AppData.createEl("p", ["item8", "text-center"], i['chauffeur']['pseudo']);
+
+
+        let placeText = i['nbPlaces'] === 0 ? "Complet" : i['nbPlaces'] === 1 ? "1 place restante" : `${i['nbPlaces']} places restantes`;
+        const place = window.AppData.createEl("p", ["item13"], placeText);
+        const energie = window.AppData.createEl("p", ["item14"], i['energie'] == "Essence" ? "Trajet non écologique" : "Trajet écologique");
+
+
+        let btnDetail = window.AppData.createEl('a', ["btn", "btn-primary", "btnDetail"], 'Détail');
+        btnDetail.href = `/detail?id=${i['id']}`;
+
+        let estChauffeur = (idUser === i['chauffeur']['id']);
+        if (i['statut'] == "terminé" && estChauffeur) {
+            tasks.push((async () => {
+                let nbReponses = await getNbReponses(i['id']);
+                // Variable valant true si tous les participants ont répondu au covoiturage
+                let tousRepondu = i['passagers'].length === nbReponses['nbReponses'];
+                // Le covoiturage peut être supprimé uniquement si le statut est terminé et si tous les participants ont validé leur voyage
+                if (tousRepondu) {
+                    ajouterBoutonSupprimer(estChauffeur, cardBody, i['id']);
+                    card.classList.add("image-card");
+                }
+            })());
+        }// Si l'utilisateur est participant et s'il il a répondu au covoiturage, il peut le supprimer de son historique
+        else {
+            tasks.push((async () => {
+                let Reponse = await getReponse(i['id'])
+                if (Reponse) {
+                    ajouterBoutonSupprimer(null, cardBody, i['id']);
+                    card.classList.add("image-card");
+                }
+            })());
+        }
+        [img, depart, dateDepart1, heureDepart, lieuDepart, arrivee, dateArrivee, heureArrivee, lieuArrivee, duree, prix,
+            pseudo, place, energie, btnDetail].forEach(child => { container.appendChild(child); });
+        cardBody.appendChild(container);
+        card.appendChild(cardBody);
+
+
+        if (Array.isArray(window.AppData.notRespondedCovoiturages) && window.AppData.notRespondedCovoiturages.length > 0) {
+            // L'élément sur lequel le scroll est fait lorsque l'utilisateur clique sur la popover montrant le nombre de covoiturages à valider
+            if (window.AppData.notRespondedCovoiturages.some(item => item.id === i.id)) {
+                card.classList.add('aValiderBorder');
+                btnDetail.appendChild(document.createTextNode(' (À valider)'));
+                btnDetail.classList.add('aValiderBtn');
+                btnDetail.title = "Voir le détail pour valider ce covoiturage";
+                if (window.AppData.notRespondedCovoiturages[0]['id'] === i.id) {
+                    showPopover(window.AppData.notRespondedCovoiturages.length, card);
+                }
+            }
+        }
+        let theFirstChild = div.firstChild;
+        div.insertBefore(card, theFirstChild);
+    }
+    await Promise.all(tasks);
+    div.after(window.AppData.createEl("div", ["mb-3"]));
+}
+
+function ajouterBoutonSupprimer(estChauffeur, container, id) {
+    const actionDiv = window.AppData.createEl("div", ["action-image-buttons"]);
+    const icon = window.AppData.createEl("i", ["bi", "bi-trash"]);
+    const btnSupprimer = window.AppData.makeButton(actionDiv, null, [], () => {
+        btnSupprimerCovoiturage.dataset.id = id;
+        btnSupprimerCovoiturage.dataset.chauffeur = estChauffeur;
+        myModalSupprimerCovoiturage.show();
+    })
+    btnSupprimer.title = "Supprimer";
+    btnSupprimer.appendChild(icon);
+    container.appendChild(actionDiv);
+};
+
+
+
+// Retourne le nombre de réponses liées à un covoiturage d'identifiant $id.
+async function getNbReponses(id) {
+    if (!id) {
+        console.error("ID invalide.");
+        return null;
+    }
+    const numId = Number(id);
+    const result = await window.AppData.apiFetch(`reponse/getNbReponses/${numId}`);
+    if (!result.ok) return null;
+    return result.data;
+}
+
+// Retourne la réponse de l'utilisateur pour le covoiturage ayant l'identifiant id 
+async function getReponse(id) {
+    if (!id) {
+        console.error("ID invalide.");
+        return null;
+    }
+    const numId = Number(id);
+    const result = await window.AppData.apiFetch(`reponse/show/${numId}`);
+    if (!result.ok) {
+        console.error('Aucune réponse trouvée pour cet utilisateur.', result.message);
+        return null;
+    }
+    return result.data;
+}
+// Récupère le nombre total de crédits de l'utilisateur et l'affiche dans l'élément "crédits"
+async function nombreCreditsTotal() {
+    const result = await window.AppData.apiFetch("credit/nombreCreditsTotal");
+    if (!result.ok) return;
+    let newSpan = window.AppData.createEl("span", ["credit-total"], window.AppData.formatPrix(result.data["creditTotal"]));
+    let newSpan1 = document.createElement("span");
+    newSpan1.textContent = " crédits";
+    credits.appendChild(newSpan);
+    credits.appendChild(newSpan1);
+}
+
+// Initialiser les informations de l'utilisateur
+async function initUserData() {
+    try {
+        await window.AppData.withLoader(async () => {
+            await nombreCreditsTotal();
+            const result = await window.AppData.getInfosUser();
+            setUser(result);
+            await getRoles();
+            setPreferences(preference, result.parametres);
+            if (animauxEtFumeurs != 2 && btnChauffeur.checked) {
+                btnChauffeur.checked = false;
+                await updateRole("chauffeur");
+            }
+            await getVoitures();
+            await getCovoiturages("chauffeur");
+            await getCovoiturages("passager");
+
+        });
+    } catch (error) {
+        console.error("Erreur lors de la récupération des données utilisateur : ", error);
+    }
+}
+initUserData();

@@ -1,54 +1,49 @@
 <div class="hero-scene text-center ">
-    <div class="hero-scene-content">
-        <h1>Rechercher un covoiturage</h1>
-    </div>
+  <div class="hero-scene-content">
+    <h1>Rechercher un covoiturage</h1>
+  </div>
 </div>
+
 <div class="container text-center pb-3">
-    <div class="d-grid gap-2 col-6 mx-auto">
-
-                              <form id="covoituragesForm">
-                              <input class="form-control me-2 mb-3" type="search" placeholder="Lieu de départ" aria-label="Search" id="lieuDepart" name="lieuDepart">
-                             <input class="form-control me-2 mb-3" type="search" placeholder="Lieu d'arrivée" aria-label="Lieu d'arrivée"id="lieuArrivee" name="lieuArrivee">
-                              <input class="form-control me-2 mb-3" type="date" id="dateDepart" name="dateDepart">
-                              <div class= "text-center pt-4 mb-5"> 
-
-                              <button type="button" id="btnCovoiturages" class="btn btn-primary">Rechercher</a>
-                              </div>
-
-                             
-                            </form>
-                                                        
-          </div>      
+  <div class="d-grid gap-2 col-6 mx-auto">
+    <form id="covoituragesForm">
+      <input class="form-control me-2 " type="search" placeholder="Ville de départ" aria-label="Search" id="lieuDepart"
+        name="lieuDepart">
+      <div id="Depart" class="mb-3"></div>
+      <input class="form-control me-2" type="search" placeholder="Ville d'arrivée" aria-label="Lieu d'arrivée"
+        id="lieuArrivee" name="lieuArrivee">
+      <div id="Arrivee" class="mb-3"></div>
+      <input class="form-control me-2 mb-3" type="date" id="dateDepart" name="dateDepart">
+      <div class="invalid-feedback" id="dateDepartFeedback"></div>
+      <div class="text-center pt-4 mb-5">
+        <button type="button" id="btnCovoiturages" class="btn btn-primary">Rechercher</a>
+      </div>
+    </form>
+  </div>
 </div>
-    
+
 <div class="card m-3">
-  <div class="card-body shadow p-3 bg-body-tertiary rounded container3" >
-    <div  id="id1" class="container5"> 
+  <div class="card-body shadow p-3 bg-body-tertiary rounded container3">
+    <div id="voyages" class="container5">
     </div>
-      <div class="card m-3 container4">
-        <div class="card-body shadow p-3 bg-body-tertiary rounded">
-        <div style="display:grid; grid-gap:19px" id="id2">
-          <p class="text-center" style="grid-row: 1/2;">Affiner la recherche</p> 
-          <button class="btn btn-primary mx-auto" style="grid-row: 2/3" id="btnToutReinitialiser">Tout réinitialiser</button>
-         <label for="PrixInput" class="form-label" style="grid-row: 3/4">Prix maximum</label>
-              <input type="number" class="form-control" style="grid-row: 4/5"  id="PrixInput" name="Prix">
-              <label for="DureeInput" class="form-label" style="grid-row: 5/6">Durée maximum (en heures)</label>
-              <input type="number" class="form-control" style="grid-row: 6/7"  id="DureeInput" name="Duree">
-   <label for="NoteInput" class="form-label" style="grid-row: 7/8">Note minimale</label>
-    <input type="number" class="form-control" style="grid-row: 8/9" min="1" max="5"  id="NoteInput" name="Note">  
-    <div class="hstack gap-3"><input class="form-check-input" style="grid-row: 9/10" type="checkbox" value="oui" id="EnergieInput">
-  <label class="form-check-label"  for="checkDefault">Trajet écologique</label></div>
-      <button class="btn btn-primary mx-auto" style="grid-row: 10/11" id="btnFiltrer">Filtrer</button>
-
-
-</div>
-
+    <div class="card m-3 container4">
+      <div class="card-body shadow p-3 bg-body-tertiary rounded">
+        <div class="id2Covoiturages" id="id2">
+          <p class="text-center" class="AffinerLaRecherche">Affiner la recherche</p>
+          <button class="btn btn-primary mx-auto" class="grid-btn" id="btnToutReinitialiser">Tout réinitialiser</button>
+          <label for="PrixInput" class="form-label" class="grid-label-prix">Prix maximum</label>
+          <input type="number" class="form-control" class="grid-input-prix" id="PrixInput" name="Prix">
+          <label for="DureeInput" class="form-label" class="grid-label-duree">Durée maximale (en heures)</label>
+          <input type="number" class="form-control" class="grid-input-duree" id="DureeInput" name="Duree">
+          <label for="NoteInput" class="form-label" class="grid-label-note">Note minimale</label>
+          <input type="number" class="form-control" class="grid-input-note" min="1" max="5" id="NoteInput" name="Note">
+          <div class="hstack gap-3"><input class="form-check-input" class="grid-input-check" type="checkbox" value="oui"
+              id="EnergieInput">
+            <label class="form-check-label" for="EnergieInput">Trajet écologique</label>
+          </div>
+          <button class="btn btn-primary mx-auto" class="grid-btnFiltrer" id="btnFiltrer">Filtrer</button>
         </div>
-        </div>                 
-        </div> 
-  </div>                 
-  </div>                   
-  
-  
-      
-    
+      </div>
+    </div>
+  </div>
+</div>

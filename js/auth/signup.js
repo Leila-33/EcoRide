@@ -1,79 +1,47 @@
-//Implémenter le JS de ma page
 
-const inputNom = document.getElementById("NomInput");
-const inputPreNom = document.getElementById("PrenomInput");
-const inputPseudo = document.getElementById("PseudoInput");
-const inputMail = document.getElementById("EmailInput");
-const inputPassword = document.getElementById("PasswordInput");
-const inputValidationPassword = document.getElementById("ValidatePasswordInput");
-const btnValidation = document.getElementById("btn-validation-inscription");
+window.AppData.inputNom = document.getElementById("NomInput");
+window.AppData.inputPrenom = document.getElementById("PrenomInput");
+window.AppData.inputPseudo = document.getElementById("PseudoInput");
+window.AppData.inputEmail = document.getElementById("EmailInput");
+window.AppData.emailFeedback = document.getElementById("emailFeedback");
+window.AppData.inputDateDeNaissance = document.getElementById("DateDeNaissanceInput");
+window.AppData.dateNaissanceFeedback = document.getElementById("dateNaissanceFeedback");
+window.AppData.inputAdresse = document.getElementById("AdresseInput");
+window.AppData.inputTelephone = document.getElementById("TelephoneInput");
+window.AppData.inputPassword = document.getElementById("PasswordInput");
+window.AppData.passwordFeedback = document.getElementById("passwordFeedback");
+window.AppData.inputValidationPassword = document.getElementById("ValidatePasswordInput");
+window.AppData.passwordConfirmationFeedback = document.getElementById("passwordConfirmationFeedback");
+window.AppData.btnInscription = document.getElementById("btnInscription");
 const formInscription = document.getElementById("formulaireInscription");
+const today = new Date().toISOString().split("T")[0];
+window.AppData.inputDateDeNaissance.setAttribute('max', today);
+[window.AppData.inputNom, window.AppData.inputPrenom, window.AppData.inputPseudo, window.AppData.inputDateDeNaissance, window.AppData.inputEmail, window.AppData.inputTelephone, window.AppData.inputPassword, window.AppData.inputValidationPassword].forEach(input => {
+  input.addEventListener("input", () => window.AppData.validateForm("inscription"));
+});
+window.AppData.btnInscription.addEventListener("click", async () => await window.AppData.withLoader(() => InscrireUtilisateur()));
+window.AppData.btnInscription.disabled = true;
 
-inputNom.addEventListener("keyup", validateForm); 
-inputPreNom.addEventListener("keyup", validateForm);
-inputPseudo.addEventListener("keyup", validateForm);
-inputMail.addEventListener("keyup", validateForm);
-inputPassword.addEventListener("keyup", validateForm);
-inputValidationPassword.addEventListener("keyup", validateForm);
-btnValidation.addEventListener("click", InscrireUtilisateur);
-btnValidation.disabled=true;
-
-//Function permettant de valider tout le formulaire
-function validateForm(){
-    const nomOk = validateRequired(inputNom);
-    const prenomOk = validateRequired(inputPreNom);
-    const pseudoOk = validateRequired(inputPseudo);
-    const mailOk = validateMail(inputMail);
-    const passwordOk = validatePassword(inputPassword);
-    const passwordConfirmOk = validateConfirmationPassword(inputPassword,inputValidationPassword)
-
-    if (nomOk && prenomOk && pseudoOk && mailOk && passwordOk && passwordConfirmOk){
-        btnValidation.disabled=false;
-    }
-    else{
-        btnValidation.disabled=true;
-    }
+// Fonction permettant d'inscrire un utilisateur
+async function InscrireUtilisateur() {
+  let dataForm = new FormData(formInscription);
+  let body = {
+    "nom": dataForm.get("Nom"),
+    "prenom": dataForm.get("Prenom"),
+    "telephone": dataForm.get("Telephone"),
+    "adresse": dataForm.get("Adresse"),
+    "dateNaissance": dataForm.get("DateDeNaissance"),
+    "pseudo": dataForm.get("Pseudo"),
+    "email": dataForm.get("Email"),
+    "password": dataForm.get("mdp")
+  };
+  const result = await window.AppData.apiFetch("registration", "POST", body, false);
+  if (!result.ok) {
+    console.error(`Erreur lors de l'inscription: ${result.message.toLowerCase()}`);
+    window.AppData.showToast(`Erreur lors de l'inscription: ${result.message.toLowerCase()}`, "danger");
+    return null;
+  }
+  window.AppData.showToast(`Bravo ${dataForm.get("Prenom")}, vous êtes maintenant inscrit, vous pouvez vous connecter.`, "success");
+  setTimeout(() => { document.location.href = "/signin"; }, 1500);
 }
 
-
-
-
-
-function InscrireUtilisateur(){
-    let dataForm = new FormData(formInscription);
-    let myHeaders = new Headers();
-    myHeaders.append("Content-Type", "application/json");
-    
-    let raw = JSON.stringify({
-      "nom": dataForm.get("Nom"),
-      "prenom":  dataForm.get("Prenom"),
-      "telephone":  dataForm.get("Telephone"),
-      "adresse":  dataForm.get("Adresse"),
-      "date_naissance":  dataForm.get("DateDeNaissance"),
-      "pseudo":  dataForm.get("Pseudo"),
-      "email":  dataForm.get("Email"),
-      "password":  dataForm.get("mdp")
-    });
-    
-    let requestOptions = {
-      method: 'POST',
-      headers: myHeaders,
-      body: raw,
-      redirect: 'follow'
-    };
-    
-    fetch(apiUrl+"registration", requestOptions)
-    .then(response => {
-        if(response.ok){
-            return response.json();
-        }
-        else{
-            alert("Erreur lors de l'inscription");
-        }
-    })
-    .then(result => {
-        alert("Bravo "+dataForm.get("Prenom")+", vous êtes maintenant inscrit, vous pouvez vous connecter.");
-        document.location.href="/signin";
-    })
-    .catch(error => console.log('error', error));;
-}

@@ -1,85 +1,80 @@
 <div class="hero-scene text-center ">
-    <div class="hero-scene-content">
-        <h1>Inscription</h1>
-    </div>
+  <div class="hero-scene-content">
+    <h1>Inscription</h1>
+  </div>
 </div>
 <div class="container login">
-    <form id="formulaireInscription">
-        <div class="mb-3">
-            <label for="NomInput" class="form-label">Nom</label>
-            <input type="text" class="form-control" id="NomInput" placeholder="Votre nom" name="Nom"> 
-            <div class="invalid-feedback">
-                Le nom est requis
-              </div>
-        </div>
-        <div class="mb-3">
-            <label for="PrenomInput" class="form-label">Prénom</label>
-            <input type="text" class="form-control" id="PrenomInput" placeholder="Votre prénom" name="Prenom"> 
-            <div class="invalid-feedback">
-                Le prénom est requis
-              </div>
-        </div>
-        <div class="mb-3">
-          <label for="PseudoInput" class="form-label">Pseudo</label>
-          <input type="text" class="form-control" id="PseudoInput" name="Pseudo" > 
-       <div class="invalid-feedback">
+  <form id="formulaireInscription">
+    <div class="mb-3">
+      <label for="NomInput" class="form-label">Nom</label>
+      <input type="text" class="form-control" id="NomInput" placeholder="Votre nom" name="Nom" maxlength="50" required>
+      <div class="invalid-feedback">
+        Le nom est requis.
+      </div>
+    </div>
+    <div class="mb-3">
+      <label for="PrenomInput" class="form-label">Prénom</label>
+      <input type="text" class="form-control" id="PrenomInput" placeholder="Votre prénom" name="Prenom" maxlength="50"
+        required>
+      <div class="invalid-feedback">
+        Le prénom est requis.
+      </div>
+    </div>
+    <div class="mb-3">
+      <label for="PseudoInput" class="form-label">Pseudo</label>
+      <input type="text" class="form-control" id="PseudoInput" name="Pseudo" maxlength="50" required>
+      <div class="invalid-feedback">
         Le pseudo est requis.
       </div>
     </div>
-     
-         <div class="mb-3">
-          <label for="DateDeNaissanceInput" class="form-label">Date de naissance</label>
-          <input type="date" class="form-control" id="DateDeNaissanceInput"  name="DateDeNaissance" > 
-        <div class="invalid-feedback">
-          La date de naissance est requise.
-        </div>
+
+    <div class="mb-3">
+      <label for="DateDeNaissanceInput" class="form-label">Date de naissance</label>
+      <input type="date" class="form-control" id="DateDeNaissanceInput" name="DateDeNaissance">
+      <div class="invalid-feedback">
+        La date de naissance doit être au format AAAA-MM-JJ.
       </div>
-        
-        <div class="mb-3">
-          <label for="EmailInput" class="form-label">Email</label>
-          <input type="email" class="form-control" id="EmailInput" placeholder="test@mail.fr" name="Email"> 
-          <div class="invalid-feedback">
-            Le mail n'est pas au bon format
-          </div>
-        </div>
-          <div class="mb-3">
-                  <label for="TelephoneInput" class="form-label">Telephone</label>
-                  <input type="tel" class="form-control" id="TelephoneInput"  name="Telephone" > 
-                <div class="invalid-feedback">
-                  Le telephone n'est pas au bon format.
-                </div>
-              </div>
-                
-            <div class="mb-3">
-                  <label for="AdresseInput" class="form-label">Adresse</label>
-                  <input type="text" class="form-control" id="AdresseInput"  name="Adresse" > 
-            <div class="invalid-feedback">
-              L'adresse est requise. 
-            </div>
-          </div>
-            
-        <div class="mb-3">
-          <label for="PasswordInput" class="form-label">Mot de passe</label>
-          <input type="password" class="form-control" id="PasswordInput" name="mdp">
-          <div class="invalid-feedback">
-            Le mot de passe n'est pas assez robuste : au moins 8 caractères, comprenant au moins 1 majuscule, 1 minuscule, 1 chiffre et 1 caractère spécial
-          </div>
-          <div class="valid-feedback">
-            Le mot de passe est robuste
-          </div>
-        </div>
-        <div class="mb-3">
-            <label for="ValidatePasswordInput" class="form-label">Validez votre mot de passe</label>
-            <input type="password" class="form-control" id="ValidatePasswordInput" name="PasswordConfirm">
-            <div class="invalid-feedback">
-                La confirmation n'est pas identique au mot de passe
-              </div>
-        </div>
-        <div class="text-center">
-            <button type="button" class="btn btn-primary" id="btn-validation-inscription">Inscription</button>
-        </div>
-    </form>
-    <div class="text-center pt-3">
-        <a href="/signin">Vous avez déjà un compte ? Connectez-vous ici !</a>
     </div>
+
+    <div class="mb-3">
+      <label for="EmailInput" class="form-label">Email</label>
+      <input type="email" class="form-control" id="EmailInput" placeholder="adresse@mail.fr" name="Email" required>
+      <div class="invalid-feedback" id="emailFeedback">
+      </div>
+    </div>
+    <div class="mb-3">
+      <label for="TelephoneInput" class="form-label">Telephone</label>
+      <input type="tel" class="form-control" id="TelephoneInput" name="Telephone">
+      <div class="invalid-feedback">
+        Le telephone n'est pas au bon format.
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label for="AdresseInput" class="form-label">Adresse</label>
+      <input type="text" class="form-control" id="AdresseInput" name="Adresse" maxlength="255">
+    </div>
+
+    <div class="mb-3">
+      <label for="PasswordInput" class="form-label">Mot de passe</label>
+      <input type="password" class="form-control" id="PasswordInput" name="mdp" required>
+      <div class="invalid-feedback" id="passwordFeedback">
+      </div>
+      <div class="valid-feedback">
+        Le mot de passe est robuste.
+      </div>
+    </div>
+    <div class="mb-3">
+      <label for="ValidatePasswordInput" class="form-label">Validez votre mot de passe</label>
+      <input type="password" class="form-control" id="ValidatePasswordInput" name="PasswordConfirm" required>
+      <div class="invalid-feedback" id="passwordConfirmationFeedback">
+      </div>
+    </div>
+    <div class="text-center">
+      <button type="button" class="btn btn-primary" id="btnInscription">Inscription</button>
+    </div>
+  </form>
+  <div class="text-center pt-3">
+    <a href="/signin">Vous avez déjà un compte ? Connectez-vous ici !</a>
+  </div>
 </div>

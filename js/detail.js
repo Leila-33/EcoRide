@@ -1,743 +1,583 @@
-
-let param=new URL(document.location).searchParams;
-const btnSupprimerCovoiturage = document.getElementById("btnSupprimerCovoiturage");
-//btnSupprimerCovoiturage.addEventListener("click",function(){supprimerCovoiturage(),});
-const confirmerParticiper = document.getElementById("confirmerParticiper");
-const btnParticiperCovoiturage = document.getElementById("btnParticiperCovoiturage");
-const annulerCovoiturage = document.getElementById("annulerCovoiturage");
- btnParticiperCovoiturage.addEventListener("click", ()=>{ console.log('covoiturage')});
+/* global bootstrap */
+let param = new URL(document.location).searchParams;
+const numId = parseInt(param.get("id"));
+// Modale "Participer à ce covoiturage"
 const myModalParticiperCovoiturage = new bootstrap.Modal('#myModalParticiperCovoiturage');
+const btnParticiperCovoiturage = document.getElementById("btnParticiperCovoiturage");
+const confirmerParticiper = document.getElementById("confirmerParticiper");
+// Modale "Annuler"
 const myModalAnnulerCovoiturage = new bootstrap.Modal('#myModalAnnulerCovoiturage');
-btnSupprimerCovoiturage.addEventListener("click",function(){supprimerCovoiturage(),myModalAnnulerCovoiturage.hide()});
-
-const id0 = document.getElementById("id0");
-const id1 = document.getElementById("id1");
-const id2 = document.getElementById("id2");
-const id3 = document.getElementById("id3");
-const id4 = document.getElementById("id4");
-const id5 = document.getElementById("id5");
-const id6 = document.getElementById("id6");
-const id7 = document.getElementById("id7");
-const id8 = document.getElementById("id8");
-const id9 = document.getElementById("id9");
-const id10 = document.getElementById("id10");
-const id11 = document.getElementById("id11");
-const id12 = document.getElementById("id12");
-const id13 = document.getElementById("id13");
-const id14 = document.getElementById("id14");
-const id15 = document.getElementById("id15");
-const id16 = document.getElementById("id16");
-const id17 = document.getElementById("id17");
-const id18 = document.getElementById("id18");
-
-
-const responseUser = document.getElementById("responseUser");
-let statut=0;
-let idChauffeur=0;
-let btnStatut, prix, users, nbPlace, idUser, credit, Chauffeur, dateDepart;
-btnStatut=document.createElement("button");
-btnStatut.classList.add("btnDetail", "btn", "btn-primary","my-auto");
-id0.appendChild(btnStatut);
-
-let btnAnnuler=document.createElement("button");
-btnAnnuler.appendChild(document.createTextNode('Annuler'));
-btnAnnuler.classList.add("btnDetail1", "btn", "btn-primary","my-auto");
-
-//Modal "Laisser un avis"
-avisForm=document.getElementById("avisForm")
-btnEnvoyerAvis=document.getElementById("btnEnvoyerAvis");
-btnEnvoyerCommentaire=document.getElementById("btnEnvoyerCommentaire");
-let userResponse;
-
-if (isConnected()){      
-getIdUser();
-}else{getCovoiturage();}
-
-
-
-
-function getIdUser(){
-    let myHeaders = new Headers();
-    myHeaders.append("X-AUTH-TOKEN", getToken());
-    myHeaders.append("Content-Type", "application/json");
-
-    let requestOptions = {
-        method: 'GET',
-        headers: myHeaders,
-        redirect: 'follow'
-    };
-     fetch(apiUrl+"account/me", requestOptions)
-    .then(response =>{
-        if(response.ok){
-            return response.json();
-        }
-        else{
-            console.log("Impossible de récupérer les informations utilisateur");
-        }
-    })
-    .then(result => {
-        idUser = result['id'];
-        credit = result['credit'];
-        getCovoiturage();
-
-
-
-    })
-    .catch(error =>{
-        console.error("erreur lors de la récupération des données utilisateur", error);
+const annulerCovoiturageModal = document.getElementById("annulerCovoiturageModal");
+const btnSupprimerCovoiturage = document.getElementById("btnSupprimerCovoiturage");
+btnSupprimerCovoiturage.addEventListener("click", async () => {
+    await window.AppData.withLoader(async () => {
+        await supprimerCovoiturage();
+        myModalAnnulerCovoiturage.hide();
     });
-}
-function getReponse(){
-    let myHeaders = new Headers();
-    myHeaders.append("X-AUTH-TOKEN", getToken());
-    myHeaders.append("Content-Type", "application/json");
+});
 
-    let requestOptions = {
-        method: 'GET',
-        headers: myHeaders,
-        redirect: 'follow'
-    };
-     fetch(apiUrl+"reponse/show/" + param.get("id"), requestOptions)
-    .then(response =>{
-        if(response.ok){
-            return response.json();
-        }
-        else{
-            console.log("Impossible de récupérer les informations utilisateur");
-        }
-    })
-    .then(result => {
-        console.log(result);
-        userResponse=result;
-        setQuestionPassager();
+const container = document.getElementById("container");
+const img = document.getElementById("img");
+const depart = document.getElementById("depart");
+const departDate = document.getElementById("departDate");
+const heureDepart = document.getElementById("heureDepart");
+const lieuDepart = document.getElementById("lieuDepart");
+const duree = document.getElementById("duree");
+const prixPersonne = document.getElementById("prixPersonne");
+const arrivee = document.getElementById("arrivee");
+const arriveeDate = document.getElementById("arriveeDate");
+const heureArrivee = document.getElementById("heureArrivee");
+const lieuArrivee = document.getElementById("lieuArrivee");
+const place = document.getElementById("place");
+const energie = document.getElementById("energie");
+const voiture = document.getElementById("voiture");
+const voitureDetails = document.getElementById("voitureDetails");
+const preference = document.getElementById("preference");
+const pseudo = document.getElementById("pseudo");
+const note = document.getElementById("note");
+const avisContainer = document.getElementById("avis");
+const question = document.getElementById("question");
+let statut = "", idChauffeur = null, userResponse = null, prix = 0, users = [], nbPlace = 0, idUser = null, pseudoUser = "", emailUser = "", Chauffeur = false, Passager = false, isAdminOrEmploye = false;
+let btnStatut = window.AppData.makeButton(container, "Statut", ["btnDetail", "btn-primary", "my-auto"], () => { })
+let btnAnnuler;
 
-    })
-    .catch(error =>{
-        console.error("erreur lors de la récupération des données utilisateur", error);
-    });
+//Modale "Laisser un avis"
+const avisForm = document.getElementById("avisForm")
+const btnEnvoyerAvis = document.getElementById("btnEnvoyerAvis");
+btnEnvoyerAvis.disabled = true;
+const NoteInput = document.getElementById("NoteInput");
+NoteInput.addEventListener('input', validateFormAvis);
+function validateFormAvis() {
+    btnEnvoyerAvis.disabled = !(window.AppData.setClass((NoteInput.value > 0) && (NoteInput.value < 6), NoteInput));
 }
 
-function paiement(prix){
-    console.log(prix);
-   let myHeaders = new Headers();
-    myHeaders.append("X-AUTH-TOKEN", getToken());
-    myHeaders.append("Content-Type", "application/json");
-
-   let raw = JSON.stringify({
-        "date_operation": new Date(Date()).toISOString().slice(0,10),
-        "operation": prix});
-    let requestOptions = {
-        method: 'POST',
-        body: raw,
-        headers: myHeaders,
-        redirect: 'follow'
-    };
-     fetch(apiUrl+"credit", requestOptions)
-    .then(response =>{
-        if(response.ok){
-            return response.json();
-        }
-        else{
-            console.log("Impossible de récupérer les informations utilisateur");
-        }
-    })
-    .then(result => {
-        console.log(result);
+//Modale "Laisser un commentaire"
+const CommentaireInput = document.getElementById("CommentaireInput")
+const btnEnvoyerCommentaire = document.getElementById("btnEnvoyerCommentaire");
+btnEnvoyerCommentaire.disabled = true;
+CommentaireInput.addEventListener("input", () => { btnEnvoyerCommentaire.disabled = !(window.AppData.validateRequired(CommentaireInput)) });
 
 
-    })
-    .catch(error =>{
-        console.error("erreur lors de la récupération des données utilisateur", error);
-    });
-}
-
-function paiement(prix, id1, id2){
-    console.log(prix);
-   let myHeaders = new Headers();
-    myHeaders.append("X-AUTH-TOKEN", getToken());
-    myHeaders.append("Content-Type", "application/json");
-
-   let raw = JSON.stringify({
-        "date_operation": new Date(Date()).toISOString().slice(0,10),
-        "operation": prix});
-    let requestOptions = {
-        method: 'POST',
-        body: raw,
-        headers: myHeaders,
-        redirect: 'follow'
-    };
-     fetch(apiUrl+"credit/payer/" + id1 +"/" + id2, requestOptions)
-    .then(response =>{
-        if(response.ok){
-            return response.json();
-        }
-        else{
-            console.log("Impossible de récupérer les informations utilisateur");
-        }
-    })
-    .then(result => {
-        console.log(result);
-
-
-    })
-    .catch(error =>{
-        console.error("erreur lors de la récupération des données utilisateur", error);
-    });
-}
-function paiementEcoride(prix){
-   let myHeaders = new Headers();
-    myHeaders.append("X-AUTH-TOKEN", getToken());
-    myHeaders.append("Content-Type", "application/json");
-
-   let raw = JSON.stringify({
-        "date_operation": new Date(Date()).toISOString().slice(0,10),
-        "operation": prix});
-    let requestOptions = {
-        method: 'POST',
-        body: raw,
-        headers: myHeaders,
-        redirect: 'follow'
-    };
-     fetch(apiUrl+"credit/payerEcoride/", requestOptions)
-    .then(response =>{
-        if(response.ok){
-            return response.json();
-        }
-        else{
-            console.log("Impossible de payer");
-        }
-    })
-    .then(result => {
-        console.log(result);
-
-
-    })
-    .catch(error =>{
-        console.error("erreur lors de la récupération des données utilisateur", error);
-    });
-}
-//Obtenir le covoiturage
-function getCovoiturage(){
-
-        let myHeaders = new Headers();         
-        myHeaders.append("Content-Type", "application/json");
-   
-        let requestOptions = {
-            method: 'GET',
-            headers: myHeaders,
-            redirect: 'follow'
-        }; 
-         fetch(apiUrl+"covoiturage/c/" + parseInt(param.get("id")), requestOptions)
-        .then(response =>{
-            if(response.ok){
-                return response.json();
+// Initialiser les informations de l'utilisateur
+async function initUserData() {
+    await window.AppData.withLoader(async () => {
+        try {
+            if (window.AppData.isConnected()) {
+                const result = await window.AppData.getInfosUser();
+                idUser = result['id'];
+                pseudoUser = result['pseudo'];
+                emailUser = result['email'];
+                window.AppData.credit = result['credit']['total'];
+                const roles = result['roles'] || [];
+                isAdminOrEmploye = roles.includes("ROLE_ADMIN") || roles.includes("ROLE_EMPLOYE");
+                await getRoles();
             }
-            else{
-                console.log("Impossible de récupérer les informations des véhicules");
-            }
-        })
-          .then(result => {
-            console.log(result);
-            Chauffeur = idUser == result['idChauffeur'] ? true : false ;
+        } catch (error) {
+            console.error("Erreur lors de la récupération des données utilisateur : ", error);
+        }
+        finally { await getCovoiturage(); }
+    });
+}
+initUserData();
 
-            setCovoiturage(result);
-            getAvis()
-        })
-        .catch(error =>{
-            console.error("erreur lors de la récupération des données des véhicules", error);
-        });
+// Obtenir les rôles
+async function getRoles() {
+    const roles = await window.AppData.apiFetch("roleEntity");
+    if (!roles.ok) {
+        console.error("Impossible de récupérer les rôles.", roles.message);
+        return;
     }
-    //Afficher le covoiturage
-    function setCovoiturage(covoiturages){
-          i=covoiturages;
-            let place=i['nbPlace']>1?" places restantes":" place restante";
-            id1.setAttribute("src",'data:'+i['voiture']['user']['photoMime'] + ';base64,' +i['voiture']['user']['photo']);
-            id2.innerHTML="Départ :";
-            id3.innerHTML=new Intl.DateTimeFormat("fr-FR").format(new Date(i['dateDepart']));
-            id4.innerHTML=i['heureDepart'];
-            id5.innerHTML=i['lieuDepart'];
-            id6.innerHTML="Durée : " + toHours(new Date(i['dateArrivee'].replace("00:00",i['heureArrivee']))-new Date(i['dateDepart'].replace("00:00",i['heureDepart']))) ;
-            id7.innerHTML="Prix : " + i['prixPersonne'];
-            let noteChauffeur=i['noteChauffeur']!=null?i['noteChauffeur']:'';
-            id8.innerHTML=i['voiture']['user']['pseudo'] +"<br>" + i['voiture']['user']['pseudo'] + "<br>"+ "Note : " + noteChauffeur + '/5';
-            id9.innerHTML="Arrivée :";
-            id10.innerHTML=new Intl.DateTimeFormat("fr-FR").format(new Date(i['dateArrivee']));
-            id11.innerHTML=i['heureArrivee'];
-            id12.innerHTML=i['lieuArrivee'];
-            id13.innerHTML=i['nbPlace'] + place;
-            id14.innerHTML=i['energie']=="Fuel"? "Trajet non écologique" : "Trajet écologique";
-            id15.innerHTML="Voiture : "
-            id16.innerHTML=i["voiture"]["marque"]["libelle"] +" " +i["voiture"]["modele"] + " " +i["voiture"]["couleur"];;
-            id17.innerHTML="Préférences du conducteur:"; 
-            for (l of i["voiture"]["user"]["parametres"]){ 
-            let newDiv= document.createElement("p");
-            ll=i["voiture"]["user"]["parametres"].indexOf(l)+4
-            lll=ll>8?6:5;
-            newDiv.innerHTML+=l['propriete'] + ' : ' + l['valeur'];
-            newDiv.setAttribute("style","grid-column:" + ll + "/" +Number(ll+1) +";grid-row:" +lll + "/" + Number(lll+1) +";");
-            id0.appendChild(newDiv);           
-            } 
-            idChauffeur=i['idChauffeur'];
-            prix=i['prixPersonne'];
-            users=i['users'];
-            nbPlace=i['nbPlace'];
-            dateDepart=new Intl.DateTimeFormat("fr-FR").format(new Date(i['dateDepart']));
-            console.log(dateDepart);
-            // Personne connecté
-            if (isConnected()){
-            statut=i["statut"];
-             /*if (Chauffeur==true){
-    setStatutButton();
-            
-   // }else{*/
-
-       setStatutButton();
-// Personne non connectée
-    }  else{setStatutButton();}
-       let sp1 = document.createElement("div");
-        sp1.classList.add("mb-3");
-        let parentDiv = id0.parentNode;
-        parentDiv.insertBefore(sp1, id0.nextSibling);}
-    
-// Afficher le bouton indiquant le statut
-        function  setStatutButton(){
-    
-            //Chauffeur
-        if (Chauffeur==true){
-            console.log('chauffeur');
-                switch (statut){
-            case "en attente":
-                btnStatut.textContent='Démarrer'; 
-                btnAnnuler.addEventListener("click", ()=>{myModalAnnulerCovoiturage.show();})
-                id0.appendChild(btnAnnuler);
-                break;
-            case "en cours":
-                btnStatut.textContent='Arrivé à destination'; break;
-            case "terminé": 
-                btnStatut.textContent='Terminé';break;} 
-            btnStatut.addEventListener("click",()=>{clickStatutAndButton()});}
-          // Utilisateur connecté
-          else if (isConnected()){
-            btnStatut.remove();
-            btnStatut=document.createElement("button");
-            btnStatut.classList.add("btnDetail", "btn", "btn-primary","my-auto");
-            id0.appendChild(btnStatut);
-            if (includes(users,idUser)==true){// Participant
-                switch (statut){
-                    case "en attente":                       
-                        btnStatut.textContent='En attente';
-                        let credits=credit>1?"credits":"credit"
-                        btnAnnuler.addEventListener("click", ()=>{
-                        annulerCovoiturage.textContent="En annulant, vous confirmez le remboursement de "+ prix +" "+ credits+ " sur votre compte.";
-                        myModalAnnulerCovoiturage.show();})
-                        id0.appendChild(btnAnnuler);
-                        break;
-                    case "en cours":
-                        btnStatut.textContent='En cours';
-                        break;
-                    case "terminé": 
-                        btnStatut.textContent='Arrivé à destination';               
-                        getReponse();  
-                        break;}}
-                        //Non participant
-            else if (statut=='en attente' && (!includes(users,idUser))){
-                btnStatut.textContent='Participer';
-                //Si credit insuffisant
-                if (credit<l){btnStatut.disabled=true;
-                    let creditInsuffisant=document.createElement("p");
-                    creditInsuffisant.classList.add("item18","mx-auto");
-                    creditInsuffisant.appendChild(document.createTextNode('Credit insuffisant'));
-                    id0.appendChild(creditInsuffisant);}
-                //Si nombre de place insuffisant
-                else if (nbPlace==0){btnStatut.disabled=true;}
-                else {     
-                    let credits=credit>1?"credits":"credit"
-
-                    btnStatut.addEventListener("click",()=>{
-                    confirmerParticiper.textContent="En participant, vous confirmez le débit de "+ prix +" "+ credits+ " de votre compte.";
-                    myModalParticiperCovoiturage.show();})
-                    
-                    btnParticiperCovoiturage.onclick=function(){myModalParticiperCovoiturage.hide();
-                    paiement(prix,idUser,9);
-                    ajouterParticipant();
-               
-                     };
-        }}}  
-        // Personne non connectée
-            else{  btnStatut.textContent='Participer';
- 
-        btnStatut.addEventListener("click",()=>{window.location.replace("/signin")});}
-        }
-           
+    Passager = roles.data.some(r => r.libelle === "passager");
+}
 
 
-
-
-    function includes(a,l){
-        for(let i of a){
-            if (i['id']==l){return true;}
-        }
-        return false;
-
+// Retourne la réponse de l'utilisateur à la question qui lui est posée en fin de trajet
+async function getReponse() {
+    const result = await window.AppData.apiFetch(`reponse/show/${numId}`);
+    if (!result.ok) {
+        console.error('Aucune réponse trouvée pour cet utilisateur.', result.message);
+        return;
     }
-     
-
-
-    function setQuestionPassager(){
-        console.log(userResponse);
- if (!userResponse){
-            responseUser.textContent="Le trajet s'est-il bien passé ?"
-            let btnResponseUserOui=document.createElement("button");
-            let btnResponseUserNon=document.createElement("button");
-            btnResponseUserOui.classList.add("btn","btn-primary","btnResponseUserOui");
-            btnResponseUserNon.classList.add("btn","btn-primary","btnResponseUserNon");
-            btnResponseUserOui.appendChild(document.createTextNode('Oui'));
-            btnResponseUserNon.appendChild(document.createTextNode('Non'));
-            id0.appendChild(btnResponseUserOui);
-            id0.appendChild(btnResponseUserNon);
-            btnResponseUserOui.addEventListener("click",()=>{
-                setReponse1("oui");
-                btnResponseUserOui.remove();btnResponseUserNon.remove();responseUser.remove();  
-                setBoutons(2); // Soumettre un avis
-                paiement(prix,9,idChauffeur);
-            })
-            btnResponseUserNon.addEventListener("click",()=>{
-                btnResponseUserOui.remove();btnResponseUserNon.remove();responseUser.remove();
-                setReponse1("non");
-                setBoutons(1); // Laisser un commentaire
-            });
-        } else if (userResponse["reponse1"]=="oui" && (userResponse["reponse2"]=="")){
-                setBoutons(2); // Soumettre un avis
-
-              
-        } else if (userResponse["reponse1"]=="non" && (userResponse["reponse2"]=="")){
-                setBoutons(1); // Laisser un commentaire
-        }
-         
-
-
-    } // Afficher les boutons "Laisser un commentaire" et "Soumetre un avis"
-        function setBoutons(i){
-            if (i==1){
-            let btnLaisserCommentaire=document.createElement("button");
-            btnLaisserCommentaire.classList.add("btn","btn-primary","btnResponseUserOui");
-            btnLaisserCommentaire.appendChild(document.createTextNode('Laisser un commentaire'));
-            id0.appendChild(btnLaisserCommentaire);
-            btnLaisserCommentaire.addEventListener("click",()=>{   
-            const myModalLaisserCommentaire = new bootstrap.Modal('#myModalLaisserCommentaire');
-            myModalLaisserCommentaire.show();});
-            btnEnvoyerCommentaire.addEventListener("click",()=>{setReponse2("oui");btnLaisserCommentaire.remove();
-            LaisserCommentaire()            
-                       });}
-            else{let btnSoumettreAvis=document.createElement("button");
-                btnSoumettreAvis.classList.add("btn","btn-primary","btnResponseUserOui");
-                btnSoumettreAvis.appendChild(document.createTextNode('Soumettre un avis'));
-                id0.appendChild(btnSoumettreAvis);
-                btnSoumettreAvis.addEventListener("click",()=>{
-                    const myModalLaisserAvis = new bootstrap.Modal('#myModalLaisserAvis');
-                    myModalLaisserAvis.show();});
-                btnEnvoyerAvis.addEventListener("click",()=>{setReponse2("oui");btnSoumettreAvis.remove();
-                    LaisserAvis();
-                })}}
-                //enregistrer avis
-                
-              
-        
-
-        
+    userResponse = result.data;
+}
 
 
 
-            function setReponse1(reponse){
-               let myHeaders = new Headers();
-               myHeaders.append("X-AUTH-TOKEN", getToken());
-               myHeaders.append("Content-Type", "application/json");
-               raw = JSON.stringify({"reponse1" : reponse,
-                "reponse2" : "",
-                 "commentaire" : ""})
 
-              let requestOptions = {
-              method: 'POST',
-              headers: myHeaders,
-              body: raw,
-              redirect: 'follow'
-                        };              
-                fetch(apiUrl+"reponse/setReponse1/" + param.get("id"), requestOptions)
-                    .then(response => {
-                        if(response.ok){
-                            return response
-                            }
-                        })
-                        .then(result => {
-                        })
-                        .catch(error => console.log('error', error));
-                    }
-            function setReponse2(reponse){
-               let myHeaders = new Headers();
-               myHeaders.append("X-AUTH-TOKEN", getToken());
-               myHeaders.append("Content-Type", "application/json");
-               raw = JSON.stringify({"reponse2" : reponse})
 
-              let requestOptions = {
-              method: 'PUT',
-              headers: myHeaders,
-              body: raw,
-              redirect: 'follow'
-                        };              
-                fetch(apiUrl+"reponse/editReponse2/" + param.get("id"), requestOptions)
-                    .then(response => {
-                        if(response.ok){
-                            return response
-                            }
-                        })
-                        .then(result => {
-                        })
-                        .catch(error => console.log('error', error));
-                    }
-
-       function supprimerCovoiturage(){
-            let myHeaders = new Headers();
-            myHeaders.append("X-AUTH-TOKEN", getToken());
-            myHeaders.append("Content-Type", "application/json");
-            let requestOptions = {
-            method: 'DELETE',
-            headers: myHeaders,
-            redirect: 'follow'  };
-            let nom;
-            if (Chauffeur==true){nom="covoiturage/";}
-            else{nom="covoiturage/removeUser/";}
-            fetch(apiUrl + nom + parseInt(param.get("id")), requestOptions)
-            .then(response => { if(response.ok){ return response; }})
-            .then(result => { if (Chauffeur==true){window.location.replace("/account");
-                mailAnnulerCovoiturage();
-            }
-        else{btnAnnuler.remove();
-            console.log(id0)
-            paiement(prix, idUser,);
-            getCovoiturage();
-        } })
-            .catch(error => console.log('error', error));}
-
-    function mailAnnulerCovoiturage(){
-    let myHeaders = new Headers();
-    myHeaders.append("X-AUTH-TOKEN", getToken());
-    myHeaders.append("Content-Type", "application/json");
-
-  let raw = JSON.stringify({
-        "email": 'Le covoiturage du ' + new Date(Date()).toISOString().slice(0,10) + ' a été annulé.'
-    });
+// Retourne le covoiturage
+async function getCovoiturage() {
     let requestOptions = {
-        method: 'POST',
-        body: raw,
-        headers: myHeaders,
-        redirect: 'follow'
+        method: "GET",
+        headers: { "Content-Type": "application/json" }
     };
-     fetch(apiUrl+"mailer/covoiturageAnnule/" + parseInt(param.get("id")), requestOptions)
-    .then(response =>{
-        if(response.ok){
-            return response.json();
+    if (!numId) {
+        console.error('ID du covoiturage manquant.');
+    }
+    try {
+        const response = await fetch(`${window.AppData.apiUrl}covoiturage/${numId}`, requestOptions);
+        if (!response.ok) {
+            console.error("Impossible de récupérer les informations du covoiturage.");
+            window.location.replace("/");
         }
-        else{
-            console.log("Impossible d'envoyer un mail");
-        }
-    })
-    .then(result => {
+        const result = await response.json();
 
-    })
-    .catch(error =>{
-        console.error("erreur lors de la récupération des données utilisateur", error);
-    });
-
-
-        }
-
-       function LaisserCommentaire(){      
-    let myHeaders = new Headers();
-    myHeaders.append("X-AUTH-TOKEN", getToken());
-     myHeaders.append("Content-Type", "application/json");
-
-   CommentaireInput=document.getElementById("CommentaireInput");
-    let  raw = JSON.stringify({"commentaire": CommentaireInput.value});
-    let requestOptions = {
-        method: 'PUT',
-        body: raw,
-        headers: myHeaders,
-        redirect: 'follow'
-    };
-        fetch(apiUrl+"reponse/editCommentaire/" + param.get("id"), requestOptions)    
-        .then(response => { if(response.ok){ return response; }})
-                .then(result =>{})
-                .catch(error => console.log('error', error))
+        // Variable valant true si l'utilisateur est chauffeur du covoiturage
+        Chauffeur = idUser == result['chauffeur']['id'];
+        await setCovoiturage(result);
+        await getAvis();
+    }
+    catch (error) {
+        console.error('Erreur dans la récupération des covoiturages :', error);
+        return null;
+    }
 
 }
 
-       function LaisserAvis(){      
-    let myHeaders = new Headers();
-    myHeaders.append("X-AUTH-TOKEN", getToken());
-     myHeaders.append("Content-Type", "application/json");
- let dataForm = new FormData(avisForm);
-                raw = JSON.stringify({
-                "note": dataForm.get("Note"),
-                "commentaire": dataForm.get("Avis"),
-                "idChauffeur": idChauffeur,
-                "statut":"en attente"});
-    let requestOptions = {
-        method: 'POST',
-        body: raw,
-        headers: myHeaders,
-        redirect: 'follow'
-    };
-       fetch(apiUrl+"avis", requestOptions)
-                .then(response => { if(response.ok){ return response; }})
-                .then(result =>{getAvis();})
-                .catch(error => console.log('error', error));}
-                        
-              
-    // Mettre à jour le statut et le bouton Statut en fonction du clic
-    function clickStatutAndButton(){
-        if (Chauffeur==true){
-            let raw=0;
-        switch (statut){
+// Afficher le covoiturage
+async function setCovoiturage(i) {
+    note.textContent = i['noteMoyenne'] != null ? `Note : ${i['noteMoyenne']}/5` : '';
+    btnAnnuler?.remove();
+    img.setAttribute("src", `http://localhost:8000/${i['chauffeur']['photo']}`);
+    depart.textContent = "Départ :";
+    departDate.textContent = new Intl.DateTimeFormat("fr-FR").format(new Date(i['dateDepart']));
+    heureDepart.textContent = i['heureDepart'];
+    lieuDepart.textContent = i['lieuDepart'];
+    duree.textContent = `Durée : ${window.AppData.toHours(new Date(i['dateArrivee'].replace("00:00", i['heureArrivee'])) - new Date(i['dateDepart'].replace("00:00", i['heureDepart'])))}`;
+    prixPersonne.textContent = `Prix : ${i['prixPersonne']} crédits`;
+    pseudo.textContent = i['chauffeur']['pseudo'];
+    arrivee.textContent = "Arrivée :";
+    arriveeDate.textContent = new Intl.DateTimeFormat("fr-FR").format(new Date(i['dateArrivee']));
+    heureArrivee.textContent = i['heureArrivee'];
+    lieuArrivee.textContent = i['lieuArrivee'];
+    place.textContent = i['nbPlaces'] === 0 ? "Complet" : i['nbPlaces'] === 1 ? "1 place restante" : `${i['nbPlaces']} places restantes`;
+    energie.textContent = i['energie'] == "Essence" ? "Trajet non écologique" : "Trajet écologique";
+    voiture.textContent = "Voiture : "
+    voitureDetails.textContent = `${i["voiture"]["marque"]} ${i["voiture"]["modele"]} ${i["voiture"]["couleur"]}`;
+    preference.textContent = "Préférences du conducteur:";
+    let ligne, colonne;
+    i["chauffeur"]["parametres"].forEach((parametre, index) => {
+        colonne = (index % 4) + 4;
+        ligne = colonne > 8 ? 6 : 5;
+        let newDiv = document.createElement("p");
+        newDiv.textContent = `${parametre['propriete']} ${parametre['valeur']}`;
+        newDiv.style.gridColumn = `${colonne}/${colonne + 1}`;
+        newDiv.style.gridRow = `${ligne}/${ligne + 1}`;
+        container.appendChild(newDiv);
+    });
+    idChauffeur = i['chauffeur']['id'];
+    prix = i['prixPersonne'];
+    users = i['users'];
+    nbPlace = i['nbPlaces'];
+    statut = i["statut"];
+    await setStatutButton();
+}
+
+
+
+
+// Affiche le statut du covoiturage pour le chauffeur
+function setButtonChauffeur() {
+    switch (statut) {
         case "en attente":
-            btnAnnuler.classList.add("d-none");
-            raw = JSON.stringify({"statut": "en cours"});
-            btnStatut.firstChild.textContent='Arrivé à destination';
-            statut="en cours";
+            btnAnnuler = window.AppData.makeButton(container, "Annuler", ["btnDetail1", "btn-danger", "my-auto"], () => { myModalAnnulerCovoiturage.show(); })
+            btnStatut.textContent = 'Démarrer';
             break;
         case "en cours":
-            raw = JSON.stringify({"statut": "terminé"});
-            btnStatut.firstChild.textContent='Terminé';
-            statut="terminé";
-            setQuestionPassager();
-            mailFinTrajet();
+            btnStatut.textContent = 'Arrivé à destination';
             break;
-               } 
-           if (raw!=0){
-               let myHeaders = new Headers();
-               myHeaders.append("X-AUTH-TOKEN", getToken());
-               myHeaders.append("Content-Type", "application/json");
-              let requestOptions = {
-              method: 'PUT',
-              headers: myHeaders,
-              body: raw,
-              redirect: 'follow'};
-              fetch(apiUrl+"covoiturage/" + parseInt(param.get("id")), requestOptions)
-                        .then(response => { if(response.ok){return response.json(); } })
-                        .then(result => {})
-                        .catch(error => console.log('error', error));
-                    }
-                }
+        case "terminé":
+            btnStatut.textContent = 'Terminé';
+            break;
+    }
+    btnStatut.onclick = async () => { await window.AppData.withLoader(clickStatutAndButton); };
+}
 
-                }
-                
-        function mailFinTrajet(){
-    let myHeaders = new Headers();
-    myHeaders.append("X-AUTH-TOKEN", getToken());
-     myHeaders.append("Content-Type", "application/json");
+// Affiche le statut du covoiturage pour le participant
+async function setButtonPassagerParticipant() {
+    switch (statut) {
+        case "en attente":
+            btnStatut.textContent = 'En attente';
+            btnAnnuler = window.AppData.makeButton(container, "Annuler", ["btnDetail1", "btn-danger", "my-auto"], () => {
+                annulerCovoiturageModal.textContent = `En annulant, un remboursement de ${window.AppData.formatPrix(prix)} crédits sera effectué sur votre compte.`;
+                myModalAnnulerCovoiturage.show();
+            })
+            break;
+        case "en cours":
+            btnStatut.textContent = 'En cours';
+            break;
+        case "terminé":
+            btnStatut.textContent = 'Arrivé à destination';
+            await getReponse();
+            setQuestionPassager();
+            break;
+    }
+}
+async function setButtonPassagerNonParticipant() {
+    // Si le nombre de places est insuffisant
+    btnStatut.disabled = (nbPlace == 0 || parseFloat(window.AppData.credit) < parseFloat(prix) || statut != 'en attente' || isAdminOrEmploye);
+    if (nbPlace == 0) {
+        btnStatut.textContent = 'Complet'; return;
+    }
+    if (statut == 'en attente') {
+        btnStatut.textContent = 'Participer';
+        //Si crédit insuffisant
+        if (parseFloat(window.AppData.credit) < parseFloat(prix)) {
+            btnStatut.disabled = true;
+            let creditInsuffisant = window.AppData.createEl("p", ["item18", "mx-auto"], 'Solde insuffisant');
+            container.appendChild(creditInsuffisant);
+            return;
+        }
 
- let raw = JSON.stringify({
-        "email": 'Rendez-vous sur votre espace personnel pour valider votre trajet. '
-    });
-    let requestOptions = {
-        method: 'POST',
-        body: raw,
-        headers: myHeaders,
-        redirect: 'follow'
+        btnStatut.onclick = () => {
+            if (Passager) {
+                confirmerParticiper.textContent = `En participant, vous acceptez le débit de ${window.AppData.formatPrix(prix)} crédits de votre compte.`;
+                myModalParticiperCovoiturage.show();
+            }
+            else { alert('Pour participer, vous devez activer le mode "Passager" depuis votre espace personnel.') }
+        };
+
+        btnParticiperCovoiturage.onclick = async () => {
+            await window.AppData.withLoader(participerCovoiturage);
+
+        }
+    } else {
+        btnStatut.textContent = 'Covoiturage démarré';
+    }
+}
+// Participer au covoiturage
+async function participerCovoiturage() {
+    // Effectuer le paiement
+    const paiementReussi = await window.AppData.paiement(prix, idUser, "achat");
+    if (!paiementReussi) {
+        alert('Le paiement a échoué. Veuillez réessayer.');
+        return;
+    }
+    // Ajouter le participant
+    const ajoutOk = await ajouterParticipant();
+    if (ajoutOk) {
+        myModalParticiperCovoiturage.hide();
+        window.AppData.showToast('Participation enregistrée avec succès.', "success");
+        await email("confirmationPassager", { utilisateurs: [{ id: idUser, pseudo: pseudoUser, email: emailUser }] });
+        return;
+    }
+    // Si l'ajout échoue, rembourser automatiquement
+    const remboursementOk = await window.AppData.paiement(prix, idUser, "remboursement");
+    if (remboursementOk) {
+        window.AppData.showToast("Votre participation n'a pas pu être enregistrée. Le remboursement a été effectué.", "danger");
+    }
+    else {
+        console.error('Impossible de rembourser automatiquement.');
+        await email("remboursementEchoue", { utilisateurs: [{ id: idUser, pseudo: pseudoUser, email: emailUser }] });
+        window.AppData.showToast("Une erreur est survenue et le remboursement n'a pas pu été effectué. Le support a été notifié.", "danger");
+    }
+
+}
+
+// Affiche le statut du covoiturage pour l'invité
+function setButtonInvite() {
+    if (statut != "en attente") {
+        btnStatut.textContent = 'Covoiturage démarré';
+    }
+    else if (nbPlace == 0) {
+        btnStatut.textContent = 'Complet';
+    }
+    else {
+        btnStatut.textContent = 'Participer';
+        btnStatut.onclick = () => { window.location.replace("/signin") };
+    }
+}
+
+
+
+
+// Afficher le bouton indiquant le statut
+async function setStatutButton() {
+    // Si l'utilisateur est chauffeur
+    if (Chauffeur == true) {
+        setButtonChauffeur();
+        // Si l'utilisateur est non chauffeur et connecté
+    } else if (window.AppData.isConnected()) {
+        if (includes(users, idUser)) {// Si l'utilisateur est participant
+            await setButtonPassagerParticipant();
+        }
+        else {
+            await setButtonPassagerNonParticipant();
+        }
+    } // Si l'utilisateur est non participant          
+    // Personne non connectée
+    else { setButtonInvite(); }
+}
+
+// Retourne true si l'utilisateur est participant du covoitueage
+function includes(users, idUser) {
+    return users.some(u => u.id === idUser);
+}
+// Affiche la question permettant au passager de valider le covoiturage
+async function setQuestionPassager() {
+    if (!includes(users, idUser)) { return; }
+    // Si l'utilisateur est participant et n'a pas répondu
+    if (!userResponse) {
+        question.textContent = "Le trajet s'est-il bien passé ?"
+        let btnOui = window.AppData.makeButton(container, "Oui", ["btn-primary", "btnOui"], async () => {
+            await window.AppData.withLoader(async () => {
+                const success = await setReponse({ reponse1: "oui" });
+                if (!success) return;
+                await window.AppData.getNotRespondedCovoiturages();
+                [btnOui, btnNon, question].forEach(btn => btn.remove());
+                await setBoutons(1); // Afficher "Soumettre un avis"
+                await window.AppData.paiement(prix, idChauffeur, "payerChauffeur");
+            });
+        }) // Payer le chauffeur
+            ;
+        let btnNon = window.AppData.makeButton(container, "Non", ["btn-danger", "btnNon"], async () => {
+            await window.AppData.withLoader(async () => {
+                const success = await setReponse({ reponse1: "non" });
+                if (!success) return;
+                await window.AppData.getNotRespondedCovoiturages();
+                [btnOui, btnNon, question].forEach(btn => btn.remove());
+                await setBoutons(2); // Afficher "Laisser un commentaire"
+            });
+        });
+    } else if (userResponse["reponse1"] === "oui" && (!userResponse["reponse2"])) {
+        await window.AppData.withLoader(() => setBoutons(1)); // Afficher "Soumettre un avis"        
+    } else if (userResponse["reponse1"] === "non" && (!userResponse["reponse2"])) {
+        await window.AppData.withLoader(() => setBoutons(2)); // Afficher "Laisser un commentaire"
+    }
+}
+
+// Afficher les boutons "Soumetre un avis" et "Laisser un commentaire"
+async function setBoutons(i) {
+    if (i == 1) { // Soumetre un avis
+        let btnSoumettreAvis = window.AppData.makeButton(container, 'Soumettre un avis', ["btn-primary", "btnOui"], () => {
+            const myModalLaisserAvis = new bootstrap.Modal('#myModalLaisserAvis');
+            myModalLaisserAvis.show();
+        });
+
+        btnEnvoyerAvis.onclick = async () => {
+            await window.AppData.withLoader(async () => {
+                const success = await LaisserAvis();
+                if (!success) return;
+                btnSoumettreAvis.remove();
+                await setReponse({ reponse2: "oui" });
+            });
+        };
+    }
+    else { // Laisser un commentaire
+        let btnLaisserCommentaire = window.AppData.makeButton(container, 'Laisser un commentaire', ["btn-primary", "btnOui"], () => {
+            const myModalLaisserCommentaire = new bootstrap.Modal('#myModalLaisserCommentaire');
+            myModalLaisserCommentaire.show();
+        });
+
+        btnEnvoyerCommentaire.onclick = async () => {
+            await window.AppData.withLoader(async () => {
+                const success = await LaisserCommentaire();
+                if (!success) return;
+                btnLaisserCommentaire.remove();
+                await setReponse({ reponse2: "oui" });
+
+            });
+        }
+    }
+}
+
+
+
+// Enregitrer la réponse à la question de validation du covoiturage "Le trajet s'est-il bien passé ?" 
+async function setReponse({ reponse1 = null, reponse2 = null }) {
+    let url, method, body;
+    if (reponse1 !== null) {
+        url = `reponse/setReponse1/${numId}`;
+        method = "POST";
+        body = { reponse1 };
+    } else if (reponse2 !== null) {
+        url = `reponse/editReponse/${numId}`;
+        method = "PUT";
+        body = { reponse2 };
+    }
+    else {
+        console.error("Aucune donnée valide transmise à setReponse.");
+        return null;
+    }
+    const result = await window.AppData.apiFetch(url, method, body)
+    if (!result.ok) {
+        console.error("Erreur lors de l'envoi de la réponse", result.message);
+        return false;
+    }
+    return true;
+}
+
+
+
+// Supprimer le covoiturage si l'utilisateur est chauffeur ou annuler sa participation au covoiturage s'il est passager
+async function supprimerCovoiturage() {
+    let endpoint = Chauffeur ? "covoiturage/" : "covoiturage/removeUser/"
+    const result = await window.AppData.apiFetch(endpoint + numId, "DELETE");
+    if (!result.ok) {
+        console.error('Erreur lors de la suppression du covoiturage.', result.message);
+        return null;
+    }
+    await annulerCovoiturage();
+}
+
+// Pour annuler le covoiturage :
+// Si l'utilisateur est chauffeur, il faut prévenir les participants que le trajet a été annulé, rembourser les participants.
+// Si l'utlisateur est participant, il faut rembourser le participant et si le remboursement échoue.
+// Si un remboursement échoue, il faut prévenir le support.
+async function annulerCovoiturage() {
+    try {
+        if (Chauffeur) {
+            await email("annuler"); // Prévenir les passagers que le trajet a été annulé
+            const results = await Promise.allSettled(users.map(user => window.AppData.paiement(prix, user['id'], "remboursement"))); // Remboursement de tous les passagers
+            const failedPayments = results.map((r, i) => r.status === 'rejected' || r.value === 'false' ? users[i] : null).filter(u => u !== null);
+            if (failedPayments.length > 0) {
+                console.error(`${failedPayments.length} remboursements ont échoué.`);
+                await email("remboursementEchoue", { utilisateurs: failedPayments });
+            } // Prévenir que certains remboursements ont échoués
+            window.location.replace("/account");
+            return;
+        }
+        else {
+            const success = await window.AppData.paiement(prix, idUser, "remboursement"); // Remboursement du passager
+            if (!success) {
+                await email("remboursementEchoue", { utilisateurs: [{ id: idUser, pseudo: pseudoUser, email: emailUser }] }); // Prévenir que le remboursement a échoué
+                alert("Le remboursement n'a pas pu être effectué. Le support a été notifié.");
+                return;
+            }
+            await getCovoiturage();
+        }
+    }
+    catch (error) {
+        console.error('Erreur dans annulerCovoiturage:', error);
+    }
+}
+
+
+// Laisser un avis si le covoiturage s'est bien passé
+async function LaisserAvis() {
+    let dataForm = new FormData(avisForm);
+    if (!dataForm.get("Note")) {
+        console.error('Note manquante');
+        return;
+    }
+    let body = {
+        "note": Number(dataForm.get("Note")),
+        "commentaire": dataForm.get("Avis"),
+        "chauffeur": idChauffeur
     };
-     fetch(apiUrl+"mailer/email/" + parseInt(param.get("id")) + "/" + dateDepart, requestOptions)
-    .then(response =>{
-        if(response.ok){
-            return response.json();
-        }
-        else{
-            console.log("Impossible d'envoyer un mail");
-        }
-    })
-    .then(result => {
+    let result = await window.AppData.apiFetch("avis", "POST", body);
+    if (!result.ok) {
+        window.AppData.showToast(`Erreur lors de l'envoi de l'avis : ${result.message}`, "danger");
+        return;
+    }
+    window.AppData.showToast("Avis envoyé avec succès.", "success");
+    await getAvis();
+    return true;
+}
 
-    })
-    .catch(error =>{
-        console.error("erreur lors de la récupération des données utilisateur", error);
-    });
+async function LaisserCommentaire() {
+    let body = {
+        "commentaire": CommentaireInput.value.trim()
+    };
+    let result = await window.AppData.apiFetch("commentaire/${numId}", "POST", body);
+    if (!result.ok) {
+        window.AppData.showToast(`Erreur lors de l'envoi du commentaire : ${result.message}`, "danger");
+        return;
+    }
+    window.AppData.showToast("Commentaire envoyé avec succès.", "success");
+    return true;
+}
 
+// Mettre à jour le statut et le bouton statut en fonction d'un clic
+async function clickStatutAndButton() {
+    let body = null;
+    if (statut === "en attente") { body = { "statut": "en cours" }; }
+    else if (statut === "en cours") { body = { "statut": "terminé" }; }
+    if (!body) { return; }
+    const result = await window.AppData.apiFetch(`covoiturage/${numId}`, "PUT", body);
+    if (!result.ok) {
+        console.error("Erreur lors de la mise à jour du statut.", result.message);
+        return null;
+    }
+    if (statut === "en attente") {
+        btnAnnuler.remove();
+        btnStatut.textContent = 'Arrivé à destination';
+        statut = "en cours";
+    }
+    else if (statut === "en cours") {
+        btnStatut.textContent = 'Terminé';
+        statut = "terminé";
+        setQuestionPassager();
+        await email("finTrajet");
+    }
+    console.log("Statut mis à jour :", statut);
+}
 
-        }
 
 // Obtenir les avis
-    function getAvis(){
-        let myHeaders = new Headers();
-        //myHeaders.append("X-AUTH-TOKEN", getToken());
-         myHeaders.append("Content-Type", "application/json");
-
-        let requestOptions = {
-            method: 'GET',
-            headers: myHeaders,
-            redirect: 'follow'
-        };    
-         fetch(apiUrl+"avis/allAvis/" + Number(idChauffeur), requestOptions)
-        .then(response =>{
-            if(response.ok){
-                return response.json();
-            }
-            else{
-                console.log("Impossible de récupérer les informations des avis");
-            }
-        })
-          .then(result => {
-            setAvis(result);
-        })
-        .catch(error =>{
-            console.error("erreur lors de la récupération des données des avis", error);
-        });
+async function getAvis() {
+    const result = await window.AppData.apiFetch(`avis/allAvis/${Number(idChauffeur)}`);
+    if (!result.ok) {
+        console.error("Impossible de récupérer les avis.", result.message);
+        return null;
     }
-    //Afficher les avis
-     function setAvis(avis){
-            id18.setAttribute("style", "display:grid; grid-template-columns:100px 100px 1fr; grid-template-rows: repeat(" + Number(avis.length+1)+ ", minmax(0, 100px)");
-          for(let i of avis){
-            let newDiv= document.createElement("p");
-            newDiv.innerHTML+=i['user']['pseudo'];
-            newDiv.setAttribute("style","grid-column:1/2; grid-row:" +Number(avis.length+1-avis.indexOf(i)) + "/" + Number(avis.length+2-avis.indexOf(i)) +";");
-            let newDiv1= document.createElement("p");
-            newDiv1.innerHTML=i['note']+"/5";
-            newDiv1.setAttribute("style","grid-column:2/3; grid-row:" +Number(avis.length+1-avis.indexOf(i)) + "/" + Number(avis.length+2-avis.indexOf(i)) +";");
-            let newDiv2= document.createElement("p");
-            newDiv2.innerHTML=i['commentaire'];
-            newDiv2.setAttribute("style","grid-column:3/4; grid-row:" +Number(avis.length+1-avis.indexOf(i)) + "/" + Number(avis.length+2-avis.indexOf(i)) +";");
-            id18.appendChild(newDiv);           
-            id18.appendChild(newDiv1);           
-            id18.appendChild(newDiv2);           
-
-         
-    }}
-    
-function ajouterParticipant(){
-    let myHeaders = new Headers();
-    myHeaders.append("X-AUTH-TOKEN", getToken());
-     myHeaders.append("Content-Type", "application/json");
-
-    let requestOptions = {
-        method: 'PUT',
-        headers: myHeaders,
-        redirect: 'follow'
-    };
-     fetch(apiUrl+"covoiturage/addUser/" + param.get("id"), requestOptions)
-    .then(response =>{
-        if(response.ok){
-            return response.json();
-        }
-        else{
-            console.log("Impossible de récupérer les informations utilisateur");
-        }
-    })
-    .then(result => {getCovoiturage();
-
-
-    })
-    .catch(error =>{
-        console.error("erreur lors de la récupération des données utilisateur", error);
-    });
-
-
-
-    
+    setAvis(result.data);
 }
+
+// Afficher les avis
+function setAvis(avis) {
+    if (!Array.isArray(avis) || avis.length == 0) {
+        avisContainer.classList.add('text-center');
+        avisContainer.textContent = ("Ce chauffeur n'a pas encore d'avis.");
+        return [];
+    }
+
+    avisContainer.innerText = '';
+    avisContainer.setAttribute("style", `display:grid; grid-template-columns:100px 100px 1fr; grid-template-rows: repeat(${avis.length}, auto)`);
+
+    avis.forEach((i, index) => {
+        let row = Number(avis.length - index);
+        let pseudo = window.AppData.createEl("p", [], i['auteurPseudo']);
+        pseudo.style.gridColumn = "1/2";
+        pseudo.style.gridRow = `${row}/${row + 1}`;
+
+        let note = window.AppData.createEl("p", [], `${i['note']}/5`);
+        note.style.gridColumn = "2/3";
+        note.style.gridRow = `${row}/${row + 1}`;
+        let commmentaireText;
+        if (i['statut'] === 'validé') {
+            commmentaireText = i['commentaire'];
+        } else if (i['auteurId'] === idUser) {
+            commmentaireText = `${i['commentaire']} (en attente de modération)`;
+        } else { commmentaireText = `Avis en attente de modération`; }
+        let commentaire = window.AppData.createEl("p", [], commmentaireText);
+        commentaire.style.gridColumn = "3/4";
+        commentaire.style.gridRow = `${row}/${row + 1}`;
+        avisContainer.append(pseudo, note, commentaire);
+    })
+}
+
+// Ajouter l'utilisateur aux users (participants) du covoiturage 
+async function ajouterParticipant() {
+    const result = await window.AppData.apiFetch(`covoiturage/addUser/${numId}`, "PUT");
+    if (!result.ok) {
+        console.error("Impossible d'ajouter un participant.", result.message);
+        return null;
+    }
+    console.log("Participant ajouté.");
+    await getCovoiturage();
+    return true;
+}
+
+// Envoyer un email
+async function email(subject, extraData = {}) {
+    const body = { "subject": subject, ...extraData };
+    const result = await window.AppData.apiFetch(`mailer/emailCovoiturage/${numId}`, "POST", body);
+    if (!result.ok) {
+        console.error("Impossible d'envoyer l'email.", result.message);
+        return;
+    }
+    console.log("Email envoyé avec succès.");
+}
+
+

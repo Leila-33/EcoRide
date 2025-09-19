@@ -1,0 +1,135 @@
+<div class="card m-3">
+  <div class="card-body shadow p-3 bg-body-tertiary rounded">
+    <div class="container2" id="container">
+      <img class="item1 mx-auto my-auto" id="img">
+      </img>
+      <p class="item2 my-auto" id="depart">
+      </p>
+      <p class="item3 my-auto" id="departDate">
+      </p>
+      <p class="item4 my-auto" id="heureDepart">
+      </p>
+      <p class="item5 my-auto" id="lieuDepart">
+      </p>
+      <p class="item6 my-auto" id="duree">
+      </p>
+      <p class="item7 my-auto" id="prixPersonne">
+      </p>
+      <div class="item8 text-center" id="id8">
+        <p class="item81 text-center" id="pseudo">
+        </p>
+        <p class="item82 text-center" id="note">
+        </p>
+      </div>
+
+      <p class="item9" id="arrivee">
+      </p>
+      <p class="item10" id="arriveeDate">
+      </p>
+      <p class="item11" id="heureArrivee">
+      </p>
+      <p class="item12" id="lieuArrivee">
+      </p>
+      <p class="item13" id="place">
+      </p>
+      <p class="item14" id="energie">
+      </p>
+      <p class="item15" id="voiture">
+      </p>
+      <p class="item16" id="voitureDetails">
+      </p>
+      <p class="item17" id="preference">
+      </p>
+      <p id="question" class="question"></p>
+    </div>
+  </div>
+</div>
+<div class="card m-3">
+  <div class="card-body shadow p-3 bg-body-tertiary rounded">
+    <div id="id18">
+      <p class="avis-title">Avis</p>
+      <p class="item3 my-auto" id="avis">
+      </p>
+
+    </div>
+  </div>
+</div>
+
+
+
+<div class="modal fade" tabindex="-1" id='myModalAnnulerCovoiturage' aria-lablledby="myModalAnnulerCovoiturage"
+  aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Annuler</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="annulerCovoiturageModal">
+        <p>Voulez-vous vraiment annuler ce covoiturage ?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal"
+          id="btnSupprimerCovoiturage">Annuler</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" tabindex="-1" id='myModalParticiperCovoiturage'>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Participer à ce covoiturage</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div id="confirmerParticiper" class="modal-body">
+        <p> En confirmant, le nombre de crédits correspondant au prix vous sera retiré.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal"
+          id="btnParticiperCovoiturage">Participer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" tabindex="-1" id='myModalLaisserCommentaire'>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Laisser un commentaire</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <textarea class="form-control" id="CommentaireInput" min="1" name="CommentaireInput" maxlength="255"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal"
+          id="btnEnvoyerCommentaire">Envoyer</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" tabindex="-1" id='myModalLaisserAvis'>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Laisser un avis</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="avisForm">
+          <label for="NoteInput" class="form-label">Note</label>
+          <input type="number" class="form-control" id="NoteInput" min="1" max="5" name="Note">
+          <label for="AvisInput" class="form-label">Avis</label>
+          <textarea class="form-control" id="AvisInput" name="Avis" maxlength="255"></textarea>
+      </div>
+      </form>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="btnEnvoyerAvis">Envoyer</button>
+      </div>
+    </div>
+  </div>
+</div>

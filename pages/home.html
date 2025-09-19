@@ -1,85 +1,146 @@
-<div class="hero-scene text-center text-black ">
+<div class="hero-scene text-center bg-light m-0">
     <div class="hero-scene-content">
         <h1>Rechercher un covoiturage</h1>
-      
-        </div>
     </div>
 </div>
-    <div class="  pb-3">
-        <div class="d-grid gap-2 col-6 mx-auto">
-    <form id="covoituragesForm">
-                              <input class="form-control me-2 mb-3" type="search" placeholder="Lieu de départ" aria-label="Search" id="lieuDepart" name="lieuDepart" required>
-                             <input class="form-control me-2 mb-3" type="search" placeholder="Lieu d'arrivée" aria-label="Lieu d'arrivée" id="lieuArrivee" name="lieuArrivee" required>
-                              <input class="form-control me-2 mb-3" type="date" id="dateDepart"  id="dateDepart" name="dateDepart" required>
-                              <div class= "text-center pt-4 mb-5"> 
-
-                              <button type="button" id="btnCovoiturages" class="btn btn-primary">Rechercher</button>
-                              </div>
-
-                             
-                            </form>                    
-                                                            
-              </div>      
+</div>
+<div class="bg-light pb-3">
+    <div class="d-grid gap-2 col-4 mx-auto">
+        <form id="covoituragesForm">
+            <input class="form-control me-2" type="search" placeholder="Ville de départ" aria-label="Search"
+                id="lieuDepart" name="lieuDepart" maxlength="50">
+            <div id="Depart" class="mb-3"></div>
+            <input class="form-control me-2" type="search" placeholder="Ville d'arrivée" aria-label="Lieu d'arrivée"
+                id="lieuArrivee" name="lieuArrivee" maxlength="50">
+            <div id="Arrivee" class="mb-3"></div>
+            <input class="form-control me-2 mb-3" type="date" id="dateDepart" id="dateDepart" name="dateDepart"
+                required>
+            <div class="invalid-feedback" id="dateDepartFeedback"></div>
+            <div class="text-center pt-4 mb-5">
+                <button type="button" id="btnCovoiturages" class="btn btn-primary">Rechercher</button>
+            </div>
+        </form>
     </div>
-    
- 
-         
-<section>
+</div>
 
+
+
+<section>
     <article class="bloc-home">
         <div class="container p-4 ">
-            <h2 class="text-center text-black mb-5 mt-5">Bienvenue sur EcoRide</h2>
-            <div class="row  align-items-center">
-                <div class="col">
-                    <p class="text-justify text-center  ">
-
-                       Bienvenue sur le site de EcoRide, la plateforme de covoiturage ou vous pouvez choisir avec quelle énergie voyager. 
-
-                    </p>
-                </div>
-             
-            </div>
-            <div class= "text-center pt-4 mb-5"> 
-                <a href="#" class="btn btn-primary">En savoir plus</a>
-            </div>
-        </div>
-    </article>
-  
-    <article class="bg-light ">
-        <div class="container p-4">
-            <h2 class="text-center text-primary">Devenez chauffeur</h2>
-            <div class="time"
-                <div class="col">
-                    <p class="text-justify text-center">
-Avec EcoRide, gagnez des crédits en devenant chauffeur. Pour cela, rendez vous sur votre espace :                   
- </p>
-                </div>
-                
-            </div>
-            <div class= "text-center pt-4"> 
-                <a href="#/galerie" class="btn btn-primary">Voir la galerie</a>
-            </div>
-        </div>
-    </article>
-
-
-    <article class="bloc-home">
-        <div class="container p-4">
-            <h2 class="text-center text-primary">Réservation en ligne</h2>
-            <div class="row row-cols-2 align-items-center">
-                <div class="col">
+            <h2 class="text-center text-black mb-5 mt-5 fw-bold">Bienvenue sur EcoRide</h2>
+            <div class="row align-items-center">
+                <div class="col-md-6 w-40">
                     <p class="text-justify">
-                        Vous pouvez directement réserver votre table sur ce site ! Il suffit de cliquer sur le bouton ci-dessous.
+
+                        Bienvenue sur <b>EcoRide</b>, la plateforme de covoiturage pour les voyageurs soucieux de
+                        l'environnement et ceux qui recherchent
+                        une solution économique pour leurs déplacements. Avec Ecoride, vous avez le choix de l'energie
+                        pour vos trajets, afin de de voyager de manière plus responsable.
+
                     </p>
+                    <div class="text-center p-5 mb-5">
+                        <a href="/signin" class="btn btn-primary">Démarrer</a>
+                    </div>
                 </div>
-                <div class="col">
-                    <img class="w-100 rounded" src="../images/l3.jpg"/>
+                <div class="col-md-6">
+                    <img src="" alt="EcoRide illustration">
 
                 </div>
             </div>
-            <div class= "text-center pt-4"> 
-                <a href="#" class="btn btn-primary">Réserver</a>
-            </div>
+        </div>
         </div>
     </article>
+    <article class="bg-light p-5 ">
+        <div class="container">
+            <h2 class="text-center m-5 fw-bold">Pourquoi choisir EcoRide ?</h2>
+            <div class="row row-cols-1 row-cols-md-3 g-5">
+                <div class="col">
+                    <div class="card shadow-sm p-5 h-100">
+                        <div class="card-body text-center rounded">
+                            <h5 class="card-title text-primary fw-bold">Ecologique</h5>
+                            <p class="card-text">Réduisez votre empreinte carbone en partageant vos trajets.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card shadow-sm p-5 h-100">
+                        <div class="card-body text-center rounded">
+                            <h5 class="card-title text-primary fw-bold">Economique</h5>
+                            <p class="card-text">Partagez les frais de transport et économisez sur vos déplacements.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card shadow-sm p-5 h-100">
+                        <div class="card-body text-center rounded">
+                            <h5 class="card-title text-primary fw-bold">Flexible</h5>
+                            <p class="card-text">Choisissez le type d'énergie pour vos trajets et adaptez vos
+                                préférences.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </article>
+
+
+    <article class="bloc-home p-5 ">
+        <div class="container">
+            <h2 class="text-center m-5 fw-bold">Devenez chauffeur</h2>
+            <p class="mb-4 text-center">
+                Avec <b>EcoRide</b>, gagnez des crédits en devenant chauffeur. Suivez ces étapes simples:
+            </p>
+            <div class="row row-cols-1 row-cols-md-3 g-5">
+                <div class="col">
+                    <div class="card text-center p-5">
+                        <div class="card-body rounded">
+                            <i class="bi bi-pencil-square display-3 text-primary"></i>
+                            <h5 class="card-title fw-bold">1. Inscrivez vous</h5>
+                            <p class="card-text">Créez votre compte pour rejoindre la communauté EcoRide.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card text-center p-5">
+                        <i class="bi bi-toggle-on display-3 text-primary"></i>
+                        <div class="card-body rounded">
+                            <h5 class="card-title fw-bold">2. Activez le mode chauffeur</h5>
+                            <p class="card-text">Rendez-vous sur votre espace personnel et activez le mode chauffeur.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card text-center p-5">
+                        <i class="bi bi-map-fill display-3 text-primary"></i>
+                        <div class="card-body rounded">
+                            <h5 class="card-title fw-bold">3. Ajouter un voyage</h5>
+                            <p class="card-text">Publiez votre trajet et commencez à transporter des passagers.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </article>
+
+    <article class="bg-light p-5">
+        <div class="container">
+            <h2 class="text-center m-5 fw-bold">Rejoignez <b>EcoRide</b></h2>
+            <p class="mb-4 text-center">
+                Inscrivez pour commencer à partager vos trajets et voyager de manière reponsable.
+            </p>
+            <div class="text-center pt-4 mb-5">
+                <a href="/signup" class="btn btn-primary">S'inscrire</a>
+            </div>
+        </div>
+        </div>
+        </div>
+    </article>
+
 </section>

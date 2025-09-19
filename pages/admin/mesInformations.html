@@ -1,0 +1,75 @@
+<body class="sb-nav-fixed">
+  <div id="layoutSidenav">
+    <div id="layoutSidenav_nav">
+      <nav class="sb-sidenav accordion sb-sidenav-light" id="sidenavAccordion">
+        <div class="sb-sidenav-menu d-flex flex-column vh-100">
+          <div class="nav">
+            <div class="sb-sidenav-menu-heading">Principal</div>
+            <a class="nav-link" href="/admin">
+              <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+              Tableau de bord
+            </a>
+            <div class="sb-sidenav-menu-heading">Interface</div>
+            <a class="nav-link" href="/createaccount">
+              <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+              Créer un compte employé
+            </a>
+            <a class="nav-link" href="/suspendre">
+              <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+              Suspendre un compte
+            </a>
+            <a class="nav-link" href="/mesInformations">
+              <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+              Mes informations personnelles
+            </a>
+          </div>
+        </div>
+        <div class="sb-sidenav-footer">
+          <div class="small" id="adminName">Logged in as:</div>
+        </div>
+      </nav>
+    </div>
+    <div id="layoutSidenav_content">
+      <div class="container-fluid px-4">
+        <h1 class="mt-4"> Mes informations personnelles</h1>
+        <ol class="breadcrumb mb-4">
+          <li class="breadcrumb-item"><a href="admin">Tableau de bord</a></li>
+          <li class="breadcrumb-item active"> Mes informations personnelles</li>
+        </ol>
+        <div class="container">
+          <div class="card m-3 ">
+            <div class="card-body shadow p-3 bg-body-tertiary rounded p-5">
+              <div class="text-center image-card1 m-auto">
+                <img id="imgInfos" class="imgAccount">
+                <div id="mesInfos" class="text-center"></div>
+                <div class="col-md-12 m-3" id="role"></div>
+              </div>
+
+              <div class="grid-Infos d-grid gap-5">
+                <div class="card cardAdresse grid-cardAdress">
+                  <div class="card-body rounded">
+                    <h5>Coordonnées</h5>
+                    <div id="Adresse"></div>
+                    <div id="Email"></div>
+                    <div id="Telephone"></div>
+                  </div>
+                </div>
+                <div class="card cardAdresse">
+                  <div class="card-body rounded">
+                    <h5>Identité</h5>
+                    <div id="Nom"></div>
+                    <div id="DateDeNaissance"></div>
+                  </div>
+                </div>
+
+
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
