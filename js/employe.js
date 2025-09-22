@@ -47,11 +47,15 @@ async function setAvis(avisList) {
 
         let btnValider = window.AppData.makeButton(cardBody, "Valider", ["btn-primary", "btnValider"], async () => {
             const success = await validerAvis(avis['id']);
-            if (success) card.remove()
+            if (success) {
+                card.remove();
+                getAvis();}
         });
         let btnSupprimer = window.AppData.makeButton(cardBody, "Supprimer", ["btn-danger", "btnSupprimer"], async () => {
             const success = await supprimerAvis(avis['id']);
-            if (success) card.remove()
+            if (success) {
+                card.remove();
+                getAvis();}
         });
 
         [pseudo, note, commentaire].forEach(child => { cardBody.appendChild(child); });
@@ -141,11 +145,26 @@ async function setReponses(reponses) {
             });
 
         let btnResolu = window.AppData.makeButton(cardBody, 'Résolu', ["btn-primary", "m-auto", "btnResolu-employe"], async () => {
-            card.remove();
+            await window.AppData.withLoader(async () => {
+                const success= await setStatutResolu(Number(reponse['id']));
+                if (success) {
+                    card.remove();
+                    getReponsesNon();}
+
+                 });            
         })
         covoiturages.appendChild(card);
     }
     covoiturages.after(window.AppData.createEl("div", ["mb-3"]));
+}
+async function setStatutResolu(numId){
+    const result = await window.AppData.apiFetch(`reponse/setStatutResolu/${numId}`, "PUT");
+    if (!result.ok) {
+        console.error("Erreur lors de la mise à jour du statut.", result.message);
+        return null;
+    }
+    window.AppData.showToast('Statut mis à jour avec succès : résolu', "success");
+    return true;
 }
 
 async function emailChauffeur() {
@@ -162,7 +181,6 @@ async function emailChauffeur() {
         return;
     }
     window.AppData.btnEnvoyerEmail.disabled = true;
-    console.log("Email envoyé avec succès.");
     window.AppData.showToast("Email envoyé avec succès.", "success")
     window.AppData.inputMessage.value = "";
     window.AppData.inputMessage.classList.remove("is-valid");

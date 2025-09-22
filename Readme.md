@@ -21,9 +21,10 @@ $ symfony check:requirements # Check minimal requirements for the project
 
 1 . **Register a GPG/SSH Key into your Github account** to push verified commits
 
-2 . Clone the repository (SSH):
+2 . Clone the repositories (SSH):
 ```bash
 $ git clone git@github.com:Leila-33/EcoRideBack.git
+$ git clone git@github.com:Leila-33/EcoRide.git
 $ cd EcoRideBack
 ```
 

@@ -19,7 +19,7 @@ const today = new Date().toISOString().split("T")[0];
 window.AppData.inputDateDeNaissance.setAttribute('max', today);
 window.AppData.inputPhoto.addEventListener("change", () => { window.AppData.validateForm("employe") });
 [window.AppData.inputPhoto, window.AppData.inputNom, window.AppData.inputPrenom, window.AppData.inputPseudo, window.AppData.inputDateDeNaissance, window.AppData.inputEmail, window.AppData.inputTelephone, window.AppData.inputAdresse, window.AppData.inputPassword, window.AppData.inputValidationPassword].forEach(input => {
-  input.addEventListener("input", () => { window.AppData.window.AppData.validateForm("employe"); });
+  input.addEventListener("input", () => {window.AppData.validateForm("employe"); });
 })
 window.AppData.btnInscription.disabled = true;
 window.AppData.btnInscription.addEventListener("click", async () => { await window.AppData.withLoader(InscrireEmploye) });
@@ -53,10 +53,10 @@ async function InscrireEmploye() {
   const result = await window.AppData.apiFetch("registration", "POST", body)
   if (!result.ok) {
     console.log(`Erreur lors de l'inscription: ${result.message}.toLowerCase()`);
-    alert(`Erreur lors de l'inscription: ${result.message}.toLowerCase()`);
+    window.AppData.showToast(`Erreur lors de l'inscription: ${result.message.toLowerCase()}`, "danger");
     return null;
   }
-  alert(`Vous venez d'inscrire ${dataForm.get("Prenom")} ${dataForm.get("Nom")}.`);
+  window.AppData.showToast(`Vous venez d'inscrire ${dataForm.get("Prenom")} ${dataForm.get("Nom")}.`, "success");
   [window.AppData.inputPhoto, window.AppData.inputNom, window.AppData.inputPrenom, window.AppData.inputPseudo, window.AppData.inputDateDeNaissance, window.AppData.inputEmail, window.AppData.inputTelephone,
   window.AppData.inputAdresse, window.AppData.inputPassword, window.AppData.inputValidationPassword].forEach(input => { input.value = ""; input.classList.remove('is-valid'); });
 

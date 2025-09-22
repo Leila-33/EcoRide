@@ -63,7 +63,8 @@ function setCovoiturages(covoiturages, div) {
         const heureDepart = window.AppData.createEl("p", ["item4", "text-center", "my-auto"], i['heureDepart']);
         const lieuDepart = window.AppData.createEl("p", ["item5", "my-auto"], i['lieuDepart']);
 
-        const duree = window.AppData.createEl("p", ["item6", "my-auto"], `Durée : ${window.AppData.toHours(new Date(i['dateArrivee'].replace("00:00", i['heureArrivee'])) - new Date(i['dateDepart'].replace("00:00", i['heureDepart'])))}`);
+        const duree = window.AppData.createEl("p", ["item6", "my-auto"],`Durée : ${window.AppData.toHours(new Date(`${i['dateArrivee']}T${i['heureArrivee']}`) - new Date(`${i['dateDepart']}T${i['heureDepart']}`))}`);
+
         const prix = window.AppData.createEl("p", ["item7", "my-auto"], `Prix : ${window.AppData.formatPrix(i['prixPersonne'])} crédits`);
 
         const arrivee = window.AppData.createEl("p", ["item9", "text-center"], "Arrivée :");

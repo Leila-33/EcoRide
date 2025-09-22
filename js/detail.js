@@ -143,7 +143,7 @@ async function setCovoiturage(i) {
     departDate.textContent = new Intl.DateTimeFormat("fr-FR").format(new Date(i['dateDepart']));
     heureDepart.textContent = i['heureDepart'];
     lieuDepart.textContent = i['lieuDepart'];
-    duree.textContent = `Durée : ${window.AppData.toHours(new Date(i['dateArrivee'].replace("00:00", i['heureArrivee'])) - new Date(i['dateDepart'].replace("00:00", i['heureDepart'])))}`;
+    duree.textContent = `Durée : ${window.AppData.toHours(new Date(`${i['dateArrivee']}T${i['heureArrivee']}`) - new Date(`${i['dateDepart']}T${i['heureDepart']}`))}`;
     prixPersonne.textContent = `Prix : ${i['prixPersonne']} crédits`;
     pseudo.textContent = i['chauffeur']['pseudo'];
     arrivee.textContent = "Arrivée :";
@@ -276,6 +276,7 @@ async function participerCovoiturage() {
 
 // Affiche le statut du covoiturage pour l'invité
 function setButtonInvite() {
+    btnStatut.disabled = (nbPlace == 0 || statut != "en attente")
     if (statut != "en attente") {
         btnStatut.textContent = 'Covoiturage démarré';
     }
@@ -298,6 +299,8 @@ async function setStatutButton() {
         setButtonChauffeur();
         // Si l'utilisateur est non chauffeur et connecté
     } else if (window.AppData.isConnected()) {
+            console.log(idUser);
+            console.log(users);
         if (includes(users, idUser)) {// Si l'utilisateur est participant
             await setButtonPassagerParticipant();
         }
@@ -479,7 +482,7 @@ async function LaisserCommentaire() {
     let body = {
         "commentaire": CommentaireInput.value.trim()
     };
-    let result = await window.AppData.apiFetch("commentaire/${numId}", "POST", body);
+    let result = await window.AppData.apiFetch(`commentaire/${numId}`, "POST", body);
     if (!result.ok) {
         window.AppData.showToast(`Erreur lors de l'envoi du commentaire : ${result.message}`, "danger");
         return;
@@ -516,7 +519,7 @@ async function clickStatutAndButton() {
 
 // Obtenir les avis
 async function getAvis() {
-    const result = await window.AppData.apiFetch(`avis/allAvis/${Number(idChauffeur)}`);
+    const result = await window.AppData.apiFetch(`avis/allAvis/${Number(idChauffeur)}`, "GET", null, false);
     if (!result.ok) {
         console.error("Impossible de récupérer les avis.", result.message);
         return null;

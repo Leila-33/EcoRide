@@ -427,7 +427,7 @@ async function updateInfos() {
     const result = await window.AppData.apiFetch("account/edit", "PUT", body);
     if (!result.ok) {
         console.error("Erreur lors de la mise à jour des données utilisateur", result.message);
-        window.AppData.showToast(`Erreur lors de la mise à jour des données utilisateur ${result.message}`);
+        window.AppData.showToast(`Erreur lors de la mise à jour des données utilisateur ${result.message}`, "danger");
         return;
     }
     const userResult = await window.AppData.getInfosUser();
@@ -788,7 +788,7 @@ async function setCovoiturages(covoiturages, div) {
         const heureArrivee = window.AppData.createEl("p", ["item11", "text-center"], i['heureArrivee']);
         const lieuArrivee = window.AppData.createEl("p", ["item12"], i['lieuArrivee']);
 
-        const duree = window.AppData.createEl("p", ["item6", "my-auto"], `Durée : ${window.AppData.toHours(new Date(i['dateArrivee'].replace("00:00", i['heureArrivee'])) - new Date(i['dateDepart'].replace("00:00", i['heureDepart'])))}`);
+        const duree = window.AppData.createEl("p", ["item6", "my-auto"], `Durée : ${window.AppData.toHours(new Date(`${i['dateArrivee']}T${i['heureArrivee']}`) - new Date(`${i['dateDepart']}T${i['heureDepart']}`))}`);
         const prix = window.AppData.createEl("p", ["item7", "my-auto"], `Prix : ${window.AppData.formatPrix(i['prixPersonne'])} crédits`);
         const pseudo = window.AppData.createEl("p", ["item8", "text-center"], i['chauffeur']['pseudo']);
 
@@ -806,7 +806,7 @@ async function setCovoiturages(covoiturages, div) {
             tasks.push((async () => {
                 let nbReponses = await getNbReponses(i['id']);
                 // Variable valant true si tous les participants ont répondu au covoiturage
-                let tousRepondu = i['passagers'].length === nbReponses['nbReponses'];
+                let tousRepondu = i['users'].length === nbReponses['nbReponses'];
                 // Le covoiturage peut être supprimé uniquement si le statut est terminé et si tous les participants ont validé leur voyage
                 if (tousRepondu) {
                     ajouterBoutonSupprimer(estChauffeur, cardBody, i['id']);
