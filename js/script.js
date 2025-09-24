@@ -4,6 +4,12 @@ const signoutBtn = document.getElementById("signout-btn");
 const nbCovoituragesNotResponded = document.getElementById("nbCovoituragesNotResponded");
 
 window.AppData = window.AppData || {};
+window.AppData.urlPhoto;
+if (window.location.hostname === 'localhost'){
+    window.AppData.urlPhoto = 'http://localhost:8000/';
+} else {
+    window.AppData.urlPhoto = 'https://ecoride.e-mecaformation.com/';
+}
 window.AppData.apiUrl = "https://127.0.0.1:8000/api/";
 window.AppData.RoleCookieName = "role";
 window.AppData.notRespondedCovoiturages = null;

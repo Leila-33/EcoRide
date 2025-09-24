@@ -55,7 +55,7 @@ function setCovoiturages(covoiturages, div) {
         const cardBody = window.AppData.createEl("div", ["card-body", "shadow-sm", "p-3", "bg-body-tertiary", "rounded", "container1"]);
         if (i['chauffeur']['photo']){
             const img = window.AppData.createEl("img", ["item1","imgAccount", "mx-auto", "my-auto"]);
-            img.src = `http://localhost:8000/${i['chauffeur']['photo']}`;
+            img.src = `${window.AppData.urlPhoto}${i['chauffeur']['photo']}`;
             img.alt = "Photo de profil"
             cardBody.appendChild(img)
         }

@@ -140,7 +140,7 @@ async function setCovoiturage(i) {
     btnAnnuler?.remove();
       if (i['chauffeur']['photo']){
             const image = window.AppData.createEl("img", ["imgAccount"]);
-            image.src = `http://localhost:8000/${i['chauffeur']['photo']}`;
+            image.src = `${window.AppData.urlPhoto}/${i['chauffeur']['photo']}`;
             image.alt = "Photo de profil"
             img.appendChild(image)
         }

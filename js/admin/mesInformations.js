@@ -23,8 +23,15 @@ async function initData() {
 
 // Fonction permettant d'afficher les informations de l'utilisateur
 function setUser(user) {
-    imgInfos.src = user['photo'] ? `http://localhost:8000/${user['photo']}` : "";
-    imgInfos.alt = "Photo de profil";
+        if (user['photo']){
+            const img = window.AppData.createEl('img', ['imgAccount']);
+            img.src = `${window.AppData.urlPhoto}/${user['photo']}`;
+            img.alt = "Photo de profil"
+            imgInfos.appendChild(img);
+        }
+        else {
+            window.AppData.addLettre(imgInfos, user['pseudo']);
+        };
     mesInfos.textContent = user['pseudo'];
     Nom.textContent = `${user['nom']} ${user['prenom']}`;
     const dateNaissance = user['dateNaissance'] ? new Intl.DateTimeFormat("fr-FR").format(new Date(user['dateNaissance'])) : '';
