@@ -471,3 +471,14 @@ window.AppData.formatPrix = function (valeur) {
     if (isNaN(nombre)) return valeur;
     return nombre.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
+// Image  de profil par défault
+window.AppData.addLettre = function (image,pseudo, chauffeur=false){
+    image.innerHTML="";
+    const div = window.AppData.createEl('div', ['lettre']);
+    div.textContent=pseudo.charAt(0);
+    if (chauffeur){
+        div.classList.add('item1')
+    }
+    image.appendChild(div);
+
+}

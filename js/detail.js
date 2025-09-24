@@ -138,7 +138,15 @@ async function getCovoiturage() {
 async function setCovoiturage(i) {
     note.textContent = i['noteMoyenne'] != null ? `Note : ${i['noteMoyenne']}/5` : '';
     btnAnnuler?.remove();
-    img.setAttribute("src", `http://localhost:8000/${i['chauffeur']['photo']}`);
+      if (i['chauffeur']['photo']){
+            const image = window.AppData.createEl("img", ["imgAccount"]);
+            image.src = `http://localhost:8000/${i['chauffeur']['photo']}`;
+            image.alt = "Photo de profil"
+            img.appendChild(image)
+        }
+        else {
+            window.AppData.addLettre(img, i['chauffeur']['pseudo']);
+        };
     depart.textContent = "Départ :";
     departDate.textContent = new Intl.DateTimeFormat("fr-FR").format(new Date(i['dateDepart']));
     heureDepart.textContent = i['heureDepart'];

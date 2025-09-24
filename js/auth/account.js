@@ -55,13 +55,22 @@ window.AppData.btnInscription = document.getElementById("btnInscription");
 const btnDeletePhoto = document.getElementById("btnDeletePhoto");
 const today = new Date().toISOString().split("T")[0];
 window.AppData.inputDateDeNaissance.setAttribute('max', today);
-window.AppData.inputPhoto.addEventListener("change", () => { window.AppData.validateForm("modification") });
+window.AppData.inputPhoto.addEventListener("change", () => { 
+    window.AppData.validateForm("modification");
+    addPhoto();
+ });
 [window.AppData.inputNom, window.AppData.inputPrenom, window.AppData.inputDateDeNaissance, window.AppData.inputTelephone].forEach(input => {
-    input.addEventListener("input", () => { window.AppData.validateForm("modification") });
+    input.addEventListener("input", () => { window.AppData.validateForm("modification"); });
 })
 window.AppData.btnInscription.addEventListener("click", async () => await window.AppData.withLoader(updateInfos));
 window.AppData.btnInscription.disabled = true;
-btnDeletePhoto.addEventListener('click', () => { btnDeletePhoto.disabled = true; deletePhoto = true; imgInfos1.src = ""; });
+btnDeletePhoto.addEventListener('click', () => { 
+    btnDeletePhoto.disabled = true; 
+    deletePhoto = true; 
+    window.AppData.addLettre(imgInfos1, window.AppData.inputPseudo.value);
+    window.AppData.inputPhoto.value = ''; 
+    window.AppData.validateForm("modification");});
+
 let ListElement = [];
 let idUser = null, deletePhoto = false, vehiculesLength = 0;
 // Modale "Modifier mon mot de passe"
@@ -368,11 +377,44 @@ function validatePreferencesForm(btnPreferences, inputPropriete, inputValeur) {
     btnPreferences.disabled = !(proprieteOk && valeurOk);
 }
 
+// Ajouter une photo à la modale "Modifier mes informations personnelles"
+function addPhoto(){
+        const file = window.AppData.inputPhoto.files[0];
+        if (file){
+            imgInfos1.innerHTML="";
+            const img = window.AppData.createEl('img', ['imgAccount']);
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                img.src = e.target.result;
+                }
+            reader.readAsDataURL(file)
+            imgInfos1.appendChild(img);
+            btnDeletePhoto.disabled=false;
+}
+}
 
 // Fonction permettant d'afficher les informations de l'utilisateur dans la carte
 // "Mes informations personnelles" et dans la modale "Modifier mes informations personnelles"
 function setUser(user) {
-    [imgInfos, imgInfos1].forEach(img => { img.src = user['photo'] ? `http://localhost:8000/${user['photo']}` : ""; img.alt = "Photo de profil" });
+    idUser = user['id'];
+    window.AppData.inputNom.value = user['nom'];
+    window.AppData.inputPrenom.value = user['prenom'];
+    window.AppData.inputPseudo.value = user['pseudo'];
+    window.AppData.inputDateDeNaissance.value = user['dateNaissance'];
+    window.AppData.inputEmail.value = user['email'];
+    window.AppData.inputTelephone.value = user['telephone'];
+    window.AppData.inputAdresse.value = user['adresse'];
+
+    [imgInfos, imgInfos1].forEach(image => { 
+        if (user['photo']){
+            const img = window.AppData.createEl('img', ['imgAccount']);
+            img.src = `http://localhost:8000/${user['photo']}`;
+            img.alt = "Photo de profil"
+            image.appendChild(img);
+        }
+        else {
+            window.AppData.addLettre(image, user['pseudo']);
+        }});
     btnDeletePhoto.disabled = user['photo'] ? false : true;
     deletePhoto = false;
     mesInfos1.textContent = user['pseudo'];
@@ -388,15 +430,6 @@ function setUser(user) {
     Email.textContent = `Email : ${user['email']}`;
     Telephone.textContent = `Téléphone : ${user['telephone']}`;
     Adresse.textContent = `Adresse : ${user['adresse']}`
-
-    idUser = user['id'];
-    window.AppData.inputNom.value = user['nom'];
-    window.AppData.inputPrenom.value = user['prenom'];
-    window.AppData.inputPseudo.value = user['pseudo'];
-    window.AppData.inputDateDeNaissance.value = user['dateNaissance'];
-    window.AppData.inputEmail.value = user['email'];
-    window.AppData.inputTelephone.value = user['telephone'];
-    window.AppData.inputAdresse.value = user['adresse'];
 }
 
 
@@ -775,9 +808,15 @@ async function setCovoiturages(covoiturages, div) {
         const card = window.AppData.createEl("div", ["card", "mb-3"]);
         const cardBody = window.AppData.createEl("div", ["card-body", "shadow-sm", "p-3", "bg-body-tertiary", "rounded"]);
         const container = window.AppData.createEl("div", ["container1"]);
-        const img = window.AppData.createEl("img", ["item1", "mx-auto", "my-auto"]);
-        img.src = `http://localhost:8000/${i['chauffeur']['photo']}`;
-
+     if (i['chauffeur']['photo']){
+            const img = window.AppData.createEl("img", ["item1","imgAccount", "mx-auto", "my-auto"]);
+            img.src = `http://localhost:8000/${i['chauffeur']['photo']}`;
+            img.alt = "Photo de profil"
+            container.appendChild(img)
+        }
+        else {
+            window.AppData.addLettre(container, i['chauffeur']['pseudo'], true);
+        };
         const depart = window.AppData.createEl("p", ["item2", "my-auto"], "Départ :");
         const dateDepart1 = window.AppData.createEl("p", ["item3", "my-auto"], new Intl.DateTimeFormat("fr-FR").format(new Date(i['dateDepart'])));
         const heureDepart = window.AppData.createEl("p", ["item4", "text-center", "my-auto"], i['heureDepart']);
@@ -823,7 +862,7 @@ async function setCovoiturages(covoiturages, div) {
                 }
             })());
         }
-        [img, depart, dateDepart1, heureDepart, lieuDepart, arrivee, dateArrivee, heureArrivee, lieuArrivee, duree, prix,
+        [depart, dateDepart1, heureDepart, lieuDepart, arrivee, dateArrivee, heureArrivee, lieuArrivee, duree, prix,
             pseudo, place, energie, btnDetail].forEach(child => { container.appendChild(child); });
         cardBody.appendChild(container);
         card.appendChild(cardBody);

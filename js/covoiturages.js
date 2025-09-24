@@ -53,11 +53,15 @@ function setCovoiturages(covoiturages, div) {
         const noteChauffeur = window.AppData.createEl("p", ["item82", "text-center"], i['noteMoyenne'] != null ? `Note : ${i['noteMoyenne']}/5` : '');
         const card = window.AppData.createEl("div", ["card", "mb-3"]);
         const cardBody = window.AppData.createEl("div", ["card-body", "shadow-sm", "p-3", "bg-body-tertiary", "rounded", "container1"]);
-
-        const img = window.AppData.createEl("img", ["item1", "mx-auto", "my-auto"]);
-        img.src = `http://localhost:8000/${i['chauffeur']['photo']}`;
-        img.alt = "Photo du conducteur";
-
+        if (i['chauffeur']['photo']){
+            const img = window.AppData.createEl("img", ["item1","imgAccount", "mx-auto", "my-auto"]);
+            img.src = `http://localhost:8000/${i['chauffeur']['photo']}`;
+            img.alt = "Photo de profil"
+            cardBody.appendChild(img)
+        }
+        else {
+            window.AppData.addLettre(cardBody, i['chauffeur']['pseudo'], true);
+        };
         const depart = window.AppData.createEl("p", ["item2", "my-auto"], "Départ :");
         const dateDepart = window.AppData.createEl("p", ["item3", "my-auto"], new Intl.DateTimeFormat("fr-FR").format(new Date(i['dateDepart'])));
         const heureDepart = window.AppData.createEl("p", ["item4", "text-center", "my-auto"], i['heureDepart']);
@@ -81,7 +85,7 @@ function setCovoiturages(covoiturages, div) {
         let btnDetail = window.AppData.createEl('a', ["btn", "btn-primary", "btnDetail"], 'Détail');
         btnDetail.href = "/detail" + "?id=" + i['id'];
 
-        [img, depart, dateDepart, heureDepart, lieuDepart, duree, prix, item, arrivee, dateArrivee,
+        [depart, dateDepart, heureDepart, lieuDepart, duree, prix, item, arrivee, dateArrivee,
             heureArrivee, lieuArrivee, place, energie, pseudo, noteChauffeur, btnDetail].forEach(el => cardBody.appendChild(el));
         item.appendChild(pseudo);
         item.appendChild(noteChauffeur);
