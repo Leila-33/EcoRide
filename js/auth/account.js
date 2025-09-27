@@ -400,7 +400,6 @@ function setUser(user) {
     window.AppData.inputNom.value = user['nom'];
     window.AppData.inputPrenom.value = user['prenom'];
     window.AppData.inputPseudo.value = user['pseudo'];
-    window.AppData.inputDateDeNaissance.value = user['dateNaissance'];
     window.AppData.inputEmail.value = user['email'];
     window.AppData.inputTelephone.value = user['telephone'];
     window.AppData.inputAdresse.value = user['adresse'];
@@ -423,7 +422,8 @@ function setUser(user) {
     if (user['dateNaissance']) {
         const d = new Date(user['dateNaissance']);
         if (!isNaN(d.getTime())) {
-            dateNaissance = new Intl.DateTimeFormat("fr-FR").format(d)
+            dateNaissance = new Intl.DateTimeFormat("fr-FR").format(d);
+            window.AppData.inputDateDeNaissance.value = new Intl.DateTimeFormat("fr-FR").format(d);
         }
     }
     DateDeNaissance.textContent = `Date de naissance : ${dateNaissance}`;
@@ -818,27 +818,31 @@ async function setCovoiturages(covoiturages, div) {
         else {
             window.AppData.addLettre(container, i['chauffeur']['pseudo'], true);
         };
-        const depart = window.AppData.createEl("p", ["item2", "my-auto"], "Départ :");
+        const pseudo = window.AppData.createEl("p", ["item81", "my-auto"], i['chauffeur']['pseudo']);
+        const noteChauffeur = window.AppData.createEl("p", ["item82", "my-auto"], i['noteMoyenne'] != null ? `Note : ${i['noteMoyenne']}/5` : '');
+        const item = document.createElement("div");
+        item.appendChild(pseudo);
+        item.appendChild(noteChauffeur);
+        const depart = window.AppData.createEl("p", ["item2","my-auto"], "Départ :");
         const dateDepart1 = window.AppData.createEl("p", ["item3", "my-auto"], new Intl.DateTimeFormat("fr-FR").format(new Date(i['dateDepart'])));
-        const heureDepart = window.AppData.createEl("p", ["item4", "text-center", "my-auto"], i['heureDepart']);
+        const heureDepart = window.AppData.createEl("p", ["item4", "my-auto"], i['heureDepart']);
         const lieuDepart = window.AppData.createEl("p", ["item5", "my-auto"], i['lieuDepart']);
 
-        const arrivee = window.AppData.createEl("p", ["item9", "text-center"], "Arrivée :");
-        const dateArrivee = window.AppData.createEl("p", ["item10"], new Intl.DateTimeFormat("fr-FR").format(new Date(i['dateArrivee'])));
-        const heureArrivee = window.AppData.createEl("p", ["item11", "text-center"], i['heureArrivee']);
-        const lieuArrivee = window.AppData.createEl("p", ["item12"], i['lieuArrivee']);
+        const arrivee = window.AppData.createEl("p", ["item9", "my-auto"], "Arrivée :");
+        const dateArrivee = window.AppData.createEl("p", ["item10", "my-auto"], new Intl.DateTimeFormat("fr-FR").format(new Date(i['dateArrivee'])));
+        const heureArrivee = window.AppData.createEl("p", ["item11", "my-auto"], i['heureArrivee']);
+        const lieuArrivee = window.AppData.createEl("p", ["item12", "my-auto"], i['lieuArrivee']);
 
         const duree = window.AppData.createEl("p", ["item6", "my-auto"], `Durée : ${window.AppData.toHours(new Date(`${i['dateArrivee']}T${i['heureArrivee']}`) - new Date(`${i['dateDepart']}T${i['heureDepart']}`))}`);
         const prix = window.AppData.createEl("p", ["item7", "my-auto"], `Prix : ${window.AppData.formatPrix(i['prixPersonne'])} crédits`);
-        const pseudo = window.AppData.createEl("p", ["item8", "text-center"], i['chauffeur']['pseudo']);
 
 
         let placeText = i['nbPlaces'] === 0 ? "Complet" : i['nbPlaces'] === 1 ? "1 place restante" : `${i['nbPlaces']} places restantes`;
-        const place = window.AppData.createEl("p", ["item13"], placeText);
-        const energie = window.AppData.createEl("p", ["item14"], i['energie'] == "Essence" ? "Trajet non écologique" : "Trajet écologique");
+        const place = window.AppData.createEl("p", ["item13", "my-auto"], placeText);
+        const energie = window.AppData.createEl("p", ["item14", "my-auto"], i['energie'] == "Essence" ? "Trajet non écologique" : "Trajet écologique");
 
 
-        let btnDetail = window.AppData.createEl('a', ["btn", "btn-primary", "btnDetail"], 'Détail');
+        let btnDetail = window.AppData.createEl('a', ["btn", "btn-primary"], 'Détail');
         btnDetail.href = `/detail?id=${i['id']}`;
 
         let estChauffeur = (idUser === i['chauffeur']['id']);
@@ -863,8 +867,10 @@ async function setCovoiturages(covoiturages, div) {
                 }
             })());
         }
-        [depart, dateDepart1, heureDepart, lieuDepart, arrivee, dateArrivee, heureArrivee, lieuArrivee, duree, prix,
-            pseudo, place, energie, btnDetail].forEach(child => { container.appendChild(child); });
+        adjustButtonsForMobile(btnDetail, item); 
+        window.addEventListener("resize",() => adjustButtonsForMobile(btnDetail, item));
+        [item, depart, dateDepart1, heureDepart, lieuDepart, arrivee, dateArrivee, heureArrivee, lieuArrivee, duree, prix,
+        place, energie, btnDetail].forEach(child => { container.appendChild(child); });
         cardBody.appendChild(container);
         card.appendChild(cardBody);
 
@@ -883,10 +889,32 @@ async function setCovoiturages(covoiturages, div) {
         }
         let theFirstChild = div.firstChild;
         div.insertBefore(card, theFirstChild);
-    }
+    
     await Promise.all(tasks);
     div.after(window.AppData.createEl("div", ["mb-3"]));
+    }
 }
+
+
+
+function adjustButtonsForMobile(btn, item){
+    if (window.innerWidth <= 768){
+        item.style.gridColumn = "1/3";
+        item.style.gridRow = "auto"; 
+        btn.style.gridColumn = "1/3";
+        btn.style.gridRow = "auto";
+        btn.style.margin = "auto";
+   }
+    else{
+        item.style.gridColumn = "1/2";
+        item.style.gridRow = "3/4";
+        btn.style.gridColumn ="8/9";
+        btn.style.gridRow ="2/3";
+        btn.style.margin = "auto";
+
+    }}
+
+
 
 function ajouterBoutonSupprimer(estChauffeur, container, id) {
     const actionDiv = window.AppData.createEl("div", ["action-image-buttons"]);

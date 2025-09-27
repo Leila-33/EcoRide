@@ -38,7 +38,7 @@ const note = document.getElementById("note");
 const avisContainer = document.getElementById("avis");
 const question = document.getElementById("question");
 let statut = "", idChauffeur = null, userResponse = null, prix = 0, users = [], nbPlace = 0, idUser = null, pseudoUser = "", emailUser = "", Chauffeur = false, Passager = false, isAdminOrEmploye = false;
-let btnStatut = window.AppData.makeButton(container, "Statut", ["btnDetail", "btn-primary", "my-auto"], () => { })
+let btnStatut = window.AppData.makeButton(null, "Statut", ["btn-primary", "my-auto"], () => { })
 let btnAnnuler;
 
 //Modale "Laisser un avis"
@@ -138,6 +138,7 @@ async function getCovoiturage() {
 async function setCovoiturage(i) {
     note.textContent = i['noteMoyenne'] != null ? `Note : ${i['noteMoyenne']}/5` : '';
     btnAnnuler?.remove();
+    btnStatut?.remove();
       if (i['chauffeur']['photo']){
             const image = window.AppData.createEl("img", ["imgAccount"]);
             image.src = `${window.AppData.urlPhoto}/${i['chauffeur']['photo']}`;
@@ -179,8 +180,36 @@ async function setCovoiturage(i) {
     nbPlace = i['nbPlaces'];
     statut = i["statut"];
     await setStatutButton();
+    const nbParams = i["chauffeur"]["parametres"].length;
+    adjustButtonsForMobile(nbParams); 
+    window.addEventListener("resize", () => adjustButtonsForMobile(nbParams));
 }
 
+function moveButtonsToEnd(nb){
+    const row = 13 + Math.ceil(nb/2);
+    console.log(row);
+    btnStatut.style.gridColumn = "1/2";
+    btnStatut.style.gridRow = `${row}/${row+1}`;
+    if (btnAnnuler){
+        container.appendChild(btnAnnuler);
+        btnAnnuler.style.gridColumn = "2/3";
+        btnAnnuler.style.gridRow = `${row}/${row+1}`;
+    }
+    
+}
+function adjustButtonsForMobile(nb){
+    container.appendChild(btnStatut);
+    if (window.innerWidth <= 768){
+        moveButtonsToEnd(nb);
+    }
+    else{
+       btnStatut.style.gridColumn ="8/9";
+        btnStatut.style.gridRow = "2/3";
+        if (btnAnnuler){
+            btnAnnuler.style.gridColumn ="8/9";
+            btnAnnuler.style.gridRow = "3/4";}
+    }
+    }
 
 
 
@@ -188,7 +217,7 @@ async function setCovoiturage(i) {
 function setButtonChauffeur() {
     switch (statut) {
         case "en attente":
-            btnAnnuler = window.AppData.makeButton(container, "Annuler", ["btnDetail1", "btn-danger", "my-auto"], () => { myModalAnnulerCovoiturage.show(); })
+            btnAnnuler = window.AppData.makeButton(container, "Annuler", ["btn-danger", "my-auto"], () => { myModalAnnulerCovoiturage.show(); })
             btnStatut.textContent = 'Démarrer';
             break;
         case "en cours":
@@ -206,7 +235,7 @@ async function setButtonPassagerParticipant() {
     switch (statut) {
         case "en attente":
             btnStatut.textContent = 'En attente';
-            btnAnnuler = window.AppData.makeButton(container, "Annuler", ["btnDetail1", "btn-danger", "my-auto"], () => {
+            btnAnnuler = window.AppData.makeButton(container, "Annuler", ["btn-danger", "my-auto"], () => {
                 annulerCovoiturageModal.textContent = `En annulant, un remboursement de ${window.AppData.formatPrix(prix)} crédits sera effectué sur votre compte.`;
                 myModalAnnulerCovoiturage.show();
             })
@@ -307,8 +336,6 @@ async function setStatutButton() {
         setButtonChauffeur();
         // Si l'utilisateur est non chauffeur et connecté
     } else if (window.AppData.isConnected()) {
-            console.log(idUser);
-            console.log(users);
         if (includes(users, idUser)) {// Si l'utilisateur est participant
             await setButtonPassagerParticipant();
         }
