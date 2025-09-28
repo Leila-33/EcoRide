@@ -1,7 +1,13 @@
 <body class="sb-nav-fixed">
+<nav class="navbar navbar-light bg-light px-3">
+<button class="btn btn-primary d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar" aria-controls="offcanvasSidebar">
+ <i class="bi bi-list"></i>
+</button>
+</nav>
+
 
     <div id="layoutSidenav">
-        <div id="layoutSidenav_nav">
+        <div id="layoutSidenav_nav" class="">
             <nav class="sb-sidenav accordion sb-sidenav-light" id="sidenavAccordion">
                 <div class="sb-sidenav-menu d-flex flex-column vh-100">
                     <div class="nav">
@@ -31,33 +37,66 @@
                 </div>
             </nav>
         </div>
+
+
+<div class="offcanvas offcanvas-start d-lg-none" tabindex="-1" id="offcanvasSidebar" aria-labelledby="offcanvasSidebarLabel">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title" id="offcanvasSidebarLabel">Menu</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body">
+    <div class="sb-sidenav-menu">
+        <div class="nav flex-column">
+        <div class="sb-sidenav-menu-heading"> Principal </div>
+        <a class="nav-link" href="/admin"> Tableau de bord </a>
+        <div class="sb-sidenav-menu-heading"> Interface </div>
+        <a class="nav-link" href="/createaccount"> Créer un compte employé </a>
+        <a class="nav-link" href="/suspendre"> Suspendre un compte </a>
+        <a class="nav-link" href="/mesInformations"> Mes informations personnelles </a>
+
+  </div>
+</div>
+  </div>
+  </div>
         <div id="layoutSidenav_content">
             <div class="container-fluid px-4">
                 <h1 class="mt-4">Tableau de bord</h1>
                 <ol class="breadcrumb mb-4">
                     <li class="breadcrumb-item active"><a href="admin">Tableau de bord</a></li>
                 </ol>
-
+                <div class="row"
+                <div class="col-12">
                 <div class="card shadow p-3 bg-body-tertiary rounded  mb-4 text-center""> 
-                            <div class=" card-header">
+                            <div class="card-header">
                     <i class="fas fa-chart-area me-1"></i>
                     Nombre de covoiturages par jour
                 </div>
-                <div class="card-body"><canvas id="myAreaChart" width="100%" height="30"></canvas></div>
+                <div class="card-body">
+                    <div style="position:relative; height:40vh; width:100%">
+                        <canvas id="myAreaChart"></canvas>
+                    </div></div>
                 <div class="card-footer small text-muted" id="updatedAtChart"></div>
             </div>
+            </div>
+            </div>
             <div class="row">
+                <div class="col-12">
                 <div class="card shadow p-3 bg-body-tertiary rounded  mb-4 text-center">
-
                     <div class="card-header">
                         <i class="fas fa-chart-bar me-1"></i>
                         Nombre de credits gagnés par jour
                     </div>
-                    <div class="card-body"><canvas id="myBarChart" width="100%" height="30"></canvas></div>
+                    <div class="card-body">
+                    <div style="position:relative; height:40vh; width:100%">
+                        <canvas id="myBarChart" "></canvas>
+                    </div>
+                    </div>
                     <div class="card-footer small text-muted" id="updatedAtBarChart"></div>
                 </div>
-
-                <div class="col-lg-6 m-auto">
+                </div>
+        </div>
+            <div class="row">
+                <div class="col-lg-6 col-md-12 m-auto">
                     <div class="card shadow p-3 bg-body-tertiary rounded  mb-4 text-center">
                         <div class="card-header">
                             Nombre de crédits total

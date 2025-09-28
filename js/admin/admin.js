@@ -66,6 +66,8 @@ function drawChart() {
       }],
     },
     options: {
+      responsive: true,
+      maintainAspectRatio: false,
       scales: {
         x: {
           time: {
@@ -119,7 +121,7 @@ async function nombreCreditsTotal() {
     window.AppData.showToast(result.message, "danger")
     return;
   }
-  let newSpan = window.AppData.createEl("span", ["credit-total"], result.data["creditTotal"])
+  let newSpan = window.AppData.createEl("span", ["credit-total"], window.AppData.formatPrix(result.data["creditTotal"]))
   let creditsText = window.AppData.createEl("span", [], " crédits");
   creditsTotal.appendChild(newSpan);
   creditsTotal.appendChild(creditsText);
@@ -141,6 +143,8 @@ function drawBarChart() {
       }],
     },
     options: {
+      responsive: true,
+      maintainAspectRatio: false,
       scales: {
         x: {
           time: {

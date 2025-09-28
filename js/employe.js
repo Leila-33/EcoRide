@@ -125,8 +125,7 @@ async function setReponses(reponses) {
         let num = window.AppData.createEl("p", ["mx-auto", "num-employe"], `Covoiturage n°${covoiturage['id']}`);
         let prix = window.AppData.createEl("p", ["my-auto"], `Prix : ${window.AppData.formatPrix(covoiturage['prixPersonne'])} crédits`);
 
-        [depart, dateDepart, heureDepart, lieuDepart, arrivee, dateArrivee, heureArrivee, lieuArrivee, participant, commentaire, email,
-            num, prix].forEach(child => cardBody.appendChild(child));
+        [num, depart, dateDepart, heureDepart, lieuDepart, arrivee, dateArrivee, heureArrivee, lieuArrivee, prix,email, participant, commentaire].forEach(child => cardBody.appendChild(child));
         card.appendChild(cardBody);
 
         let btnContacter = window.AppData.makeButton(cardBody, 'Contacter le chauffeur', ["btn-primary", "m-auto", "btnContacter-employe"], () => {
@@ -153,10 +152,19 @@ async function setReponses(reponses) {
 
                  });            
         })
+
+
         covoiturages.appendChild(card);
     }
     covoiturages.after(window.AppData.createEl("div", ["mb-3"]));
 }
+
+
+
+
+
+
+
 async function setStatutResolu(numId){
     const result = await window.AppData.apiFetch(`reponse/setStatutResolu/${numId}`, "PUT");
     if (!result.ok) {

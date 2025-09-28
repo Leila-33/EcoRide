@@ -1,5 +1,9 @@
 <body class="sb-nav-fixed">
-
+<nav class="navbar navbar-light bg-light px-3">
+<button class="btn btn-primary d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar" aria-controls="offcanvasSidebar">
+ <i class="bi bi-list"></i>
+</button>
+</nav>
   <div id="layoutSidenav">
     <div id="layoutSidenav_nav">
       <nav class="sb-sidenav accordion sb-sidenav-light" id="sidenavAccordion">
@@ -31,6 +35,25 @@
         </div>
       </nav>
     </div>
+    <div class="offcanvas offcanvas-start d-lg-none" tabindex="-1" id="offcanvasSidebar" aria-labelledby="offcanvasSidebarLabel">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title" id="offcanvasSidebarLabel">Menu</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body">
+    <div class="sb-sidenav-menu">
+        <div class="nav flex-column">
+        <div class="sb-sidenav-menu-heading"> Principal </div>
+        <a class="nav-link" href="/admin"> Tableau de bord </a>
+        <div class="sb-sidenav-menu-heading"> Interface </div>
+        <a class="nav-link" href="/createaccount"> Créer un compte employé </a>
+        <a class="nav-link" href="/suspendre"> Suspendre un compte </a>
+        <a class="nav-link" href="/mesInformations"> Mes informations personnelles </a>
+
+  </div>
+</div>
+  </div>
+  </div>
     <div id="layoutSidenav_content">
       <div class="container-fluid px-4">
         <h1 class="mt-4">Suspendre un compte</h1>

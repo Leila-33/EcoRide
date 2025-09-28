@@ -38,7 +38,7 @@ const note = document.getElementById("note");
 const avisContainer = document.getElementById("avis");
 const question = document.getElementById("question");
 let statut = "", idChauffeur = null, userResponse = null, prix = 0, users = [], nbPlace = 0, idUser = null, pseudoUser = "", emailUser = "", Chauffeur = false, Passager = false, isAdminOrEmploye = false;
-let btnStatut = window.AppData.makeButton(null, "Statut", ["btn-primary", "my-auto"], () => { })
+let btnStatut = window.AppData.makeButton(null, "Statut", ["btn-primary", "m-auto"], () => { })
 let btnAnnuler;
 
 //Modale "Laisser un avis"
@@ -186,23 +186,29 @@ async function setCovoiturage(i) {
 }
 
 function moveButtonsToEnd(nb){
-    const row = 13 + Math.ceil(nb/2);
-    console.log(row);
-    btnStatut.style.gridColumn = "1/2";
-    btnStatut.style.gridRow = `${row}/${row+1}`;
+    const row = 11 + Math.ceil((nb-2)/4);
+    btnStatut.style.gridRow = `${row+2}/${row+3}`;
+    question.style.gridColumn = "1/3";
+    question.style.gridRow = `${row}/${row+1}`;    
     if (btnAnnuler){
+        btnStatut.style.gridColumn = "2/3";
         container.appendChild(btnAnnuler);
-        btnAnnuler.style.gridColumn = "2/3";
-        btnAnnuler.style.gridRow = `${row}/${row+1}`;
+        btnAnnuler.style.gridColumn = "3/4";
+        btnAnnuler.style.gridRow = `${row+2}/${row+3}`;
     }
+    else{
+        btnStatut.style.gridColumn = "1/-1";
+
     
-}
+}}
 function adjustButtonsForMobile(nb){
     container.appendChild(btnStatut);
     if (window.innerWidth <= 768){
         moveButtonsToEnd(nb);
     }
     else{
+    question.style.gridColumn = "2/4";
+    question.style.gridRow = "6/7"; 
        btnStatut.style.gridColumn ="8/9";
         btnStatut.style.gridRow = "2/3";
         if (btnAnnuler){
@@ -210,6 +216,31 @@ function adjustButtonsForMobile(nb){
             btnAnnuler.style.gridRow = "3/4";}
     }
     }
+    function setButtonsForMobile(btnOui,btnNon){
+        btnOui.style.marginBottom = "auto";
+        btnOui.style.marginRight = "auto";
+        btnNon.style.marginBottom = "auto";
+
+    if (window.innerWidth <= 768){
+        btnOui.style.gridColumn ="3/4";
+        btnOui.style.gridRow = "12/13";
+        btnNon.style.gridColumn ="4/5";
+        btnNon.style.gridRow = "12/13";
+        btnNon.style.marginRight = "auto";
+        btnNon.style.marginLeft = "";
+
+    }
+    else{
+        btnOui.style.gridColumn ="4/5";
+        btnOui.style.gridRow = "6/7";
+        btnNon.style.gridColumn ="4/5";
+        btnNon.style.gridRow = "6/7";
+        btnNon.style.marginBottom = "auto";
+        btnNon.style.marginLeft = "auto";
+        btnNon.style.marginRight = "";
+
+    }}
+
 
 
 
@@ -217,7 +248,7 @@ function adjustButtonsForMobile(nb){
 function setButtonChauffeur() {
     switch (statut) {
         case "en attente":
-            btnAnnuler = window.AppData.makeButton(container, "Annuler", ["btn-danger", "my-auto"], () => { myModalAnnulerCovoiturage.show(); })
+            btnAnnuler = window.AppData.makeButton(container, "Annuler", ["btn-danger", "m-auto"], () => { myModalAnnulerCovoiturage.show(); })
             btnStatut.textContent = 'Démarrer';
             break;
         case "en cours":
@@ -357,7 +388,7 @@ async function setQuestionPassager() {
     // Si l'utilisateur est participant et n'a pas répondu
     if (!userResponse) {
         question.textContent = "Le trajet s'est-il bien passé ?"
-        let btnOui = window.AppData.makeButton(container, "Oui", ["btn-primary", "btnOui"], async () => {
+        let btnOui = window.AppData.makeButton(container, "Oui", ["btn-primary"], async () => {
             await window.AppData.withLoader(async () => {
                 const success = await setReponse({ reponse1: "oui" });
                 if (!success) return;
@@ -368,7 +399,7 @@ async function setQuestionPassager() {
             });
         }) // Payer le chauffeur
             ;
-        let btnNon = window.AppData.makeButton(container, "Non", ["btn-danger", "btnNon"], async () => {
+        let btnNon = window.AppData.makeButton(container, "Non", ["btn-danger"], async () => {
             await window.AppData.withLoader(async () => {
                 const success = await setReponse({ reponse1: "non" });
                 if (!success) return;
@@ -377,6 +408,9 @@ async function setQuestionPassager() {
                 await setBoutons(2); // Afficher "Laisser un commentaire"
             });
         });
+        setButtonsForMobile(btnOui,btnNon);
+        window.addEventListener("resize", () => setButtonsForMobile(btnOui,btnNon));
+
     } else if (userResponse["reponse1"] === "oui" && (!userResponse["reponse2"])) {
         await window.AppData.withLoader(() => setBoutons(1)); // Afficher "Soumettre un avis"        
     } else if (userResponse["reponse1"] === "non" && (!userResponse["reponse2"])) {
