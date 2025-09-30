@@ -15,6 +15,11 @@ btnSupprimerCovoiturage.addEventListener("click", async () => {
         myModalAnnulerCovoiturage.hide();
     });
 });
+const statutSchema =  document.getElementById("statut");
+const cercle2 =  document.getElementById("cercle2");
+const cercle3 =  document.getElementById("cercle3");
+const border1 =  document.getElementById("border1");
+const border2 =  document.getElementById("border2");
 
 const container = document.getElementById("container");
 const img = document.getElementById("img");
@@ -33,13 +38,14 @@ const energie = document.getElementById("energie");
 const voiture = document.getElementById("voiture");
 const voitureDetails = document.getElementById("voitureDetails");
 const preference = document.getElementById("preference");
+const preferences = document.getElementById("preferences");
 const pseudo = document.getElementById("pseudo");
 const note = document.getElementById("note");
 const avisContainer = document.getElementById("avis");
 const question = document.getElementById("question");
 let statut = "", idChauffeur = null, userResponse = null, prix = 0, users = [], nbPlace = 0, idUser = null, pseudoUser = "", emailUser = "", Chauffeur = false, Passager = false, isAdminOrEmploye = false;
 let btnStatut = window.AppData.makeButton(null, "Statut", ["btn-primary", "m-auto"], () => { })
-let btnAnnuler;
+let btnAnnuler, expired;
 
 //Modale "Laisser un avis"
 const avisForm = document.getElementById("avisForm")
@@ -107,21 +113,16 @@ async function getReponse() {
 
 // Retourne le covoiturage
 async function getCovoiturage() {
-    let requestOptions = {
-        method: "GET",
-        headers: { "Content-Type": "application/json" }
-    };
     if (!numId) {
         console.error('ID du covoiturage manquant.');
     }
     try {
-        const response = await fetch(`${window.AppData.apiUrl}covoiturage/${numId}`, requestOptions);
+        const response = await window.AppData.apiFetch(`covoiturage/${numId}`, "GET", null, false);
         if (!response.ok) {
             console.error("Impossible de récupérer les informations du covoiturage.");
             window.location.replace("/");
         }
-        const result = await response.json();
-
+        const result = response.data;
         // Variable valant true si l'utilisateur est chauffeur du covoiturage
         Chauffeur = idUser == result['chauffeur']['id'];
         await setCovoiturage(result);
@@ -131,7 +132,6 @@ async function getCovoiturage() {
         console.error('Erreur dans la récupération des covoiturages :', error);
         return null;
     }
-
 }
 
 // Afficher le covoiturage
@@ -139,15 +139,17 @@ async function setCovoiturage(i) {
     note.textContent = i['noteMoyenne'] != null ? `Note : ${i['noteMoyenne']}/5` : '';
     btnAnnuler?.remove();
     btnStatut?.remove();
-      if (i['chauffeur']['photo']){
-            const image = window.AppData.createEl("img", ["imgAccount"]);
-            image.src = `${window.AppData.urlPhoto}/${i['chauffeur']['photo']}`;
-            image.alt = "Photo de profil"
-            img.appendChild(image)
-        }
-        else {
-            window.AppData.addLettre(img, i['chauffeur']['pseudo']);
-        };
+    img.innerHTML="";
+    preferences.innerHTML="";
+    if (i['chauffeur']['photo']) {
+        const image = window.AppData.createEl("img", ["imgAccount"]);
+        image.src = `${window.AppData.urlPhoto}/${i['chauffeur']['photo']}`;
+        image.alt = "Photo de profil"
+        img.appendChild(image)
+    }
+    else {
+        window.AppData.addLettre(img, i['chauffeur']['pseudo']);
+    };
     depart.textContent = "Départ :";
     departDate.textContent = new Intl.DateTimeFormat("fr-FR").format(new Date(i['dateDepart']));
     heureDepart.textContent = i['heureDepart'];
@@ -164,88 +166,102 @@ async function setCovoiturage(i) {
     voiture.textContent = "Voiture : "
     voitureDetails.textContent = `${i["voiture"]["marque"]} ${i["voiture"]["modele"]} ${i["voiture"]["couleur"]}`;
     preference.textContent = "Préférences du conducteur:";
-    let ligne, colonne;
-    i["chauffeur"]["parametres"].forEach((parametre, index) => {
-        colonne = (index % 4) + 4;
-        ligne = colonne > 8 ? 6 : 5;
-        let newDiv = document.createElement("p");
-        newDiv.textContent = `${parametre['propriete']} ${parametre['valeur']}`;
-        newDiv.style.gridColumn = `${colonne}/${colonne + 1}`;
-        newDiv.style.gridRow = `${ligne}/${ligne + 1}`;
-        container.appendChild(newDiv);
+    
+    i["chauffeur"]["parametres"].forEach((parametre) => {
+        const span = window.AppData.createEl("span", ["badge", "bg-primary","my-auto"], `${parametre['propriete']} ${parametre['valeur']}`);
+        preferences.appendChild(span)
     });
     idChauffeur = i['chauffeur']['id'];
     prix = i['prixPersonne'];
     users = i['users'];
     nbPlace = i['nbPlaces'];
     statut = i["statut"];
+    expired = new Date(i["dateDepart"]) < new Date();
     await setStatutButton();
-    const nbParams = i["chauffeur"]["parametres"].length;
-    adjustButtonsForMobile(nbParams); 
-    window.addEventListener("resize", () => adjustButtonsForMobile(nbParams));
+    adjustButtonsForMobile();
+    window.addEventListener("resize", () => adjustButtonsForMobile());
 }
 
-function moveButtonsToEnd(nb){
-    const row = 11 + Math.ceil((nb-2)/4);
-    btnStatut.style.gridRow = `${row+2}/${row+3}`;
-    question.style.gridColumn = "1/3";
-    question.style.gridRow = `${row}/${row+1}`;    
-    if (btnAnnuler){
-        btnStatut.style.gridColumn = "2/3";
-        container.appendChild(btnAnnuler);
-        btnAnnuler.style.gridColumn = "3/4";
-        btnAnnuler.style.gridRow = `${row+2}/${row+3}`;
+function adjustButtonsForMobile() {
+    btnStatut.style.gridColumn = "1/-1";
+    if (btnAnnuler) btnAnnuler.style.gridColumn = "1/-1";
+    if (window.innerWidth <= 768) {
+        question.style.gridColumn = "1/3";
+        question.style.gridRow = "11/12";
+        btnStatut.style.gridRow = "12/13";
+        if (btnAnnuler) {
+            btnAnnuler.style.gridRow = "13/14";
+            btnAnnuler.style.gridColumn = "1/-1";}
     }
     else{
-        btnStatut.style.gridColumn = "1/-1";
+        btnStatut.style.gridRow = "7/8";
+        question.style.gridColumn = "2/4";
+        question.style.gridRow = "6/7";
+        if (btnAnnuler) {
+            btnAnnuler.style.gridRow = "8/9";}
+    }
+}
 
-    
-}}
-function adjustButtonsForMobile(nb){
-    container.appendChild(btnStatut);
-    if (window.innerWidth <= 768){
-        moveButtonsToEnd(nb);
-    }
-    else{
-    question.style.gridColumn = "2/4";
-    question.style.gridRow = "6/7"; 
-       btnStatut.style.gridColumn ="8/9";
-        btnStatut.style.gridRow = "2/3";
-        if (btnAnnuler){
-            btnAnnuler.style.gridColumn ="8/9";
-            btnAnnuler.style.gridRow = "3/4";}
-    }
-    }
-    function setButtonsForMobile(btnOui,btnNon){
-        btnOui.style.marginBottom = "auto";
-        btnOui.style.marginRight = "auto";
-        btnNon.style.marginBottom = "auto";
 
-    if (window.innerWidth <= 768){
-        btnOui.style.gridColumn ="3/4";
-        btnOui.style.gridRow = "12/13";
-        btnNon.style.gridColumn ="4/5";
-        btnNon.style.gridRow = "12/13";
+function setButtonsForMobile(btnOui, btnNon) {
+    btnOui.style.marginBottom = "auto";
+    btnOui.style.marginRight = "auto";
+    btnNon.style.marginBottom = "auto";
+
+    if (window.innerWidth <= 768) {
+        btnOui.style.gridColumn = "3/4";
+        btnOui.style.gridRow = "11/12";
+        btnNon.style.gridColumn = "4/5";
+        btnNon.style.gridRow = "11/12";;
         btnNon.style.marginRight = "auto";
         btnNon.style.marginLeft = "";
-
     }
-    else{
-        btnOui.style.gridColumn ="4/5";
+    else {
+        btnOui.style.gridColumn = "4/5";
         btnOui.style.gridRow = "6/7";
-        btnNon.style.gridColumn ="4/5";
+        btnNon.style.gridColumn = "4/5";
         btnNon.style.gridRow = "6/7";
         btnNon.style.marginBottom = "auto";
         btnNon.style.marginLeft = "auto";
         btnNon.style.marginRight = "";
 
-    }}
+    }
+}
 
 
+function setButtonForMobile(btn) {
+    if (window.innerWidth <= 768) {
+        btn.style.gridColumn = "1/-1";
+        btn.style.gridRow = "11/12";
+    }
+    else {
+        btn.style.gridColumn = "4/5";
+        btn.style.gridRow = "6/7";
+    }
+}
 
+// Afficher le bouton indiquant le statut
+async function setStatutButton() {
+    // Si l'utilisateur est chauffeur
+    if (Chauffeur == true) {
+        setButtonChauffeur();
+        // Si l'utilisateur est non chauffeur et connecté
+    } else if (window.AppData.isConnected()) {
+        if (includes(users, idUser)) {// Si l'utilisateur est participant
+            await setButtonPassagerParticipant();
+        }
+        else {
+            await setButtonPassagerNonParticipant();
+        }
+    } // Si l'utilisateur est non participant          
+    // Personne non connectée
+    else { setButtonInvite(); }
+}
 
 // Affiche le statut du covoiturage pour le chauffeur
 function setButtonChauffeur() {
+    container.appendChild(btnStatut);
+    statutSchema.classList.remove("d-none");
     switch (statut) {
         case "en attente":
             btnAnnuler = window.AppData.makeButton(container, "Annuler", ["btn-danger", "m-auto"], () => { myModalAnnulerCovoiturage.show(); })
@@ -253,35 +269,80 @@ function setButtonChauffeur() {
             break;
         case "en cours":
             btnStatut.textContent = 'Arrivé à destination';
+            border1.classList.replace('border-success', 'border-primary');
+            cercle2.classList.replace('bg-green', 'bg-primary');
+            console.log(border1);
             break;
-        case "terminé":
+        case "terminé":  
             btnStatut.textContent = 'Terminé';
+            border1.classList.replace('border-success', 'border-primary');
+            cercle2.classList.replace('bg-green', 'bg-primary');
+            border2.classList.replace('border-success', 'border-primary');
+            cercle3.classList.replace('bg-green', 'bg-primary');
+            btnStatut.disabled = true;
             break;
     }
     btnStatut.onclick = async () => { await window.AppData.withLoader(clickStatutAndButton); };
 }
+// Mettre à jour le statut et le bouton statut en fonction d'un clic
+async function clickStatutAndButton() {
+    let body = null;
+    if (statut === "en attente") { body = { "statut": "en cours" }; }
+    else if (statut === "en cours") { body = { "statut": "terminé" }; }
+    if (!body) { return; }
+    const result = await window.AppData.apiFetch(`covoiturage/${numId}`, "PUT", body);
+    if (!result.ok) {
+        console.error("Erreur lors de la mise à jour du statut.", result.message);
+        return null;
+    }
+    if (statut === "en attente") {
+        btnAnnuler.remove();
+        btnAnnuler=null;
+        btnStatut.textContent = 'Arrivé à destination';
+        border1.classList.replace('border-success', 'border-primary');
+        cercle2.classList.replace('bg-green', 'bg-primary');
+        statut = "en cours";
+    }
+    else if (statut === "en cours") {
+        btnStatut.textContent = 'Terminé';
+        border2.classList.replace('border-success', 'border-primary');
+        cercle3.classList.replace('bg-green', 'bg-primary');
+        statut = "terminé";
+        btnStatut.disabled = true;
+        setQuestionPassager();
+        await email("finTrajet");
+    }
+    console.log("Statut mis à jour :", statut);
+}
+
 
 // Affiche le statut du covoiturage pour le participant
 async function setButtonPassagerParticipant() {
+    statutSchema.classList.remove("d-none");
     switch (statut) {
         case "en attente":
-            btnStatut.textContent = 'En attente';
-            btnAnnuler = window.AppData.makeButton(container, "Annuler", ["btn-danger", "my-auto"], () => {
+            btnAnnuler = window.AppData.makeButton(container, "Annuler", ["btn-danger", "m-auto"], () => {
                 annulerCovoiturageModal.textContent = `En annulant, un remboursement de ${window.AppData.formatPrix(prix)} crédits sera effectué sur votre compte.`;
                 myModalAnnulerCovoiturage.show();
             })
             break;
         case "en cours":
-            btnStatut.textContent = 'En cours';
+            border1.classList.replace('border-success', 'border-primary');
+            cercle2.classList.replace('bg-green', 'bg-primary');
             break;
         case "terminé":
-            btnStatut.textContent = 'Arrivé à destination';
+            border1.classList.replace('border-success', 'border-primary');
+            cercle2.classList.replace('bg-green', 'bg-primary');
+            border2.classList.replace('border-success', 'border-primary');
+            cercle3.classList.replace('bg-green', 'bg-primary');    
             await getReponse();
             setQuestionPassager();
             break;
     }
 }
 async function setButtonPassagerNonParticipant() {
+    container.appendChild(btnStatut)
+    statutSchema.classList.add("d-none");
     // Si le nombre de places est insuffisant
     btnStatut.disabled = (nbPlace == 0 || parseFloat(window.AppData.credit) < parseFloat(prix) || statut != 'en attente' || isAdminOrEmploye);
     if (nbPlace == 0) {
@@ -307,7 +368,6 @@ async function setButtonPassagerNonParticipant() {
 
         btnParticiperCovoiturage.onclick = async () => {
             await window.AppData.withLoader(participerCovoiturage);
-
         }
     } else {
         btnStatut.textContent = 'Covoiturage démarré';
@@ -344,38 +404,22 @@ async function participerCovoiturage() {
 
 // Affiche le statut du covoiturage pour l'invité
 function setButtonInvite() {
-    btnStatut.disabled = (nbPlace == 0 || statut != "en attente")
+    container.appendChild(btnStatut);
+    statutSchema.classList.add("d-none");
+    btnStatut.disabled = (nbPlace == 0 || statut != "en attente" || expired)
     if (statut != "en attente") {
         btnStatut.textContent = 'Covoiturage démarré';
     }
     else if (nbPlace == 0) {
         btnStatut.textContent = 'Complet';
     }
+    else if (expired){
+        btnStatut.textContent = 'Covoiturage expiré';
+    }
     else {
         btnStatut.textContent = 'Participer';
         btnStatut.onclick = () => { window.location.replace("/signin") };
     }
-}
-
-
-
-
-// Afficher le bouton indiquant le statut
-async function setStatutButton() {
-    // Si l'utilisateur est chauffeur
-    if (Chauffeur == true) {
-        setButtonChauffeur();
-        // Si l'utilisateur est non chauffeur et connecté
-    } else if (window.AppData.isConnected()) {
-        if (includes(users, idUser)) {// Si l'utilisateur est participant
-            await setButtonPassagerParticipant();
-        }
-        else {
-            await setButtonPassagerNonParticipant();
-        }
-    } // Si l'utilisateur est non participant          
-    // Personne non connectée
-    else { setButtonInvite(); }
 }
 
 // Retourne true si l'utilisateur est participant du covoitueage
@@ -408,8 +452,8 @@ async function setQuestionPassager() {
                 await setBoutons(2); // Afficher "Laisser un commentaire"
             });
         });
-        setButtonsForMobile(btnOui,btnNon);
-        window.addEventListener("resize", () => setButtonsForMobile(btnOui,btnNon));
+        setButtonsForMobile(btnOui, btnNon);
+        window.addEventListener("resize", () => setButtonsForMobile(btnOui, btnNon));
 
     } else if (userResponse["reponse1"] === "oui" && (!userResponse["reponse2"])) {
         await window.AppData.withLoader(() => setBoutons(1)); // Afficher "Soumettre un avis"        
@@ -421,7 +465,7 @@ async function setQuestionPassager() {
 // Afficher les boutons "Soumetre un avis" et "Laisser un commentaire"
 async function setBoutons(i) {
     if (i == 1) { // Soumetre un avis
-        let btnSoumettreAvis = window.AppData.makeButton(container, 'Soumettre un avis', ["btn-primary", "btnOui"], () => {
+        let btnSoumettreAvis = window.AppData.makeButton(container, 'Soumettre un avis', ["btn-primary", "btnOui", "m-auto"], () => {
             const myModalLaisserAvis = new bootstrap.Modal('#myModalLaisserAvis');
             myModalLaisserAvis.show();
         });
@@ -434,9 +478,12 @@ async function setBoutons(i) {
                 await setReponse({ reponse2: "oui" });
             });
         };
+        setButtonForMobile(btnSoumettreAvis);
+        window.addEventListener("resize", () => setButtonForMobile(btnSoumettreAvis));
+
     }
     else { // Laisser un commentaire
-        let btnLaisserCommentaire = window.AppData.makeButton(container, 'Laisser un commentaire', ["btn-primary", "btnOui"], () => {
+        let btnLaisserCommentaire = window.AppData.makeButton(container, 'Laisser un commentaire', ["btn-primary", "btnOui", "m-auto"], () => {
             const myModalLaisserCommentaire = new bootstrap.Modal('#myModalLaisserCommentaire');
             myModalLaisserCommentaire.show();
         });
@@ -447,10 +494,11 @@ async function setBoutons(i) {
                 if (!success) return;
                 btnLaisserCommentaire.remove();
                 await setReponse({ reponse2: "oui" });
-
             });
         }
     }
+    setButtonForMobile(btnEnvoyerCommentaire);
+    window.addEventListener("resize", () => setButtonForMobile(btnEnvoyerCommentaire));
 }
 
 
@@ -560,30 +608,9 @@ async function LaisserCommentaire() {
     return true;
 }
 
-// Mettre à jour le statut et le bouton statut en fonction d'un clic
-async function clickStatutAndButton() {
-    let body = null;
-    if (statut === "en attente") { body = { "statut": "en cours" }; }
-    else if (statut === "en cours") { body = { "statut": "terminé" }; }
-    if (!body) { return; }
-    const result = await window.AppData.apiFetch(`covoiturage/${numId}`, "PUT", body);
-    if (!result.ok) {
-        console.error("Erreur lors de la mise à jour du statut.", result.message);
-        return null;
-    }
-    if (statut === "en attente") {
-        btnAnnuler.remove();
-        btnStatut.textContent = 'Arrivé à destination';
-        statut = "en cours";
-    }
-    else if (statut === "en cours") {
-        btnStatut.textContent = 'Terminé';
-        statut = "terminé";
-        setQuestionPassager();
-        await email("finTrajet");
-    }
-    console.log("Statut mis à jour :", statut);
-}
+
+
+
 
 
 // Obtenir les avis
@@ -605,8 +632,7 @@ function setAvis(avis) {
     }
 
     avisContainer.innerText = '';
-    avisContainer.setAttribute("style", `display:grid; grid-template-columns:100px 100px 1fr; grid-template-rows: repeat(${avis.length}, auto)`);
-
+    avisContainer.classList.add('avis-grid');
     avis.forEach((i, index) => {
         let row = Number(avis.length - index);
         let pseudo = window.AppData.createEl("p", [], i['auteurPseudo']);

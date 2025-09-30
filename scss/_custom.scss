@@ -12,3 +12,9 @@ $form-switch-checked-color:  #3F997A;
 @import "../node_modules/bootstrap/scss/bootstrap";
 
 // Then add additional custom code here
+.bg-green {
+    background-color:#d9ebe4 !important;
+}
+.border-success{
+    border-color:#d9ebe4 !important;
+}

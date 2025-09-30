@@ -1,6 +1,34 @@
 <div class="card m-3">
   <div class="card-body shadow p-3 bg-body-tertiary rounded">
-    <div class="container2 m-auto" id="container">
+
+    <div class="container py-1" id="statut">
+      <div class="d-flex align-items-center justify-content-center ">
+          
+        <div class="d-flex flex-column align-items-center" style="flex-basis: 4rem;">
+        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center " style="width: 3rem; height:3rem" id="cercle1">1</div>
+          <small class="text-center mt-1" >En attente</small>
+        </div>
+        
+        <div class="flex-grow-1 d-flex align-items-center">
+          <div class="border-top border-2 border-success w-100 mx-1" id="border1"></div>
+        </div>         
+          <div class="d-flex flex-column align-items-center" style="flex-basis: 4rem;">
+          <div class="rounded-circle bg-green text-white d-flex align-items-center justify-content-center" style="width: 3rem; height:3rem"  id="cercle2">2</div>
+          <small class="text-center mt-1" >En cours</small>
+          </div>
+          <div class="flex-grow-1 d-flex align-items-center">
+          <div class="border-top border-top border-2 border-success w-100 mx-1" id="border2"></div>
+          </div>
+
+          <div class="d-flex flex-column align-items-center" style="flex-basis: 4rem;">
+          <div class="rounded-circle bg-green text-white d-flex align-items-center justify-content-center" style="width: 3rem; height:3rem" id="cercle3">3</div>
+          <small class="text-center mt-1">Arrivé à destination</small>
+      </div>
+        </div>
+ 
+      </div>
+
+    <div class="containerDetail m-auto" id="container">
       <div class="item1" id="img"></div>
       <p class="item2 " id="depart">
       </p>
@@ -36,6 +64,8 @@
       <p class="item16" id="voitureDetails">
       </p>
       <p class="item17" id="preference">
+      </p>
+      <p class="itemPreferences d-flex flex-wrap gap-2" id="preferences">
       </p>
       <div id="question"></div>
     </div>

@@ -808,7 +808,7 @@ async function setCovoiturages(covoiturages, div) {
     for (let i of covoiturages) {
         const card = window.AppData.createEl("div", ["card", "mb-3"]);
         const cardBody = window.AppData.createEl("div", ["card-body", "shadow-sm", "p-3", "bg-body-tertiary", "rounded"]);
-        const container = window.AppData.createEl("div", ["container1"]);
+        const container = window.AppData.createEl("div", ["containerCovoiturages"]);
      if (i['chauffeur']['photo']){
             const img = window.AppData.createEl("img", ["item1","imgAccount", "mx-auto", "my-auto"]);
             img.src = `${window.AppData.urlPhoto}/${i['chauffeur']['photo']}`;
