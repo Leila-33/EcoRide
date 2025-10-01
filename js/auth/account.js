@@ -498,16 +498,15 @@ async function addVoiture(vehiculeForm) {
         "nbPlaces": Number(dataForm.get("NbPlaces")),
     };
     const result = await window.AppData.apiFetch("voiture/addVoiture", "POST", body);
-    if (result.data) {
-        window.AppData.showToast("Voiture ajoutée avec succès", "success");
-        await getVoitures();
-        return result.data['id'];
-    }
-    else {
+    if (!result.ok) {
         console.error("Erreur lors de l'ajout de la voiture", result.message);
         window.AppData.showToast(`Erreur lors de l'ajout de la voiture: ${result.message}`, "danger");
         return false;
     }
+        window.AppData.showToast("Voiture ajoutée avec succès", "success");
+        await getVoitures();
+        return result.data['id'];
+    
 }
 
 //Obtenir les voitures

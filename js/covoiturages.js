@@ -39,9 +39,6 @@ btnFiltrer.addEventListener("click", filtrerResultats);
 btnToutReinitialiser.addEventListener("click", () => { EnergieInput.checked = false; DureeInput.value = ''; NoteInput.value = ''; PrixInput.value = '' });
 
 
-// Fonction permettant de retourner le prix minimum, le prix maximum, la durée minimum et la durée maximum des covoiturages du jour recherché
-// et les mettant comme limites aux champs des filtres
-
 // Affiche les covoiturages
 function setCovoiturages(covoiturages, div) {
     div.textContent = "";

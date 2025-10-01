@@ -6,13 +6,13 @@ window.AppData.inputObjet = document.getElementById("ObjetInput");
 window.AppData.inputMessage = document.getElementById("MessageInput");
 window.AppData.btnEnvoyerEmail = document.getElementById("btnEnvoyerEmail");
 const contactForm = document.getElementById("contactForm");
-window.AppData.btnEnvoyerEmail.addEventListener("click", async () => { await window.AppData.withLoader(() => EnvoyerMessage()); });
+window.AppData.btnEnvoyerEmail.addEventListener("click", async () => { await window.AppData.withLoader(() => envoyerMessage()); });
 window.AppData.btnEnvoyerEmail.disabled = true;
 [window.AppData.inputNom, window.AppData.inputPrenom, window.AppData.inputEmail, window.AppData.inputObjet, window.AppData.inputMessage].forEach(input => { input.addEventListener("input", window.AppData.validateFormContact); });
 
 
 
-async function EnvoyerMessage() {
+async function envoyerMessage() {
   let dataForm = new FormData(contactForm);
   let body = {
     "nom": dataForm.get("Nom"),

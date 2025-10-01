@@ -1,0 +1,115 @@
+<body class="sb-nav-fixed">
+  <nav class="navbar navbar-light bg-light px-3">
+    <button class="btn btn-primary d-lg-none" type="button" data-bs-toggle="offcanvas"
+      data-bs-target="#offcanvasSidebar" aria-controls="offcanvasSidebar">
+      <i class="bi bi-list"></i>
+    </button>
+  </nav>
+
+
+  <div id="layoutSidenav">
+    <div id="layoutSidenav_nav" class="">
+      <nav class="sb-sidenav accordion sb-sidenav-light" id="sidenavAccordion">
+        <div class="sb-sidenav-menu d-flex flex-column vh-100">
+          <div class="nav">
+            <a class="nav-link" href="/mesInformationsE">
+              <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+              Mes informations personnelles
+            </a>
+            <a class="nav-link" href="/avis">
+              <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+              Avis
+            </a>
+            <a class="nav-link" href="/covoituragesE">
+              <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+              Covoiturages
+            </a>
+            </a>
+          </div>
+        </div>
+        <div class="sb-sidenav-footer">
+          <div class="small" id="adminName">Logged in as:</div>
+        </div>
+      </nav>
+    </div>
+
+
+    <div class="offcanvas offcanvas-start d-lg-none" tabindex="-1" id="offcanvasSidebar"
+      aria-labelledby="offcanvasSidebarLabel">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasSidebarLabel">Menu</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">
+        <div class="sb-sidenav-menu">
+          <div class="nav flex-column">
+            <a class="nav-link" href="/mesInformationsE">Mes informations personnelles</a>
+            <a class="nav-link" href="/avis">Avis</a>
+            <a class="nav-link" href="/covoituragesE">Covoiturages</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="layoutSidenav_content">
+      <div class="container-fluid px-4">
+
+
+        <div class="hero-scene text-center ">
+          <div class="hero-scene-content">
+            <h1>Covoiturages</h1>
+          </div>
+        </div>
+
+
+        <div class="card m-3">
+          <div class="card-body shadow p-3 bg-body-tertiary rounded ">
+            <p class="text-center">Covoiturages</p>
+            <div id="covoiturages">
+
+            </div>
+          </div>
+        </div>
+        <div class="modal" tabindex="-1" id='myModalEnvoyerEmail'>
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Contacter le chauffeur</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <form id="emailForm">
+
+                  <div class="mb-3">
+                    <label for="EmailInput" class="form-label">Email</label>
+                    <input type="text" class="form-control" id="EmailInput" name="Email">
+                    <div class="invalid-feedback" id="emailFeedback">
+                    </div>
+                  </div>
+                  <div class="mb-3">
+                    <label for="ObjetInput" class="form-label">Objet</label>
+                    <input type="text" class="form-control" id="ObjetInput" name="Objet">
+                    <div class="invalid-feedback">
+                      L'objet est requis.
+                    </div>
+                  </div>
+                  <div class="mb-3">
+                    <label for="MessageInput" class="form-label">Message</label>
+                    <textarea rows="10" class="form-control" id="MessageInput" name="Message"></textarea>
+                    <div class="invalid-feedback">
+                      Le message est requis.
+                    </div>
+                  </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal"
+                  id="btnEnvoyerEmail">Envoyer</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+      </div>
+    </div>
+  </div>
+</body>

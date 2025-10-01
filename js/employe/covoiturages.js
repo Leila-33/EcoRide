@@ -1,5 +1,4 @@
 /* global bootstrap */
-const avisContainer = document.getElementById("avis");
 const covoiturages = document.getElementById("covoiturages");
 const emailForm = document.getElementById("emailForm");
 window.AppData.inputEmail = document.getElementById("EmailInput");
@@ -10,81 +9,17 @@ window.AppData.btnEnvoyerEmail = document.getElementById("btnEnvoyerEmail");
 window.AppData.btnEnvoyerEmail.addEventListener("click", async () => { await window.AppData.withLoader(() => emailChauffeur()) });
 window.AppData.btnEnvoyerEmail.disabled = true;
 [window.AppData.inputEmail, window.AppData.inputObjet, window.AppData.inputMessage].forEach(input => { input.addEventListener("input", window.AppData.validateFormContact); });
+const adminName = document.getElementById("adminName");
 
 async function initUserData() {
     await window.AppData.withLoader(async () => {
-        await getAvis();
+        const result = await window.AppData.getInfosUser();
+        adminName.textContent = `${result['prenom']}  ${result['nom']}`;
         await getReponsesNon();
     })
 }
 initUserData();
 
-// Obtenir les avis
-async function getAvis() {
-    const result = await window.AppData.apiFetch("avis/avisAVerifier");
-    if (!result.ok) {
-        console.error("Impossible de récupérer les avis.", result.message);
-        return;
-    }
-    setAvis(result.data);
-}
-
-async function setAvis(avisList) {
-    avisContainer.innerHTML = "";
-    if (!Array.isArray(avisList) || avisList.length === 0) {
-        avisContainer.classList.add('text-center');
-        avisContainer.textContent = ("Il n'y pas d'avis à vérifier.");
-        return;
-    }
-
-    for (let avis of avisList) {
-        let pseudo = window.AppData.createEl("p", ["m-auto", "pseudo-employe"], avis['auteurPseudo']);
-        let note = window.AppData.createEl("p", ["m-auto", "note-employe"], `${avis['note']}/5`);
-        let commentaire = window.AppData.createEl("p", ["my-auto", "p-3", "commentaireReponse-employe"], avis['commentaire']);
-        let card = window.AppData.createEl("div", ["card", "mx-5", "mb-3", "shadow-sm"]);
-        let cardBody = window.AppData.createEl("div", ["card-body", "rounded", "card-employe"]);
-
-
-        let btnValider = window.AppData.makeButton(cardBody, "Valider", ["btn-primary", "btnValider"], async () => {
-            const success = await validerAvis(avis['id']);
-            if (success) {
-                card.remove();
-                getAvis();}
-        });
-        let btnSupprimer = window.AppData.makeButton(cardBody, "Supprimer", ["btn-danger", "btnSupprimer"], async () => {
-            const success = await supprimerAvis(avis['id']);
-            if (success) {
-                card.remove();
-                getAvis();}
-        });
-
-        [pseudo, note, commentaire].forEach(child => { cardBody.appendChild(child); });
-        card.appendChild(cardBody);
-        avisContainer.appendChild(card);
-    }
-}
-
-
-
-async function validerAvis(avisId) {
-    const result = await window.AppData.apiFetch(`avis/validerAvis/${avisId}`, "PUT");
-    if (!result.ok) {
-        console.error("Impossible de valider l'avis.", result.message);
-        return false;
-    }
-    window.AppData.showToast('Avis validé.', "success");
-    return true;
-}
-
-async function supprimerAvis(avisId) {
-    const result = await window.AppData.apiFetch(`avis/${avisId}`, "DELETE");
-    if (!result.ok) {
-        console.error("Impossible de supprimer l'avis.", result.message);
-        return false;
-    }
-    window.AppData.showToast('Avis supprimé.', "danger");
-    return true;
-}
 
 async function getReponsesNon() {
     const result = await window.AppData.apiFetch("reponse/reponsesNon")
@@ -104,7 +39,7 @@ async function setReponses(reponses) {
     }
     for (let reponse of reponses) {
         let covoiturage = reponse['covoiturage'];
-        let card = window.AppData.createEl("div", ["card", "mb-3", "mx-5"]);
+        let card = window.AppData.createEl("div", ["card", "mb-3", "mx-1", "mx-md-5"]);
         let cardBody = window.AppData.createEl("div", ["card-body", "shadow-sm", "rounded", "cardBodyReponses-employe"]);
 
         let depart = window.AppData.createEl("p", ["my-auto", "depart-employe"], "Départ :");
@@ -123,7 +58,7 @@ async function setReponses(reponses) {
         let email = window.AppData.createEl("p", ["my-auto", "email-employe"], `Chauffeur : ${covoiturage['chauffeur']['email']}`);
 
         let num = window.AppData.createEl("p", ["mx-auto", "num-employe"], `Covoiturage n°${covoiturage['id']}`);
-        let prix = window.AppData.createEl("p", ["my-auto"], `Prix : ${window.AppData.formatPrix(covoiturage['prixPersonne'])} crédits`);
+        let prix = window.AppData.createEl("p", ["my-auto", "prix-employe"], `Prix : ${window.AppData.formatPrix(covoiturage['prixPersonne'])} crédits`);
 
         [num, depart, dateDepart, heureDepart, lieuDepart, arrivee, dateArrivee, heureArrivee, lieuArrivee, prix,email, participant, commentaire].forEach(child => cardBody.appendChild(child));
         card.appendChild(cardBody);
@@ -131,7 +66,7 @@ async function setReponses(reponses) {
         let btnContacter = window.AppData.makeButton(cardBody, 'Contacter le chauffeur', ["btn-primary", "m-auto", "btnContacter-employe"], () => {
             const myModalEnvoyerEmail = new bootstrap.Modal('#myModalEnvoyerEmail');
             window.AppData.inputEmail.value = covoiturage['chauffeur']['email'];
-            window.AppData.ObjetInput.value = `Covoiturage du ${new Date(covoiturage['dateDepart']).toLocaleDateString('fr-FR')} à ${covoiturage['heureDepart']}`;
+            window.AppData.inputObjet.value = `Covoiturage du ${new Date(covoiturage['dateDepart']).toLocaleDateString('fr-FR')} à ${covoiturage['heureDepart']}`;
             myModalEnvoyerEmail.show();
         });
 
