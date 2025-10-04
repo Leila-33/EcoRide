@@ -455,7 +455,6 @@ async function updateInfos() {
         "dateNaissance": dataForm.get("DateDeNaissance"),
         "telephone": dataForm.get("Telephone"),
         "adresse": dataForm.get("Adresse"),
-        "password": dataForm.get("mdp")
     };
     const result = await window.AppData.apiFetch("account/edit", "PUT", body);
     if (!result.ok) {

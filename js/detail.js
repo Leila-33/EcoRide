@@ -344,11 +344,14 @@ async function setButtonPassagerNonParticipant() {
     container.appendChild(btnStatut)
     statutSchema.classList.add("d-none");
     // Si le nombre de places est insuffisant
-    btnStatut.disabled = (nbPlace == 0 || parseFloat(window.AppData.credit) < parseFloat(prix) || statut != 'en attente' || isAdminOrEmploye);
+    btnStatut.disabled = (nbPlace == 0 || parseFloat(window.AppData.credit) < parseFloat(prix) || statut != 'en attente' || isAdminOrEmploye || expired);
     if (nbPlace == 0) {
-        btnStatut.textContent = 'Complet'; return;
+        btnStatut.textContent = 'Complet';
     }
-    if (statut == 'en attente') {
+    else if (expired){
+        btnStatut.textContent = 'Covoiturage expiré';
+    }
+    else if (statut == 'en attente') {
         btnStatut.textContent = 'Participer';
         //Si crédit insuffisant
         if (parseFloat(window.AppData.credit) < parseFloat(prix)) {
@@ -373,7 +376,7 @@ async function setButtonPassagerNonParticipant() {
         btnStatut.textContent = 'Covoiturage démarré';
     }
 }
-// Participer au covoiturage
+// Participer au .
 async function participerCovoiturage() {
     // Effectuer le paiement
     const paiementReussi = await window.AppData.paiement(prix, idUser, "achat");
